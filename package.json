@@ -1,0 +1,45 @@
+{
+  "name": "@tgrospic/rnode-client-js",
+  "version": "0.1.0",
+  "description": "RNode sample client: nodejs & web",
+  "author": "Tomislav Grospic",
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "start-web": "parcel src/web/index.html",
+    "start-nodejs": "node src/nodejs/client",
+    "rnode-generate": "rnode-grpc",
+    "rnode-generate-v11": "rnode-grpc --rnode-version v0.9.11 --gen-dir rnode-grpc-gen-11",
+    "clean": "rimraf -f rnode-grpc-gen dist .cache"
+  },
+  "dependencies": {
+    "@tgrospic/rnode-grpc-js": "^0.1.1",
+    "google-protobuf": "^3.9.1",
+    "grpc": "^1.23.2",
+    "grpc-web": "^1.0.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "grpc-tools": "^1.8.0",
+    "parcel": "^1.12.3",
+    "protobufjs": "^6.8.8",
+    "rimraf": "^3.0.0"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "useBuiltIns": "usage",
+          "corejs": 3,
+          "shippedProposals": true
+        }
+      ]
+    ],
+    "plugins": [
+      "@babel/transform-runtime",
+      {}
+    ]
+  }
+}
