@@ -19,21 +19,21 @@ npm run rnode-generate
 # - which is in the PATH when npm scripts are executed
 node_modules/.bin/rnode-grpc
 ```
-## Run **Nodejs example** ([`src/nodejs`](src/nodejs))
+## Run **Nodejs example** ([`src/nodejs/client.js`](src/nodejs/client.js))
 
-In `src/nodejs` folder is an example of how to connect to RNode from Nodejs.
+In `src/nodejs/client.js` script is an example of how to connect to RNode from Nodejs.
 
 ```sh
 # Run nodejs example / sample requests to testnet/devnet/sandboxnet validator
 npm run start-nodejs
 ```
-## Run **Web example** / connect to RNode from the browser ([`src/web`](src/web))
+## Run **Web example** / connect to RNode from the browser ([`src/web/index.js`](src/web/index.js))
 
 This will start local nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
 
 On page load it will make some sample requests to RNode and print outputs. This is very simle example, just text, no UI. :)
 
- The code for Nodejs is almost the same as for the browser, the main difference is how _client_ is constructed. Nodejs uses generated _protocol_ files with `..._grpc_pb.js` suffix and browser with `..._grpc_web_pb.js` suffix. Files with just `..._pb.js` have defined types and they are common for both platforms.
+The code for Nodejs is almost the same as for the browser, the main difference is how _client_ is constructed. Nodejs uses generated _protocol_ files with `..._grpc_pb.js` suffix and browser with `..._grpc_web_pb.js` suffix. Files with just `..._pb.js` have defined types and they are common for both platforms.
 
 ```sh
 # Run web example / sample request to Envoy proxy
