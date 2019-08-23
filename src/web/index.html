@@ -7,7 +7,26 @@
   <title>RChain web</title>
 </head>
 <body>
-  <div></div>
+  <style>
+    :root {
+      font-size: 80%;
+    }
+  </style>
+  <script>
+    const { log } = console
+    const logWrap = (...args) => {
+      const lines = Array.from(args).map(x => {
+        const el = document.createElement('pre')
+        const f = (_, v) => v && v.buffer instanceof ArrayBuffer
+          ? Array.from(v).toString() : v
+        el.innerHTML = JSON.stringify(x, f, 2)
+        return el
+      })
+      lines.reverse().map(txt => document.body.prepend(txt))
+      log(...args)
+    }
+    console.log = logWrap
+  </script>
   <script src="./index.js"></script>
 </body>
 </html>

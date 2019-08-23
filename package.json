@@ -7,13 +7,17 @@
   "main": "src/index.js",
   "scripts": {
     "start-web": "parcel src/web/index.html",
+    "build-web": "parcel build --public-url ./ src/web/index.html",
     "start-nodejs": "node src/nodejs/client",
     "rnode-generate": "rnode-grpc",
     "rnode-generate-v11": "rnode-grpc --rnode-version v0.9.11 --gen-dir rnode-grpc-gen-11",
-    "clean": "rimraf -f rnode-grpc-gen dist .cache"
+    "clean": "rimraf rnode-grpc-gen dist .cache"
   },
   "dependencies": {
-    "@tgrospic/rnode-grpc-js": "^0.1.1",
+    "@babel/runtime": "^7.5.5",
+    "@tgrospic/rnode-grpc-js": "^0.2.0",
+    "blakejs": "^1.1.0",
+    "elliptic": "^6.5.0",
     "google-protobuf": "^3.9.1",
     "grpc": "^1.23.2",
     "grpc-web": "^1.0.6"
