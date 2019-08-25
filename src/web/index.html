@@ -5,24 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>RChain web</title>
-</head>
-<body>
   <style>
     :root {
       font-size: 80%;
+      font-family: sans-serif;
+    }
+
+    pre {
+      margin: 0;
+      padding: 10px 0px;
+      border-bottom: solid 1px #cccccc6c;
+    }
+
+    * + * {
+      margin-right: 10px;
+    }
+
+    select, button {
+      padding: 4px;
     }
   </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="log"></div>
   <script>
     const { log } = console
+    const logEL = document.querySelector('#log')
     const logWrap = (...args) => {
       const lines = Array.from(args).map(x => {
-        const el = document.createElement('pre')
         const f = (_, v) => v && v.buffer instanceof ArrayBuffer
           ? Array.from(v).toString() : v
-        el.innerHTML = JSON.stringify(x, f, 2)
-        return el
+        return JSON.stringify(x, f, 2).replace(/\\n/g, '<br/>')
       })
-      lines.reverse().map(txt => document.body.prepend(txt))
+      const el = document.createElement('pre')
+      el.innerHTML = lines.join(' ')
+      logEL.prepend(el)
       log(...args)
     }
     console.log = logWrap

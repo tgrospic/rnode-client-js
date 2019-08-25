@@ -1,18 +1,23 @@
 const grpc = require('grpc')
 const { ec } = require('elliptic')
-const { rnodeClient, signDeploy } = require('@tgrospic/rnode-grpc-js')
+const { rnodeDeploy, rnodePropose, signDeploy } = require('@tgrospic/rnode-grpc-js')
 
+// Generated files with rnode-grpc-js tool
 const { DeployServiceClient } = require('../../rnode-grpc-gen/js/DeployService_grpc_pb')
+const { ProposeServiceClient } = require('../../rnode-grpc-gen/js/ProposeService_grpc_pb')
 const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
 
 const { log, warn } = console
 
-// const grpcServerUrl = 'localhost:40401'
-const grpcServerUrl = 'node8.testnet.rchain-dev.tk:40401'
-// const grpcServerUrl = 'node3.devnet.rchain-dev.tk:40401'
-// const grpcServerUrl = 'node4.sandboxnet.rchain-dev.tk:40401'
+const deployRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
 
-const grpcService = new DeployServiceClient(grpcServerUrl, grpc.credentials.createInsecure())
+// const rnodeUrl = 'localhost:40401'
+const rnodeUrl = 'node8.testnet.rchain-dev.tk:40401'
+// const rnodeUrl = 'node3.devnet.rchain-dev.tk:40401'
+// const rnodeUrl = 'node4.sandboxnet.rchain-dev.tk:40401'
+
+const deployService = new DeployServiceClient(rnodeUrl, grpc.credentials.createInsecure())
+const proposeService = new ProposeServiceClient(rnodeUrl, grpc.credentials.createInsecure())
 
 const {
   getBlocks,
@@ -20,7 +25,9 @@ const {
   visualizeDag,
   listenForDataAtName,
   DoDeploy,
-} = rnodeClient(grpcService, { protoSchema })
+} = rnodeDeploy(deployService, { protoSchema })
+
+const { propose } = rnodePropose(proposeService, { protoSchema })
 
 const main = async () => {
   // Examples of requests to RNode
@@ -39,7 +46,7 @@ const main = async () => {
 
   const listenData = await listenForDataAtName({
     depth: 10,
-    name: { exprs: [{g_string: 'RChain'}, {g_int: 123}] },
+    name: { exprs: [{gString: 'RChain'}, {gInt: 123}] },
   })
   log('LISTEN', listenData)
 
@@ -49,7 +56,7 @@ const main = async () => {
   const key = secp256k1.genKeyPair()
 
   const deployData = {
-    term: 'new a in { Nil }',
+    term: deployRholangCode,
     phloLimit: 10e3,
   }
   const deploy = signDeploy(key, deployData)
@@ -57,6 +64,10 @@ const main = async () => {
 
   const { message } = await DoDeploy(deploy).catch(x => warn(x.message, x.data))
   log('DEPLOY RESPONSE', message)
+
+
+  await propose()
+  log('PROPOSE successful!')
 }
 
 main()

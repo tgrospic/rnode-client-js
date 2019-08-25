@@ -1,26 +1,30 @@
 {
   "name": "@tgrospic/rnode-client-js",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "RNode sample client: nodejs & web",
   "author": "Tomislav Grospic",
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
-    "start-web": "parcel src/web/index.html",
-    "build-web": "parcel build --public-url ./ src/web/index.html",
     "start-nodejs": "node src/nodejs/client",
+    "start-web": "parcel src/web/index.html",
+    "build-web": "npm-run-all clean build",
+    "build": "parcel build --public-url ./ src/web/index.html",
     "rnode-generate": "rnode-grpc",
     "rnode-generate-v11": "rnode-grpc --rnode-version v0.9.11 --gen-dir rnode-grpc-gen-11",
-    "clean": "rimraf rnode-grpc-gen dist .cache"
+    "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-gen-dev",
+    "clean": "rimraf dist .cache"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "@tgrospic/rnode-grpc-js": "^0.2.0",
+    "@tgrospic/rnode-grpc-js": "^0.3.2",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",
     "google-protobuf": "^3.9.1",
     "grpc": "^1.23.2",
-    "grpc-web": "^1.0.6"
+    "grpc-web": "^1.0.6",
+    "mithril": "^2.0.4",
+    "npm-run-all": "^4.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
