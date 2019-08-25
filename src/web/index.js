@@ -111,7 +111,7 @@ const findByIndex = (nets, index) => nets.flatMap(({urls}) => urls)[index]
 
 const mainView = r => ({nets, sel}) =>
   m('div',
-    m('h3', sel.grpc, ` <proxy> `, sel.http),
+    m('.title', m('pre', sel.grpc), ` <proxy> `, m('pre', sel.http)),
     m('select', {
         // `r` accepts next state to render when selection is changed
         onchange: ev => r({nets, sel: findByIndex(nets, ev.target.selectedIndex)}),
