@@ -13,11 +13,12 @@
     "rnode-generate": "rnode-grpc",
     "rnode-generate-v11": "rnode-grpc --rnode-version v0.9.11 --gen-dir rnode-grpc-gen-11",
     "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-gen-dev",
-    "clean": "rimraf dist .cache"
+    "clean": "rimraf dist .cache",
+    "clean:all": "rimraf dist .cache rnode-grpc-gen node_modules"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "@tgrospic/rnode-grpc-js": "^0.3.4",
+    "@tgrospic/rnode-grpc-js": "^0.3.5",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",
     "google-protobuf": "^3.9.1",
