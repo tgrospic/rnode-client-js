@@ -1,3 +1,5 @@
+// Reference to TypeScript definitions for IntelliSense in VSCode
+/// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
 import { ec } from 'elliptic'
 import m from 'mithril'
 import { rnodeDeploy, rnodePropose, signDeploy } from '@tgrospic/rnode-grpc-js'

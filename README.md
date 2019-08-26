@@ -51,6 +51,16 @@ Because it's a static page it can be published directly on Github via `gh-pages`
 npm run build-web
 ```
 
+## TypeScript definitions
+
+The library also generates a TypeScript definition file that can be referenced in your code and can provide IntelliSense support in VSCode.
+
+```typescript
+/// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
+```
+
+![](docs/intellisense-vscode.png)
+
 ## Available proxies for _testnet_, _devnet_ and _sandboxnet_
 
 Sample static site to test requests from the browser
@@ -75,23 +85,3 @@ HTTP `https://NETWORK-{0-n}.grpc.rchain.isotypic.com`
 | node7.testnet.rchain-dev.tk:40401 | https://testnet-7.grpc.rchain.isotypic.com
 | node8.testnet.rchain-dev.tk:40401 | https://testnet-8.grpc.rchain.isotypic.com
 | node9.testnet.rchain-dev.tk:40401 | https://testnet-9.grpc.rchain.isotypic.com
-
-### devnet
-
-| gRPC                              | HTTP
-|:---------------------------------:|:-----------------------------------------:
-| node0.devnet.rchain-dev.tk:40401  | https://devnet-0.grpc.rchain.isotypic.com
-| node1.devnet.rchain-dev.tk:40401  | https://devnet-1.grpc.rchain.isotypic.com
-| node2.devnet.rchain-dev.tk:40401  | https://devnet-2.grpc.rchain.isotypic.com
-| node3.devnet.rchain-dev.tk:40401  | https://devnet-3.grpc.rchain.isotypic.com
-| node4.devnet.rchain-dev.tk:40401  | https://devnet-4.grpc.rchain.isotypic.com
-
-### sandboxnet
-
-| gRPC                                 | HTTP
-|:------------------------------------:|:-----------------------------------------:
-| node0.sandboxnet.rchain-dev.tk:40401 | https://sandboxnet-0.grpc.rchain.isotypic.com
-| node1.sandboxnet.rchain-dev.tk:40401 | https://sandboxnet-1.grpc.rchain.isotypic.com
-| node2.sandboxnet.rchain-dev.tk:40401 | https://sandboxnet-2.grpc.rchain.isotypic.com
-| node3.sandboxnet.rchain-dev.tk:40401 | https://sandboxnet-3.grpc.rchain.isotypic.com
-| node4.sandboxnet.rchain-dev.tk:40401 | https://sandboxnet-4.grpc.rchain.isotypic.com
