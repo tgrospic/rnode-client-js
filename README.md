@@ -2,6 +2,8 @@
 
 This repo contains samples how to use [@tgrospic/rnode-grpc-js](https://www.npmjs.com/package/@tgrospic/rnode-grpc-js) helper library to generate JS bindings for RNode (in Nodejs and browser).
 
+Web example is published from `gh-pages` branch on this url [https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js).
+
 ## Install
 
 Install project dependencies (in `./node_modules` folder).
@@ -61,10 +63,9 @@ The library also generates a TypeScript definition file that can be referenced i
 
 ![](docs/intellisense-vscode.png)
 
-## Available proxies for _testnet_, _devnet_ and _sandboxnet_
+## Available proxies for _testnet_
 
-Sample static site to test requests from the browser
-[https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js). It's published as part of the example repository [@tgrospic/rnode-client-js](https://github.com/tgrospic/rnode-client-js).
+In the example, the proxies are also for _devnet_ and _sandboxnet_, but they are much less stable and are intended for RChain developers.
 
 #### Proxy address pattern:
 
