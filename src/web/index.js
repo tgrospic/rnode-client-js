@@ -15,8 +15,6 @@ const deployRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 
 // const rnodeUrl = 'http://localhost:44401'
 // const rnodeUrl = 'https://testnet-8.grpc.rchain.isotypic.com'
-// const rnodeUrl = 'https://devnet-3.grpc.rchain.isotypic.com'
-// const rnodeUrl = 'https://sandboxnet-3.grpc.rchain.isotypic.com'
 
 const main = async rnodeUrl => {
   const deployService = new DeployServiceClient(rnodeUrl)
@@ -75,7 +73,7 @@ const main = async rnodeUrl => {
 /*
   Additional stuff only for the browser example.
 
-  This will display a dropdown with textnet, devnet and sandboxnet validators.
+  This will display a dropdown with RChain testnet validators.
   Selection will display grpc and proxy http address which is used to
   make sample requests to RNode from the browser.
 */
@@ -85,12 +83,6 @@ const proxyNets = [
   // node{0-9}.testnet.rchain-dev.tk
   // https://testnet-{0-9}.grpc.rchain.isotypic.com
   ['testnet', 10],
-  // node{0-4}.devnet.rchain-dev.tk
-  // https://devnet-{0-4}.grpc.rchain.isotypic.com
-  ['devnet', 5],
-  // node{0-4}.sandboxnet.rchain-dev.tk
-  // https://sandboxnet-{0-4}.grpc.rchain.isotypic.com
-  ['sandboxnet', 5],
 ]
 
 const localProxyNet = { label: 'local', urls: [

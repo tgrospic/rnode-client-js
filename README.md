@@ -26,12 +26,12 @@ node_modules/.bin/rnode-grpc
 In `src/nodejs/client.js` script is an example of how to connect to RNode from Nodejs.
 
 ```sh
-# Run nodejs example / sample requests to testnet/devnet/sandboxnet validator
+# Run nodejs example / sample requests to RChain testnet
 npm run start-nodejs
 ```
 ## Run **Browser example** ([`src/web/index.js`](src/web/index.js))
 
-This will start local nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
+This will start local Nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
 
 On page load it will make some sample requests to RNode and print outputs. This is very simle example, just text, no UI. :)
 
@@ -39,7 +39,7 @@ The code for Nodejs is almost the same as for the browser, the main difference i
 
 ```sh
 # Run web example / sample request to Envoy proxy
-# - proxy is available for testnet/devnet/sandboxnet
+# - proxy is available for RChain testnet
 npm run start-web
 ```
 ## Build static page (offline mode)
@@ -65,7 +65,7 @@ The library also generates a TypeScript definition file that can be referenced i
 
 ## Available proxies for _testnet_
 
-In the example, the proxies are also for _devnet_ and _sandboxnet_, but they are much less stable and are intended for RChain developers.
+List of proxies to validators in RChain _testnet_ network.
 
 #### Proxy address pattern:
 

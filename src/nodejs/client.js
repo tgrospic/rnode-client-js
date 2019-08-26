@@ -15,8 +15,6 @@ const deployRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy tes
 
 // const rnodeUrl = 'localhost:40401'
 const rnodeUrl = 'node8.testnet.rchain-dev.tk:40401'
-// const rnodeUrl = 'node3.devnet.rchain-dev.tk:40401'
-// const rnodeUrl = 'node4.sandboxnet.rchain-dev.tk:40401'
 
 const deployService = new DeployServiceClient(rnodeUrl, grpc.credentials.createInsecure())
 const proposeService = new ProposeServiceClient(rnodeUrl, grpc.credentials.createInsecure())
