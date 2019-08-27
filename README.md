@@ -9,6 +9,7 @@ Web example is published from `gh-pages` branch on this url [https://tgrospic.gi
 Install project dependencies (in `./node_modules` folder).
 
 ```sh
+npm i @tgrospic/rnode-grpc-js
 npm install
 ```
 Generate JS bindings (default in `./rnode-grpc-gen`).
