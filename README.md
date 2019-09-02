@@ -1,6 +1,6 @@
-# RNode JS client samples for Nodejs and browser
+# RNode JS client examples for Nodejs and browser
 
-This repo contains samples how to use [@tgrospic/rnode-grpc-js](https://www.npmjs.com/package/@tgrospic/rnode-grpc-js) helper library to generate JS bindings for RNode (in Nodejs and browser).
+This repo contains examples how to use [**@tgrospic/rnode-grpc-js**](https://github.com/tgrospic/rnode-grpc-js) helper library to generate **RNode API** for **Nodejs** and the **browser**. There you can find more information about API, how to install it and use it. 
 
 Web example is published from `gh-pages` branch on this url [https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js).
 
@@ -33,7 +33,7 @@ npm run start-nodejs
 
 This will start local Nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
 
-On page load it will make some sample requests to RNode and print outputs. This is very simle example, just text, no UI. :)
+Test page contains a list of testnet validators with a button to make sample requests and print outputs.
 
 The code for Nodejs is almost the same as for the browser, the main difference is how _client_ is constructed. Nodejs uses generated _protocol_ files with `..._grpc_pb.js` suffix and browser with `..._grpc_web_pb.js` suffix. Files with just `..._pb.js` have defined types and they are common for both platforms.
 
@@ -55,7 +55,7 @@ npm run build-web
 
 ## TypeScript definitions
 
-The library also generates a TypeScript definition file that can be referenced in your code and can provide IntelliSense support in VSCode.
+`rnode-grpc-js` library also generates a TypeScript definition file that can be referenced in your code and can provide IntelliSense support in VSCode.
 
 ```typescript
 /// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />

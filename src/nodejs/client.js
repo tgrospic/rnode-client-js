@@ -2,7 +2,7 @@
 /// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
 const grpc = require('grpc')
 const { ec } = require('elliptic')
-const { rnodeDeploy, rnodePropose, signDeploy } = require('@tgrospic/rnode-grpc-js')
+const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } = require('@tgrospic/rnode-grpc-js')
 
 // Generated files with rnode-grpc-js tool
 const { DeployServiceClient } = require('../../rnode-grpc-gen/js/DeployService_grpc_pb')
@@ -11,25 +11,31 @@ const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
 
 const { log, warn } = console
 
-const deployRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
+const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
 
-// const rnodeUrl = 'localhost:40401'
-const rnodeUrl = 'node8.testnet.rchain-dev.tk:40401'
+const rnodeExternalUrl = 'localhost:40401'
+// const rnodeExternalUrl = 'node8.testnet.rchain-dev.tk:40401'
 
-const deployService = new DeployServiceClient(rnodeUrl, grpc.credentials.createInsecure())
-const proposeService = new ProposeServiceClient(rnodeUrl, grpc.credentials.createInsecure())
+// NOTE: in the future, propose service will be available only on the internal port
+// const rnodeInternalUrl = 'localhost:40402'
 
-const {
-  getBlocks,
-  lastFinalizedBlock,
-  visualizeDag,
-  listenForDataAtName,
-  DoDeploy,
-} = rnodeDeploy(deployService, { protoSchema })
-
-const { propose } = rnodePropose(proposeService, { protoSchema })
+// Instantiate grpc clients
+const deployService  = new DeployServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
+const proposeService = new ProposeServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
 
 const main = async () => {
+  // Get RNode service methods
+
+  const {
+    getBlocks,
+    lastFinalizedBlock,
+    visualizeDag,
+    listenForDataAtName,
+    DoDeploy,
+  } = rnodeDeploy(deployService, { protoSchema })
+
+  const { propose } = rnodePropose(proposeService, { protoSchema })
+
   // Examples of requests to RNode
 
   const lastBlockObj = await lastFinalizedBlock()
@@ -54,13 +60,17 @@ const main = async () => {
 
   const secp256k1 = new ec('secp256k1')
   const key = secp256k1.genKeyPair()
+  // const key = '1bf36a3d89c27ddef7955684b97667c75454317d8964528e57b2308947b250b0'
 
   const deployData = {
-    term: deployRholangCode,
+    term: sampleRholangCode,
     phloLimit: 10e3,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
+
+  const isValidDeploy = verifyDeploy(deploy)
+  log('DEPLOY IS VALID', isValidDeploy)
 
   const { message } = await DoDeploy(deploy).catch(x => warn(x.message, x.data))
   log('DEPLOY RESPONSE', message)

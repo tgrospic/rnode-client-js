@@ -2,7 +2,7 @@
 /// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
 import { ec } from 'elliptic'
 import m from 'mithril'
-import { rnodeDeploy, rnodePropose, signDeploy } from '@tgrospic/rnode-grpc-js'
+import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
 import { DeployServiceClient } from '../../rnode-grpc-gen/js/DeployService_grpc_web_pb'
@@ -11,14 +11,20 @@ import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 
 const { log, warn } = console
 
-const deployRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy test") }'
+const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy test") }'
 
-// const rnodeUrl = 'http://localhost:44401'
-// const rnodeUrl = 'https://testnet-8.grpc.rchain.isotypic.com'
+// const rnodeExternalUrl = 'http://localhost:44401'
+// const rnodeExternalUrl = 'https://testnet-8.grpc.rchain.isotypic.com'
+
+// NOTE: in the future, propose service will be available only on the internal port
+// const rnodeInternalUrl = 'http://localhost:44402'
 
 const main = async rnodeUrl => {
-  const deployService = new DeployServiceClient(rnodeUrl)
+  // Instantiate http clients
+  const deployService  = new DeployServiceClient(rnodeUrl)
   const proposeService = new ProposeServiceClient(rnodeUrl)
+
+  // Get RNode service methods
 
   const {
     getBlocks,
@@ -54,13 +60,17 @@ const main = async rnodeUrl => {
 
   const secp256k1 = new ec('secp256k1')
   const key = secp256k1.genKeyPair()
+  // const key = '1bf36a3d89c27ddef7955684b97667c75454317d8964528e57b2308947b250b0'
 
   const deployData = {
-    term: deployRholangCode,
+    term: sampleRholangCode,
     phloLimit: 10e3,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
+
+  const isValidDeploy = verifyDeploy(deploy)
+  log('DEPLOY IS VALID', isValidDeploy)
 
   const { message } = await DoDeploy(deploy).catch(x => warn(x.message, x.data))
   log('DEPLOY RESPONSE', message)

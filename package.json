@@ -1,6 +1,6 @@
 {
   "name": "@tgrospic/rnode-client-js",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "RNode sample client: nodejs & web",
   "author": "Tomislav Grospic",
   "license": "MIT",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "@tgrospic/rnode-grpc-js": "^0.3.5",
+    "@tgrospic/rnode-grpc-js": "^0.4.0",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",
     "google-protobuf": "^3.9.1",
