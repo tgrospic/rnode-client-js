@@ -72,7 +72,7 @@ const main = async () => {
   const isValidDeploy = verifyDeploy(deploy)
   log('DEPLOY IS VALID', isValidDeploy)
 
-  const { message } = await DoDeploy(deploy).catch(x => warn(x.message, x.data))
+  const { message } = await DoDeploy(deploy)
   log('DEPLOY RESPONSE', message)
 
 
