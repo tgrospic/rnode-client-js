@@ -13,9 +13,9 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy tes
 
 const rnodeInternalUrl = 'localhost:40402'
 
-const replService = new ReplClient(rnodeInternalUrl, grpc.credentials.createInsecure())
+const replClient = new ReplClient(rnodeInternalUrl, grpc.credentials.createInsecure())
 
-const { Eval } = rnodeRepl(replService, { protoSchema })
+const { Eval } = rnodeRepl(replClient, { protoSchema })
 
 const main = async () => {
   // Examples of eval request to RNode
