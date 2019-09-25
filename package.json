@@ -13,6 +13,7 @@
     "rnode-generate": "rnode-grpc",
     "rnode-generate-v11": "rnode-grpc --rnode-version v0.9.11 --gen-dir rnode-grpc-gen-11",
     "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-gen-dev",
+    "postinstall": "npm run rnode-generate",
     "clean": "rimraf dist .cache",
     "clean:all": "rimraf dist .cache rnode-grpc-gen node_modules"
   },
