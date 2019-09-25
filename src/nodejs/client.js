@@ -1,5 +1,5 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
-/// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
+/// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
 const grpc = require('grpc')
 const { ec } = require('elliptic')
 const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } = require('@tgrospic/rnode-grpc-js')
@@ -23,7 +23,7 @@ const rnodeExternalUrl = 'localhost:40401'
 const deployService  = new DeployServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
 const proposeService = new ProposeServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
 
-const main = async () => {
+const rnodeExample = async () => {
   // Get RNode service methods
 
   const {
@@ -46,13 +46,13 @@ const main = async () => {
   log('BLOCKS', blocks)
 
 
-  const vdagObj = await visualizeDag({ depth: 2, showJustificationLines: true })
+  const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
   log('VDAG', vdagObj.map(x => x.content).join(''))
 
 
   const listenData = await listenForDataAtName({
     depth: 10,
-    name: { exprs: [{gString: 'RChain'}, {gInt: 123}] },
+    name: { exprsList: [{gString: 'RChain'}, {gInt: 123}] },
   })
   log('LISTEN', listenData)
 
@@ -80,4 +80,4 @@ const main = async () => {
   log('PROPOSE successful!')
 }
 
-main()
+rnodeExample()

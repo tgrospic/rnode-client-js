@@ -58,7 +58,7 @@ npm run build-web
 `rnode-grpc-js` library also generates a TypeScript definition file that can be referenced in your code and can provide IntelliSense support in VSCode.
 
 ```typescript
-/// <reference path="../../rnode-grpc-gen/js/rnode-grps-js.d.ts" />
+/// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
 ```
 
 ![](docs/intellisense-vscode.png)
