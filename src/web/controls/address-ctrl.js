@@ -15,7 +15,7 @@ export const addressCtrl = (r, {pubKey, ethAddr, revAddr}) => {
 
   return m('.address-ctrl',
     m('input[type=text]', {placeholder: 'Public key / ETH address', oninput: keyPress}),
-    m('.address-gen',
+    revAddr && m('.address-gen',
       m('table',
         m('tr', m('td', '>'), m('td', pubKey)),
         m('tr', m('td', 'ETH'), m('td', ethAddr)),
