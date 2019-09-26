@@ -29,6 +29,8 @@ const proxyNets = [
   // node{0-9}.testnet.rchain-dev.tk
   // https://testnet-{0-9}.grpc.rchain.isotypic.com
   ['testnet', 10],
+  // ['devnet', 5],
+  // ['sandboxnet', 5],
 ]
 
 const localProxyNet = { label: 'local', urls: [
@@ -86,7 +88,7 @@ const bytesFromHex = hexStr => {
   const byte2hex = ([arr, bhi], x) =>
     bhi ? [[...arr, parseInt(`${bhi}${x}`, 16)]] : [arr, x]
   const [resArr] = Array.from(hexStr).reduce(byte2hex, [[]])
-  return new Uint8Array(resArr)
+  return Uint8Array.from(resArr)
 }
 
 const mainCtrl = (r, st) => {

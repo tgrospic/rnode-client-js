@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "@tgrospic/rnode-grpc-js": "^0.6.3",
+    "@tgrospic/rnode-grpc-js": "^0.6.4",
     "base-58": "0.0.1",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",

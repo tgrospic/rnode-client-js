@@ -12,7 +12,7 @@ const bytesFromHex = hexStr => {
   const byte2hex = ([arr, bhi], x) =>
     bhi ? [[...arr, parseInt(`${bhi}${x}`, 16)]] : [arr, x]
   const [resArr] = Array.from(hexStr).reduce(byte2hex, [[]])
-  return new Uint8Array(resArr)
+  return Uint8Array.form(resArr)
 }
 
 const toBase58 = hexStr => {
