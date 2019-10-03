@@ -43,6 +43,8 @@ const getUrls = net => n => ({
   http: `https://${net}-${n}.grpc.rchain.isotypic.com`,
 })
 
+const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
+
 const rnode = rnodeUrl => {
   // Instantiate http clients
   const deployService  = new DeployServiceClient(rnodeUrl)
@@ -122,6 +124,8 @@ const mainCtrl = (r, st) => {
 
   // App render
   return m('div',
+    m('div', 'Demo client for RNode ',
+      m('a', {href: repoUrl, target: '_blank'}, repoUrl)),
     m('h1', 'RNode client testing page'),
     m('h2', 'RNode selector'),
     selectorCtrl(selSet, {nets, sel}),
