@@ -1,6 +1,6 @@
 {
   "name": "@tgrospic/rnode-client-js",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "RNode sample client: nodejs & web",
   "author": "Tomislav Grospic",
   "license": "MIT",
@@ -8,6 +8,7 @@
   "scripts": {
     "start-nodejs": "node src/nodejs/client",
     "start-web": "parcel src/web/index.html",
+    "start-web-ts": "parcel src/web-ts/index.html",
     "build-web": "npm-run-all clean build",
     "build": "parcel build --public-url ./ src/web/index.html",
     "rnode-generate": "rnode-grpc --rnode-version v0.9.14",
@@ -36,7 +37,8 @@
     "grpc-tools": "^1.8.0",
     "parcel": "^1.12.3",
     "protobufjs": "^6.8.8",
-    "rimraf": "^3.0.0"
+    "rimraf": "^3.0.0",
+    "typescript": "^3.6.3"
   },
   "babel": {
     "presets": [

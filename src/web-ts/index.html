@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>RChain web</title>
+  <style>
+    :root {
+      font-size: .8rem;
+      font-family: sans-serif;
+    }
+
+    hr {
+      margin: 12px 0 5px;
+      padding: 0;
+      border-color: #ffffffb3;
+    }
+
+    h2 {
+      margin: 6px 0 4px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 10px 0px;
+      border-bottom: solid 1px #cccccc6c;
+    }
+
+    .selector-ctrl pre {
+      display:inline-block;
+      padding: 0px 0px;
+      font-weight: bold;
+      font-size: 1.3em;
+      border: none;
+    }
+
+    * + * {
+      margin-top: 4px;
+      margin-right: 4px;
+    }
+
+    input, select, button {
+      padding: 4px;
+    }
+
+    input[type="text"] {
+      width: 480px;
+      border-color: #cfcfcf9c;
+      border-width: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="log"></div>
+  <script>
+    const { log } = console
+    const logEL = document.querySelector('#log')
+    const logWrap = (...args) => {
+      const lines = Array.from(args).map(x => {
+        const f = (_, v) => v && v.buffer instanceof ArrayBuffer
+          ? Array.from(v).toString() : v
+        return JSON.stringify(x, f, 2).replace(/\\n/g, '<br/>')
+      })
+      const el = document.createElement('pre')
+      el.innerHTML = lines.join(' ')
+      logEL.prepend(el)
+      log(...args)
+    }
+    console.log = logWrap
+  </script>
+  <script src="./index.ts"></script>
+</body>
+</html>

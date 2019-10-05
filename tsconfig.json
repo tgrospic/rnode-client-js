@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/web-ts/**/*",
+    "rnode-grpc-gen/js/rnode-grpc-js.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
