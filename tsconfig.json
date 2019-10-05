@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noImplicitAny": false
   },
   "include": [
     "src/web-ts/**/*",
