@@ -1,30 +1,31 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
-const grpc = require('grpc')
+const grpc = require('@grpc/grpc-js')
 const { ec } = require('elliptic')
 const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } = require('@tgrospic/rnode-grpc-js')
 
 // Generated files with rnode-grpc-js tool
-const { DeployServiceClient } = require('../../rnode-grpc-gen/js/DeployService_grpc_pb')
-const { ProposeServiceClient } = require('../../rnode-grpc-gen/js/ProposeService_grpc_pb')
 const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
+// Import generated protobuf types (in global scope)
+require('../../rnode-grpc-gen/js/DeployService_pb')
+require('../../rnode-grpc-gen/js/ProposeService_pb')
 
 const { log, warn } = console
 
 const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
 
-const rnodeExternalUrl = 'localhost:40401'
+const rnodeExternalUrl = 'localhost:50401'
 // const rnodeExternalUrl = 'node8.testnet.rchain-dev.tk:40401'
 
 // NOTE: in the future, propose service will be available only on the internal port
-// const rnodeInternalUrl = 'localhost:40402'
-
-// Instantiate grpc clients
-const deployService  = new DeployServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
-const proposeService = new ProposeServiceClient(rnodeExternalUrl, grpc.credentials.createInsecure())
+const rnodeInternalUrl = 'localhost:50402'
 
 const rnodeExample = async () => {
   // Get RNode service methods
+  const options = url => ({
+    client: new grpc.Client(url, grpc.credentials.createInsecure()),
+    protoSchema,
+  })
 
   const {
     getBlocks,
@@ -32,9 +33,9 @@ const rnodeExample = async () => {
     visualizeDag,
     listenForDataAtName,
     DoDeploy,
-  } = rnodeDeploy(deployService, { protoSchema })
+  } = rnodeDeploy(options(rnodeExternalUrl))
 
-  const { propose } = rnodePropose(proposeService, { protoSchema })
+  const { propose } = rnodePropose(options(rnodeInternalUrl))
 
   // Examples of requests to RNode
 
@@ -64,7 +65,7 @@ const rnodeExample = async () => {
 
   const deployData = {
     term: sampleRholangCode,
-    phloLimit: 10e3,
+    phlolimit: 10e3,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)

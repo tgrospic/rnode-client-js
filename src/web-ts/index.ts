@@ -1,11 +1,14 @@
+import * as grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
+// @ts-ignore
 import { startApp } from '../web/controls/main-ctrl' // web example addition (not in TypeScript)
 import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy, UnsignedDeployData } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
-import { DeployServiceClient } from '../../rnode-grpc-gen/js/DeployService_grpc_web_pb'
-import { ProposeServiceClient } from '../../rnode-grpc-gen/js/ProposeService_grpc_web_pb'
 import * as protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
+// Import generated protobuf types (in global scope)
+import '../../rnode-grpc-gen/js/DeployService_pb'
+import '../../rnode-grpc-gen/js/ProposeService_pb'
 
 const { log, warn } = console
 
@@ -18,11 +21,12 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 // const rnodeInternalUrl = 'http://localhost:44402'
 
 const rnodeExample = async (rnodeUrl: string) => {
-  // Instantiate http clients
-  const deployService  = new DeployServiceClient(rnodeUrl)
-  const proposeService = new ProposeServiceClient(rnodeUrl)
-
   // Get RNode service methods
+  const options = {
+    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
+    host: rnodeUrl,
+    protoSchema,
+  }
 
   const {
     getBlocks,
@@ -30,9 +34,9 @@ const rnodeExample = async (rnodeUrl: string) => {
     visualizeDag,
     listenForDataAtName,
     DoDeploy,
-  } = rnodeDeploy(deployService, { protoSchema })
+  } = rnodeDeploy(options)
 
-  const { propose } = rnodePropose(proposeService, { protoSchema })
+  const { propose } = rnodePropose(options)
 
   // Examples of requests to RNode
 
@@ -78,5 +82,5 @@ const rnodeExample = async (rnodeUrl: string) => {
   log('PROPOSE successful!')
 }
 
-// Start main app (not in TypeScript)
+// Start main app
 startApp(rnodeExample)

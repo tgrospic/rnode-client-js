@@ -1,6 +1,6 @@
 {
   "name": "@tgrospic/rnode-client-js",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "RNode sample client: nodejs & web",
   "author": "Tomislav Grospic",
   "license": "MIT",
@@ -20,12 +20,12 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
-    "@tgrospic/rnode-grpc-js": "^0.7.0",
+    "@grpc/grpc-js": "^0.6.5",
+    "@tgrospic/rnode-grpc-js": "file:../rnode-grpc-js",
     "base-58": "0.0.1",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",
     "google-protobuf": "^3.9.1",
-    "grpc": "^1.23.3",
     "grpc-web": "^1.0.6",
     "js-sha3": "^0.8.0",
     "mithril": "^2.0.4",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/plugin-transform-runtime": "^7.5.5",
+    "@types/elliptic": "^6.4.10",
     "grpc-tools": "^1.8.0",
     "parcel": "^1.12.3",
     "protobufjs": "^6.8.8",

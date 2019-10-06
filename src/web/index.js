@@ -1,13 +1,15 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
+import grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
 import { startApp } from './controls/main-ctrl' // web example addition
 import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
-import { DeployServiceClient } from '../../rnode-grpc-gen/js/DeployService_grpc_web_pb'
-import { ProposeServiceClient } from '../../rnode-grpc-gen/js/ProposeService_grpc_web_pb'
 import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
+// Import generated protobuf types (in global scope)
+import '../../rnode-grpc-gen/js/DeployService_pb'
+import '../../rnode-grpc-gen/js/ProposeService_pb'
 
 const { log, warn } = console
 
@@ -20,11 +22,12 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 // const rnodeInternalUrl = 'http://localhost:44402'
 
 const rnodeExample = async rnodeUrl => {
-  // Instantiate http clients
-  const deployService  = new DeployServiceClient(rnodeUrl)
-  const proposeService = new ProposeServiceClient(rnodeUrl)
-
   // Get RNode service methods
+  const options = {
+    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
+    host: rnodeUrl,
+    protoSchema,
+  }
 
   const {
     getBlocks,
@@ -32,9 +35,9 @@ const rnodeExample = async rnodeUrl => {
     visualizeDag,
     listenForDataAtName,
     DoDeploy,
-  } = rnodeDeploy(deployService, { protoSchema })
+  } = rnodeDeploy(options)
 
-  const { propose } = rnodePropose(proposeService, { protoSchema })
+  const { propose } = rnodePropose(options)
 
   // Examples of requests to RNode
 
@@ -64,7 +67,7 @@ const rnodeExample = async rnodeUrl => {
 
   const deployData = {
     term: sampleRholangCode,
-    phloLimit: 10e3,
+    phlolimit: 10e3,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)

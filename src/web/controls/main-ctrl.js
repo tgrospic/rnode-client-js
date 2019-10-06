@@ -1,12 +1,11 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
+import grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
 import m from 'mithril'
 import { rnodeDeploy, rnodePropose, signDeploy } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
-import { DeployServiceClient } from '../../../rnode-grpc-gen/js/DeployService_grpc_web_pb'
-import { ProposeServiceClient } from '../../../rnode-grpc-gen/js/ProposeService_grpc_web_pb'
 import protoSchema from '../../../rnode-grpc-gen/js/pbjs_generated.json'
 
 // Controls
@@ -47,11 +46,14 @@ const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
 const rnode = rnodeUrl => {
   // Instantiate http clients
-  const deployService  = new DeployServiceClient(rnodeUrl)
-  const proposeService = new ProposeServiceClient(rnodeUrl)
+  const options = {
+    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
+    host: rnodeUrl,
+    protoSchema,
+  }
   // Get RNode service methods
-  const { DoDeploy, listenForDataAtName } = rnodeDeploy(deployService, { protoSchema })
-  const { propose } = rnodePropose(proposeService, { protoSchema })
+  const { DoDeploy, listenForDataAtName } = rnodeDeploy(options)
+  const { propose } = rnodePropose(options)
   return { DoDeploy, propose, listenForDataAtName }
 }
 
