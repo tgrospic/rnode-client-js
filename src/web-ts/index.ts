@@ -22,11 +22,7 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 
 const rnodeExample = async (rnodeUrl: string) => {
   // Get RNode service methods
-  const options = {
-    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
-    host: rnodeUrl,
-    protoSchema,
-  }
+  const options = { grpcLib: grpcWeb, host: rnodeUrl, protoSchema }
 
   const {
     getBlocks,

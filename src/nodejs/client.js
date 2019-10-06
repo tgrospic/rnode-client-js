@@ -22,10 +22,7 @@ const rnodeInternalUrl = 'localhost:50402'
 
 const rnodeExample = async () => {
   // Get RNode service methods
-  const options = url => ({
-    client: new grpc.Client(url, grpc.credentials.createInsecure()),
-    protoSchema,
-  })
+  const options = host => ({ grpcLib: grpc, host, protoSchema })
 
   const {
     getBlocks,

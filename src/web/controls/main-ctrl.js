@@ -46,11 +46,8 @@ const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
 const rnode = rnodeUrl => {
   // Instantiate http clients
-  const options = {
-    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
-    host: rnodeUrl,
-    protoSchema,
-  }
+  const options = { grpcLib: grpcWeb, host: rnodeUrl, protoSchema }
+
   // Get RNode service methods
   const { DoDeploy, listenForDataAtName } = rnodeDeploy(options)
   const { propose } = rnodePropose(options)

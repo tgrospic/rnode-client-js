@@ -30,19 +30,27 @@ In `src/nodejs/client.js` script is an example of how to connect to RNode from N
 # Run nodejs example / sample requests to RChain testnet
 npm run start-nodejs
 ```
+
 ## Run **Browser example** ([`src/web/index.js`](src/web/index.js))
 
 This will start local Nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
 
 Test page contains a list of testnet validators with a button to make sample requests and print outputs.
 
-The code for Nodejs is almost the same as for the browser, the main difference is how _client_ is constructed. Nodejs uses generated _protocol_ files with `..._grpc_pb.js` suffix and browser with `..._grpc_web_pb.js` suffix. Files with just `..._pb.js` have defined types and they are common for both platforms.
+The code for Nodejs is almost the same as for the browser, the only difference is gRPC protocol implementation. `@grpc/grpc-js`, `grpc` for Nodejs or `grpc-web` for the browser.
 
 ```sh
 # Run web example / sample request to Envoy proxy
 # - proxy is available for RChain testnet
 npm run start-web
 ```
+
+### TypeScript version ([`src/web-ts/index.ts`](src/web-ts/index.ts))
+
+```sh
+npm run start-web-ts
+```
+
 ## Build static page (offline mode)
 
 Web site can be compiled to static page which can be opened with double click on `index.html` in `./dist` directory where the page is built. This is exactly what we need for offline wallet. :)

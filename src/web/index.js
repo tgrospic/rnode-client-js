@@ -23,11 +23,7 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 
 const rnodeExample = async rnodeUrl => {
   // Get RNode service methods
-  const options = {
-    client: new grpcWeb.GrpcWebClientBase({format: 'binary'}),
-    host: rnodeUrl,
-    protoSchema,
-  }
+  const options = { grpcLib: grpcWeb, host: rnodeUrl, protoSchema }
 
   const {
     getBlocks,
@@ -41,16 +37,16 @@ const rnodeExample = async rnodeUrl => {
 
   // Examples of requests to RNode
 
-  const lastBlockObj = await lastFinalizedBlock()
-  log('LAST BLOCK', lastBlockObj)
+  // const lastBlockObj = await lastFinalizedBlock()
+  // log('LAST BLOCK', lastBlockObj)
 
 
   const blocks = await getBlocks({ depth: 2 })
   log('BLOCKS', blocks)
 
 
-  const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
-  log('VDAG', vdagObj.map(x => x.content).join(''))
+  // const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
+  // log('VDAG', vdagObj.map(x => x.content).join(''))
 
 
   const listenData = await listenForDataAtName({

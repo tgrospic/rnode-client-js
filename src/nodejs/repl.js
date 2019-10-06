@@ -14,10 +14,7 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy tes
 
 const rnodeInternalUrl = 'localhost:50402'
 
-const options = {
-  client: new grpc.Client(rnodeInternalUrl, grpc.credentials.createInsecure()),
-  protoSchema,
-}
+const options = { grpcLib: grpc, host: rnodeInternalUrl, protoSchema }
 
 const { Eval } = rnodeRepl(options)
 
