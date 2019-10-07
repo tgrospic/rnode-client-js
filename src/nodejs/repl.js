@@ -12,7 +12,7 @@ const { log } = console
 
 const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
 
-const rnodeInternalUrl = 'localhost:50402'
+const rnodeInternalUrl = 'localhost:40402'
 
 const options = { grpcLib: grpc, host: rnodeInternalUrl, protoSchema }
 

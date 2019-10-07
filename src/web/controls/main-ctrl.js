@@ -49,9 +49,9 @@ const rnode = rnodeUrl => {
   const options = { grpcLib: grpcWeb, host: rnodeUrl, protoSchema }
 
   // Get RNode service methods
-  const { DoDeploy, listenForDataAtName } = rnodeDeploy(options)
+  const { doDeploy, listenForDataAtName } = rnodeDeploy(options)
   const { propose } = rnodePropose(options)
-  return { DoDeploy, propose, listenForDataAtName }
+  return { DoDeploy: doDeploy, propose, listenForDataAtName }
 }
 
 const sendDeploy = async (rnodeUrl, code, privateKey) => {
@@ -64,25 +64,25 @@ const sendDeploy = async (rnodeUrl, code, privateKey) => {
   // Sign deploy
   const deploy = signDeploy(key, deployData)
   // Send deploy
-  const { message } = await DoDeploy(deploy)
+  const { result } = await DoDeploy(deploy)
   // Try to propose but don't throw on error
   try {
     const resPropose = await propose()
     warn('PROPOSE', resPropose)
   } catch (error) { warn(error) }
   // Deploy response
-  return [message, deploy]
+  return [result, deploy]
 }
 
 const getDataForDeploy = async (rnodeUrl, deployId) => {
   const { listenForDataAtName } = rnode(rnodeUrl)
-  const { blockresultsList } = await listenForDataAtName({
+  const { payload: { blockinfoList }  } = await listenForDataAtName({
     depth: -1,
     name: { unforgeablesList: [{gDeployIdBody: {sig: deployId}}] },
   })
   // Get data as number
-  return blockresultsList.length &&
-    blockresultsList[0].postblockdataList[0].exprsList[0].gInt
+  return blockinfoList.length &&
+    blockinfoList[0].postblockdataList[0].exprsList[0].gInt
 }
 
 const bytesFromHex = hexStr => {

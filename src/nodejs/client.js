@@ -7,18 +7,17 @@ const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } = require('@tgrosp
 // Generated files with rnode-grpc-js tool
 const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
 // Import generated protobuf types (in global scope)
-require('../../rnode-grpc-gen/js/DeployService_pb')
-require('../../rnode-grpc-gen/js/ProposeService_pb')
+require('../../rnode-grpc-gen/js/DeployServiceV1_pb')
+require('../../rnode-grpc-gen/js/ProposeServiceV1_pb')
 
 const { log, warn } = console
 
 const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
 
-const rnodeExternalUrl = 'localhost:50401'
+const rnodeExternalUrl = 'localhost:40401'
 // const rnodeExternalUrl = 'node8.testnet.rchain-dev.tk:40401'
 
-// NOTE: in the future, propose service will be available only on the internal port
-const rnodeInternalUrl = 'localhost:50402'
+const rnodeInternalUrl = 'localhost:40402'
 
 const rnodeExample = async () => {
   // Get RNode service methods
@@ -29,7 +28,7 @@ const rnodeExample = async () => {
     lastFinalizedBlock,
     visualizeDag,
     listenForDataAtName,
-    DoDeploy,
+    doDeploy,
   } = rnodeDeploy(options(rnodeExternalUrl))
 
   const { propose } = rnodePropose(options(rnodeInternalUrl))
@@ -70,12 +69,12 @@ const rnodeExample = async () => {
   const isValidDeploy = verifyDeploy(deploy)
   log('DEPLOY IS VALID', isValidDeploy)
 
-  const { message } = await DoDeploy(deploy)
-  log('DEPLOY RESPONSE', message)
+  const { result } = await doDeploy(deploy)
+  log('DEPLOY RESPONSE', result)
 
 
-  await propose()
-  log('PROPOSE successful!')
+  const { result: proposeRes } = await propose()
+  log('PROPOSE RESPONSE', proposeRes)
 }
 
 rnodeExample()

@@ -8,8 +8,8 @@ import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } from '@tgrospic/r
 // Generated files with rnode-grpc-js tool
 import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 // Import generated protobuf types (in global scope)
-import '../../rnode-grpc-gen/js/DeployService_pb'
-import '../../rnode-grpc-gen/js/ProposeService_pb'
+import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
+import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
 const { log, warn } = console
 
@@ -30,7 +30,7 @@ const rnodeExample = async rnodeUrl => {
     lastFinalizedBlock,
     visualizeDag,
     listenForDataAtName,
-    DoDeploy,
+    doDeploy,
   } = rnodeDeploy(options)
 
   const { propose } = rnodePropose(options)
@@ -71,12 +71,14 @@ const rnodeExample = async rnodeUrl => {
   const isValidDeploy = verifyDeploy(deploy)
   log('DEPLOY IS VALID', isValidDeploy)
 
-  const { message } = await DoDeploy(deploy)
-  log('DEPLOY RESPONSE', message)
+  const { result } = await doDeploy(deploy)
+  log('DEPLOY RESPONSE', result)
 
 
-  await propose()
-  log('PROPOSE successful!')
+  if (!!rnodeUrl.match(/localhost/)) {
+    const { result: proposeRes } = await propose()
+    log('PROPOSE successful!', proposeRes)
+  }
 }
 
 // Start main app

@@ -29,7 +29,7 @@ const rnodeExample = async (rnodeUrl: string) => {
     lastFinalizedBlock,
     visualizeDag,
     listenForDataAtName,
-    DoDeploy,
+    doDeploy,
   } = rnodeDeploy(options)
 
   const { propose } = rnodePropose(options)
@@ -70,12 +70,14 @@ const rnodeExample = async (rnodeUrl: string) => {
   const isValidDeploy = verifyDeploy(deploy)
   log('DEPLOY IS VALID', isValidDeploy)
 
-  const { message } = await DoDeploy(deploy)
-  log('DEPLOY RESPONSE', message)
+  const { result } = await doDeploy(deploy)
+  log('DEPLOY RESPONSE', result)
 
 
-  await propose()
-  log('PROPOSE successful!')
+  if (!!rnodeUrl.match(/localhost/)) {
+    const { result: proposeRes } = await propose()
+    log('PROPOSE RESPONSE', proposeRes)
+  }
 }
 
 // Start main app
