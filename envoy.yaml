@@ -29,8 +29,8 @@ static_resources:
                   cluster: local-cluster-p1
                   max_grpc_timeout: 0s
               cors:
-                allow_origin:
-                - "*"
+                allow_origin_string_match:
+                - prefix: "*"
                 allow_methods: GET, PUT, DELETE, POST, OPTIONS
                 allow_headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,custom-header-1,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout
                 max_age: "1728000"
@@ -42,8 +42,8 @@ static_resources:
   # Listener for local RNode 2
   - name: listener-local-p2
     address:
-      # HTTP endpoint http://localhost:54401
-      socket_address: { address: 0.0.0.0, port_value: 54401 }
+      # HTTP endpoint http://localhost:44402
+      socket_address: { address: 0.0.0.0, port_value: 44402 }
     filter_chains:
     - filters:
       - name: envoy.http_connection_manager
@@ -61,8 +61,8 @@ static_resources:
                   cluster: local-cluster-p2
                   max_grpc_timeout: 0s
               cors:
-                allow_origin:
-                - "*"
+                allow_origin_string_match:
+                - prefix: "*"
                 allow_methods: GET, PUT, DELETE, POST, OPTIONS
                 allow_headers: keep-alive,user-agent,cache-control,content-type,content-transfer-encoding,custom-header-1,x-accept-content-transfer-encoding,x-accept-response-streaming,x-user-agent,x-grpc-web,grpc-timeout
                 max_age: "1728000"
@@ -80,7 +80,7 @@ static_resources:
     lb_policy: round_robin
     hosts:
     # Proxy to RNode gRPC endpoint
-    - socket_address: { address: boot, port_value: 40401 }
+    - socket_address: { address: 127.0.0.1, port_value: 40401 }
   # Local RNode 2
   - name: local-cluster-p2
     connect_timeout: 0.25s
@@ -89,4 +89,4 @@ static_resources:
     lb_policy: round_robin
     hosts:
     # Proxy to RNode gRPC endpoint
-    - socket_address: { address: boot, port_value: 40401 }
+    - socket_address: { address: 127.0.0.1, port_value: 40402 }

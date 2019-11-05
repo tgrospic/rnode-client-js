@@ -1,4 +1,4 @@
-version: '3.4'
+version: '2.3'
 
 x-rnode:
   &default-rnode
@@ -13,15 +13,31 @@ services:
   boot:
     << : *default-rnode
     container_name: boot
-    command: run -s --validator-private-key $VALIDATOR_PRIVATE_BOOT --allow-private-addresses --host $MY_NET_IP -p 50400 -n --synchrony-constraint-threshold 0
+    command: run -s --validator-private-key $VALIDATOR_PRIVATE_BOOT --allow-private-addresses --host boot -p 40400 -n --synchrony-constraint-threshold 0
+              --wallets-file /data/genesis/wallets.txt --bonds-file /data/genesis/bonds.txt
+              --certificate /data/node.certificate.pem --key /data/node.key.pem
+              --duration '10 seconds' --interval '10 seconds'
+    ports:
+    - $MY_NET_IP:40400:40400
+    - $MY_NET_IP:40401:40401
+    - $MY_NET_IP:40402:40402
+    - $MY_NET_IP:40403:40403
+    - $MY_NET_IP:40404:40404
+    volumes:
+    - ./data:/data
+
+  read:
+    << : *default-rnode
+    container_name: read
+    command: run -b $BOOTSTRAP --allow-private-addresses --host read -p 50400 -n
+              --duration '10 seconds' --interval '10 seconds'
+              --fork-choice-check-if-stale-interval '30 seconds' --fork-choice-stale-threshold '30 seconds'
     ports:
     - $MY_NET_IP:50400:50400
     - $MY_NET_IP:50401:40401
     - $MY_NET_IP:50402:40402
     - $MY_NET_IP:50403:40403
     - $MY_NET_IP:50404:40404
-    volumes:
-    - ./data/boot:/var/lib/rnode
 
   envoy:
     container_name: envoy
@@ -35,8 +51,7 @@ services:
     - $MY_NET_IP:44401:44401
     - $MY_NET_IP:54401:54401
     - $MY_NET_IP:9901:9901
-    networks:
-    - rchain-net
+    network_mode: host
 
 networks:
   rchain-net:

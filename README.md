@@ -32,6 +32,9 @@ Example configuration for [Docker compose](docker-compose.yml) and [Envoy](envoy
 ```sh
 # Starts RNode and Envoy proxy in daemon mode
 docker-compose up -d
+
+# If read-only node is not initially connected, it can be restarted
+docker-compose restart read
 ```
 
 ## Run **Nodejs example** ([`src/nodejs/client.js`](src/nodejs/client.js))

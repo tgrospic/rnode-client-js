@@ -1,0 +1,1 @@
+0xb7686a4c99916285f6f983f896bbcaf2eb964417,100000000000,0    # Start network with this REV balances - only used on genesis
