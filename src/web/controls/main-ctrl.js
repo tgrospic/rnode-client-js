@@ -60,7 +60,13 @@ const sendDeploy = async (rnodeUrl, code, privateKey) => {
   const secp256k1 = new ec('secp256k1')
   const key = privateKey || secp256k1.genKeyPair()
   // Create deploy
-  const deployData = { term: code, phlolimit: 100e3 }
+  const deployData = {
+    term: code, phlolimit: 100e3,
+    // TEMP: in RNode v0.9.16 'valid after block number' must be zero
+    // so that signature will be valid.
+    // Future versions will require correct block number.
+    validafterblocknumber: 0,
+  }
   // Sign deploy
   const deploy = signDeploy(key, deployData)
   // Send deploy

@@ -37,16 +37,16 @@ const rnodeExample = async rnodeUrl => {
 
   // Examples of requests to RNode
 
-  // const lastBlockObj = await lastFinalizedBlock()
-  // log('LAST BLOCK', lastBlockObj)
+  const lastBlockObj = await lastFinalizedBlock()
+  log('LAST BLOCK', lastBlockObj)
 
 
-  const blocks = await getBlocks({ depth: 2 })
+  const blocks = await getBlocks({ depth: 1 })
   log('BLOCKS', blocks)
 
 
-  // const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
-  // log('VDAG', vdagObj.map(x => x.content).join(''))
+  const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
+  log('VDAG', vdagObj.map(x => x.content).join(''))
 
 
   const listenData = await listenForDataAtName({
@@ -64,6 +64,10 @@ const rnodeExample = async rnodeUrl => {
   const deployData = {
     term: sampleRholangCode,
     phlolimit: 10e3,
+    // TEMP: in RNode v0.9.16 'valid after block number' must be zero
+    // so that signature will be valid.
+    // Future versions will require correct block number.
+    validafterblocknumber: 0,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
