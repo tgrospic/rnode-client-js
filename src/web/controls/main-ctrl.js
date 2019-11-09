@@ -7,6 +7,10 @@ import { rnodeDeploy, rnodePropose, signDeploy } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
 import protoSchema from '../../../rnode-grpc-gen/js/pbjs_generated.json'
+// Import generated protobuf types (in global scope)
+// - because of imports in index.js these are not needed here
+// import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
+// import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
 // Controls
 import { selectorCtrl } from './selector-ctrl'
