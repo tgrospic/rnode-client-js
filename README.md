@@ -22,6 +22,18 @@ npm run rnode-generate
 # - which is in the PATH when npm scripts are executed
 node_modules/.bin/rnode-grpc
 ```
+
+## Run RNode and Envoy proxy with Docker
+
+RNode currently only exposes gRPC connection which is not yet supported in browsers. To be able to connect you must use a proxy between gRPC and HTTP.
+
+Example configuration for [Docker compose](docker-compose.yml) and [Envoy](envoy.yaml) are in the repo.
+
+```sh
+# Starts RNode and Envoy proxy in daemon mode
+docker-compose up -d
+```
+
 ## Run **Nodejs example** ([`src/nodejs/client.js`](src/nodejs/client.js))
 
 In `src/nodejs/client.js` script is an example of how to connect to RNode from Nodejs.

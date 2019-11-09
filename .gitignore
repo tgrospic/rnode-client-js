@@ -3,3 +3,5 @@ dist/
 .cache/
 .gen
 rnode-grpc-*
+data/*
+!data/genesis

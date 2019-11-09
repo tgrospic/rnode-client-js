@@ -1,0 +1,37 @@
+version: '3.4'
+
+x-rnode:
+  &default-rnode
+  image: $RNODE_IMAGE
+  user: root
+  restart: always
+  networks:
+  - rchain-net
+
+services:
+
+  boot:
+    << : *default-rnode
+    container_name: boot
+    command: run -s --validator-private-key $VALIDATOR_PRIVATE_BOOT --allow-private-addresses --host $MY_NET_IP -p 50400 -n --synchrony-constraint-threshold 0
+    ports:
+    - $MY_NET_IP:50400:50400
+    - $MY_NET_IP:50401:40401
+    - $MY_NET_IP:50402:40402
+    - $MY_NET_IP:50403:40403
+    - $MY_NET_IP:50404:40404
+    volumes:
+    - ./data/boot:/var/lib/rnode
+
+  envoy:
+    container_name: envoy
+    image: envoyproxy/envoy:latest
+    restart: always
+    network_mode: host
+    command: -c /etc/envoy/envoy.yaml -l trace
+    volumes:
+    # Envoy configuration
+    - ./envoy.yaml:/etc/envoy/envoy.yaml
+
+networks:
+  rchain-net:
