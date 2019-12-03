@@ -27,11 +27,16 @@ services:
     container_name: envoy
     image: envoyproxy/envoy:latest
     restart: always
-    network_mode: host
     command: -c /etc/envoy/envoy.yaml -l trace
     volumes:
     # Envoy configuration
     - ./envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+    - $MY_NET_IP:44401:44401
+    - $MY_NET_IP:54401:54401
+    - $MY_NET_IP:9901:9901
+    networks:
+    - rchain-net
 
 networks:
   rchain-net:

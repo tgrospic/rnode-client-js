@@ -80,7 +80,7 @@ static_resources:
     lb_policy: round_robin
     hosts:
     # Proxy to RNode gRPC endpoint
-    - socket_address: { address: 127.0.0.1, port_value: 40401 }
+    - socket_address: { address: boot, port_value: 40401 }
   # Local RNode 2
   - name: local-cluster-p2
     connect_timeout: 0.25s
@@ -89,4 +89,4 @@ static_resources:
     lb_policy: round_robin
     hosts:
     # Proxy to RNode gRPC endpoint
-    - socket_address: { address: 127.0.0.1, port_value: 50401 }
+    - socket_address: { address: boot, port_value: 40401 }
