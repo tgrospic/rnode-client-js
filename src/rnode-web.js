@@ -130,12 +130,12 @@ export const sendDeploy = async (node, account, code) => {
 let GET_DATA_TIMEOUT_HANDLE
 
 // Listen for data on `deploy signature`
-export const getDataForDeploy = async (node, deployId, onProgress) => {
+export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
   GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
 
   // Get validator's latest sequence number
   const getSeqNumber = async () => {
-    const { seqNumber } = await rnodeHttp(node.httpUrl, 'prepare-deploy')
+    const { seqNumber } = await rnodeHttp(httpUrl, 'prepare-deploy')
     return seqNumber
   }
 
@@ -145,9 +145,9 @@ export const getDataForDeploy = async (node, deployId, onProgress) => {
 
   const getData = (resolve, reject) => async () => {
     const getDataUnsafe = async () => {
-      const args = { depth: 3, name: { UnforgDeploy: { data: deployId } } }
+      const args = { depth: 2, name: { UnforgDeploy: { data: deployId } } }
       // Request for data at deploy signature (deployId)
-      const { exprs } = await rnodeHttp(node.httpUrl, 'data-at-name', args)
+      const { exprs } = await rnodeHttp(httpUrl, 'data-at-name', args)
       // Check if RNode returned any data
       const hasData = !R.isEmpty(exprs) && !exprs[0].ExprTuple
       if (hasData) {
@@ -159,11 +159,11 @@ export const getDataForDeploy = async (node, deployId, onProgress) => {
         const delta = seqNumber - startSeqNumber
         if (delta > 0) {
           // Block is created, let's find our deploy (it should be in the new block)
-          const block = await rnodeHttp(node.httpUrl, `deploy/${deployId}`)
+          const block = await rnodeHttp(httpUrl, `deploy/${deployId}`)
           if (!block) {
             throw Error(`New block was created but the download failed.`)
           } else {
-            const {deploys} = await rnodeHttp(node.httpUrl, `block/${block.blockHash}`)
+            const {deploys} = await rnodeHttp(httpUrl, `block/${block.blockHash}`)
             const deploy    = deploys.find(({sig}) => sig === deployId)
             console.warn({deploy})
             if (!deploy) {
@@ -184,8 +184,10 @@ export const getDataForDeploy = async (node, deployId, onProgress) => {
         } else {
           // Retry
           const cancel = await onProgress(exprs)
-          if (!cancel)
-            GET_DATA_TIMEOUT_HANDLE = setTimeout(getData(resolve, reject), 5000)
+          if (!cancel) {
+            GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
+            GET_DATA_TIMEOUT_HANDLE = setTimeout(getData(resolve, reject), 7500)
+          }
         }
       }
     }

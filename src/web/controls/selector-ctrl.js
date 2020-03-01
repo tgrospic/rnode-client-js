@@ -1,38 +1,89 @@
 import m from 'mithril'
+import { getNodeUrls } from '../../rchain-networks'
+import { labelStyle } from './common'
 
-const findByIndex = (nets, index) => nets.flatMap(({urls}) => urls)[index]
+export const selectorCtrl = (st, {nets}) => {
+  const {valNode, readNode} = st.view({})
+  const isTestnet = valNode.name === 'testnet'
+  const isMainnet = valNode.name === 'mainnet'
 
-export const selectorCtrl = (r, {nets, sel}) => {
-  const isTestnet = sel.grpc.match(/testnet.rchain-dev.tk/)
-  const [_ ,domain, port] = sel.grpc.match(/([^:]+):([\d]+)/)
-  const statusUrl = `http://${domain}:${2+parseInt(port)}/status`
-  const logsUrl   = `http://${domain}:8181/logs/name:rnode`
-  const filesUrl  = `http://${domain}:18080`
+  const findValidatorByIndex = index =>
+    nets.flatMap(({hosts}) => hosts)[index]
+
+  const findReadOnlyByIndex = (index, netName) =>
+    nets.filter(x => x.name === netName).flatMap(({readOnlys}) => readOnlys)[index]
 
   const onSelIdx = ev => {
-    const sel = findByIndex(nets, ev.target.selectedIndex)
-    r(sel)
+    const sel  = findValidatorByIndex(ev.target.selectedIndex)
+    const read = sel.name === valNode.name ? readNode : findReadOnlyByIndex(0, sel.name)
+    st.set({valNode: sel, readNode: read})
   }
 
+  const onSelReadIdx = ev => {
+    const sel = findReadOnlyByIndex(ev.target.selectedIndex, valNode.name)
+    st.set({valNode, readNode: sel})
+  }
+
+  const valUrls  = getNodeUrls(valNode)
+  const readUrls = getNodeUrls(readNode)
+
   return m('.selector-ctrl',
+    // Validator selector
+    m('h3', `${valNode.title} - validator node`),
+    m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
     m('select', {onchange: onSelIdx},
-      nets.map(({label, urls}) =>
-        m('optgroup', {label},
-          urls.map(({grpc, http}) =>
-            m('option', {title: http, selected: sel && sel.grpc === grpc}, grpc)
+      nets.map(({title, hosts}) =>
+        m('optgroup', {label: title},
+          hosts.map(({domain, grpc, http}) =>
+            m('option',
+              {title, selected: valNode && valNode.domain === domain && valNode.grpc === grpc},
+              `${domain} gRPC:${grpc} http:${http}`
+            )
           ),
         ),
       ),
     ),
+    // Validator info
     m('table',
-      m('tr', m('td', 'RNode gRPC'), m('td', m('pre', sel.grpc))),
-      m('tr', m('td', 'HTTP proxy'), m('td', m('pre', sel.http))),
+      m('tr', m('td', 'RNode gRPC'), m('td', m('pre', valUrls.grpcUrl))),
+      m('tr', m('td', 'RNode HTTP'), m('td', m('pre', valUrls.httpUrl))),
+      valUrls.grpcProxyUrl && m('tr', m('td', 'HTTP proxy'), m('td', m('pre', valUrls.grpcProxyUrl))),
     ),
-    'RNode ',
-    m('a', {target: '_blank', href: statusUrl}, 'status'),
+    'Validator RNode ',
+    m('a', {target: '_blank', href: valUrls.statusUrl}, 'status'),
     isTestnet && [
-      m('a', {target: '_blank', href: logsUrl}, 'logs'),
-      m('a', {target: '_blank', href: filesUrl}, 'files'),
-    ]
+      m('a', {target: '_blank', href: valUrls.logsUrl}, 'logs'),
+      m('a', {target: '_blank', href: valUrls.filesUrl}, 'files'),
+    ],
+    isMainnet && [
+      m('p.warning', 'You are connected to MAIN RChain network. Any deploy will use REAL REVs.'),
+    ],
+
+    // Read-only selector
+    m('h3', `${readNode.title} - read-only node`),
+    m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
+    m('select', {onchange: onSelReadIdx},
+      nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
+        m('optgroup', {label: title},
+          readOnlys.map(({domain, grpc, http}) =>
+            m('option',
+              {title, selected: readNode && readNode.domain === domain && readNode.grpc === grpc},
+              `${domain} gRPC:${grpc} http:${http}`
+            )
+          ),
+        ),
+      ),
+    ),
+    // Read-only info
+    m('table',
+      m('tr', m('td', 'RNode gRPC'), m('td', m('pre', readUrls.grpcUrl))),
+      m('tr', m('td', 'RNode HTTP'), m('td', m('pre', readUrls.httpUrl))),
+    ),
+    'Read-only RNode ',
+    m('a', {target: '_blank', href: readUrls.statusUrl}, 'status'),
+    isTestnet && [
+      m('a', {target: '_blank', href: readUrls.logsUrl}, 'logs'),
+      m('a', {target: '_blank', href: readUrls.filesUrl}, 'files'),
+    ],
   )
 }

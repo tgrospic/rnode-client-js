@@ -1,38 +1,52 @@
 import m from 'mithril'
+import * as R from 'ramda'
+import { labelStyle, showRevDecimal } from './common'
 
-import { checkBalance_rho } from '../../rho/check-balance'
+const initSelected = (st, wallet) => {
+  const {account} = st
 
-export const balanceCtrl = (r, st) => {
-  const {onCheckBalance, onGetData, addr, deployId, dataBal, dataGet} = st
+  // Pre-select first account if not selected
+  const selAccount = R.isNil(account) && !R.isNil(wallet)
+    ? R.head(wallet) : account
 
-  const valEv = name => ev => {
-    const val = ev.target.value
-    r({...st, [name]: val})
+  return {...st, account: selAccount}
+}
+
+export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
+  const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
+
+  const checkBalanceEv = async _ => {
+    st.update(s => ({...s, dataBal: '...', dataError: ''}))
+
+    const [bal, dataError] = await onCheckBalance(account.revAddr)
+      .catch(ex => ['', ex.message])
+
+    const dataBal = typeof bal === 'number'
+      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(bal)})` : ''
+    st.update(s => ({...s, dataBal, dataError}))
   }
 
-  const checkBalaneEv = _ => {
-    r({...st, dataBal: '...'})
-    const deployCode = checkBalance_rho(addr)
-    onCheckBalance(deployCode)
+  const accountChangeEv = ev => {
+    const account = wallet[ev.target.selectedIndex]
+    st.set({account})
   }
 
-  const getDataEv = _ => {
-    r({...st, dataGet: '...'})
-    onGetData(deployId)
-  }
+  const labelAddr     = 'REV address'
+  const isWalletEmpty = R.isNil(wallet) || R.isEmpty(wallet)
 
-  return m('.balance-ctrl',
-    m('', 'Check logs at the bottom and browser console to see deploy details.'),
-    m('input[type=text]', {placeholder: 'REV address', oninput: valEv('addr')}),
-    m(''),
-    m('button', {onclick: checkBalaneEv, disabled: !addr}, 'Check balance'),
-    m('b', dataBal),
-    // Get data by deployId
-    m(''),
-    m('', 'Get data by deployId (this doesn\'t create a new deploy).'),
-    m('input[type=text]', {placeholder: 'Deploy Id', oninput: valEv('deployId')}),
-    m(''),
-    m('button', {onclick: getDataEv, disabled: !deployId}, 'Get data'),
-    m('b', dataGet),
-  )
+  return isWalletEmpty
+    ? m('b', 'REV wallet is empty, add accounts to check balance.')
+    : m('.balance-ctrl',
+        m('', 'Sends exploratory deploy to selected read-only RNode.'),
+        m('', labelStyle(account), labelAddr),
+        m('select', {onchange: accountChangeEv},
+          wallet.map(({name, revAddr}) =>
+            m('option', `${name}: ${revAddr}`)
+          ),
+        ),
+        m(''),
+        m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
+        m('b', dataBal),
+        m('b.warning', dataError),
+      )
 }

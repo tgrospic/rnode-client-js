@@ -9,6 +9,7 @@
     :root {
       font-size: .8rem;
       font-family: sans-serif;
+      padding-bottom: 40px;
     }
 
     hr {
@@ -21,10 +22,18 @@
       margin: 6px 0 4px;
     }
 
+    h3 {
+      margin: 4px 0 2px;
+    }
+
     pre {
       margin: 0;
       padding: 10px 0px;
       border-bottom: solid 1px #cccccc6c;
+    }
+
+    table th {
+      text-align: left;
     }
 
     .selector-ctrl pre {
@@ -45,9 +54,30 @@
     }
 
     input[type="text"] {
-      width: 480px;
+      width: 440px;
       border-color: #cfcfcf9c;
       border-width: 1px;
+    }
+
+    input[type="text"].addr-name {
+      width: 180px;
+    }
+
+    .warning {
+      margin: 0;
+      padding: 5px 0;
+      color: #ca0000;
+      font-weight: bold;
+    }
+
+    .wallet {
+      width: 500px;
+    }
+
+    .account {
+      font-weight: bold;
+      text-decoration: underline;
+      cursor: pointer;
     }
   </style>
 </head>

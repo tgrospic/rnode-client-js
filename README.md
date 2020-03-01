@@ -4,6 +4,17 @@ This repo contains examples how to use [**@tgrospic/rnode-grpc-js**](https://git
 
 Web example is published from `gh-pages` branch on this url [https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js).
 
+## _NEW: Example of RNode connection to Metamask (with hardware wallet)_
+
+RNode has support for Ethereum type of signatures so Metamask can be used for signing deploys e.g. making transfers of REVs. In Web example, button to add selected Metamask account should be visible next to REV import textbox.
+
+Helper functions are in [eth-wrapper.js](src/eth/eth-wrapper.js) which contains the code for communication with Metamask, getting selected ETH address and sending deploys for signing.
+In [eth-sign.js](src/eth/eth-sign.js) are functions to verify deploy signature and to extract public key.  
+This is all that is needed for communication with Metamask and also for connected hardware wallets (Ledger). How to use these functions and send deploys to RNode is in [node-web.js](src/rnode-web.js).
+
+Changes on the web page are only saved in memory so it will be lost after refreshing the page.  
+RChain networks available for selection are in [rchain-networks.js](src/rchain-networks.js) file.
+
 ## Install
 
 Install project dependencies (in `./node_modules` folder).
@@ -25,9 +36,9 @@ node_modules/.bin/rnode-grpc
 
 ## Run RNode and Envoy proxy with Docker
 
-RNode currently only exposes gRPC connection which is not yet supported in browsers. To be able to connect you must use a proxy between gRPC and HTTP.
+RNode now supports HTTP but _propose_ is only available on gRPC endpoint which is not yet supported in browsers. So in Web example Envoy proxy is used to call _propose_.
 
-Example configuration for [Docker compose](docker-compose.yml) and [Envoy](envoy.yaml) are in the repo.
+In the project is [Docker compose](docker-compose.yml) configuration to run local RChain network and also for [Envoy](envoy.yaml) proxy.
 
 ```sh
 # Starts RNode and Envoy proxy in daemon mode

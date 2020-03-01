@@ -1,16 +1,13 @@
-// Reference to TypeScript definitions for IntelliSense in VSCode
-/// <reference path="../../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
-import grpcWeb from 'grpc-web'
-import { ec } from 'elliptic'
+// @ts-check
+import * as R from 'ramda'
 import m from 'mithril'
-import { rnodeDeploy, rnodePropose, signDeploy } from '@tgrospic/rnode-grpc-js'
-
-// Generated files with rnode-grpc-js tool
-import protoSchema from '../../../rnode-grpc-gen/js/pbjs_generated.json'
-// Import generated protobuf types (in global scope)
-// - because of imports in index.js these are not needed here
-// import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
-// import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
+import { newRevAddr } from '@tgrospic/rnode-grpc-js/dist/rnode-address'
+import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks.js'
+import { rnodeHttp, sendDeploy, getDataForDeploy } from '../../rnode-web.js'
+import { transferFunds_rho } from '../../rho/transfer-funds.js'
+import { checkBalance_rho } from '../../rho/check-balance'
+import { ethDetected } from '../../eth/eth-wrapper'
+import { mkCell } from './common'
 
 // Controls
 import { selectorCtrl } from './selector-ctrl'
@@ -19,117 +16,67 @@ import { balanceCtrl } from './balance-ctrl'
 import { transferCtrl } from './transfer-ctrl'
 
 /*
-  Additional stuff (for now) only in the browser example.
-
-  This will display the test page to select testnet and local validators
-  and make sample requests.
+  This will display the test page to select local, testnet, and mainnet validators
+  and make REV transfers and check balance.
 */
 
 const { log, warn } = console
 
-// Available networks and validators
-const proxyNets = [
-  // node{0-9}.testnet.rchain-dev.tk
-  // https://testnet-{0-9}.grpc.rchain.isotypic.com
-  ['testnet', 10],
-  // ['devnet', 5],
-  // ['sandboxnet', 5],
-]
-
-const localProxyNet = { label: 'local', urls: [
-  {grpc: 'localhost:40401', http: 'http://localhost:44401'},
-  {grpc: 'localhost:50401', http: 'http://localhost:54401'},
-]}
-
-const getUrls = net => n => ({
-  grpc: `node${n}.${net}.rchain-dev.tk:40401`,
-  http: `https://${net}-${n}.grpc.rchain.isotypic.com`,
-})
-
 const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
-const rnode = rnodeUrl => {
-  // Instantiate http clients
-  const options = { grpcLib: grpcWeb, host: rnodeUrl, protoSchema }
+const mainCtrl = st => {
+  const {nets, sel, wallet} = st.view()
+  const valNodeUrls  = getNodeUrls(sel.valNode)
+  const readNodeUrls = getNodeUrls(sel.readNode)
 
-  // Get RNode service methods
-  const { doDeploy, listenForDataAtName } = rnodeDeploy(options)
-  const { propose } = rnodePropose(options)
-  return { DoDeploy: doDeploy, propose, listenForDataAtName }
-}
+  // Control states
+  const selSt      = st.o('sel')
+  const addressSt  = st.o('address')
+  const balanceSt  = st.o('balance')
+  const transferSt = st.o('transfer')
 
-const sendDeploy = async (rnodeUrl, code, privateKey) => {
-  const { DoDeploy, propose } = rnode(rnodeUrl)
-  // Deploy signing key
-  const secp256k1 = new ec('secp256k1')
-  const key = privateKey || secp256k1.genKeyPair()
-  // Create deploy
-  const deployData = {
-    term: code, phlolimit: 100e3,
-    // TEMP: in RNode v0.9.16 'valid after block number' must be zero
-    // so that signature will be valid.
-    // Future versions will require correct block number.
-    validafterblocknumber: 0,
+  const onCheckBalance = async revAddr => {
+    const deloyCode   = checkBalance_rho(revAddr)
+    const {expr: [e]} = await rnodeHttp(readNodeUrls.httpUrl, 'explore-deploy', deloyCode)
+    const dataBal     = e && e.ExprInt && e.ExprInt.data
+    const dataError   = e && e.ExprString && e.ExprString.data
+    return [dataBal, dataError]
   }
-  // Sign deploy
-  const deploy = signDeploy(key, deployData)
-  // Send deploy
-  const { result } = await DoDeploy(deploy)
-  // Try to propose but don't throw on error
-  try {
-    const resPropose = await propose()
-    warn('PROPOSE', resPropose)
-  } catch (error) { warn(error) }
-  // Deploy response
-  return [result, deploy]
-}
 
-const getDataForDeploy = async (rnodeUrl, deployId) => {
-  const { listenForDataAtName } = rnode(rnodeUrl)
-  const { payload: { blockinfoList }  } = await listenForDataAtName({
-    depth: -1,
-    name: { unforgeablesList: [{gDeployIdBody: {sig: deployId}}] },
+  const onTransfer = async ({fromAccount, toAccount, amount}) => {
+    log('TRANSFER', {amount, from: fromAccount.name, to: toAccount.name})
+    const code = transferFunds_rho(fromAccount.revAddr, toAccount.revAddr, amount)
+    const statusSet  = transferSt.o('status').set
+    statusSet(`Deploying ...`)
+    const {signature} = await sendDeploy(valNodeUrls, fromAccount, code)
+    log('DEPLOYED', {signature})
+    // Try to get result from next proposed block
+    const mkProgress = i => () => {
+      i = i > 60 ? 0 : i + 3
+      return `Checking result ${R.repeat('.', i).join('')}`
+    }
+    const progressStep   = mkProgress(0)
+    const updateProgress = _ => statusSet(progressStep())
+    updateProgress()
+    const {expr}     = await getDataForDeploy(valNodeUrls, signature, updateProgress)
+    const {ExprTuple: {data: tuple}} = expr
+    const [{ExprBool: {data: success}}, {ExprString: {data: message}}] = tuple
+
+    if (!success) throw Error(`Transfer error: ${message}.`)
+    return `✓ ${message}`
+  }
+
+  const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {
+    const idx = R.findIndex(pred, xs)
+    // @ts-ignore
+    const apply = idx === -1 ? R.append : R.update(idx)
+    return apply(x, xs)
   })
-  // Get data as number
-  return blockinfoList.length &&
-    blockinfoList[0].postblockdataList[0].exprsList[0].gInt
-}
 
-const bytesFromHex = hexStr => {
-  const byte2hex = ([arr, bhi], x) =>
-    bhi ? [[...arr, parseInt(`${bhi}${x}`, 16)]] : [arr, x]
-  const [resArr] = Array.from(hexStr).reduce(byte2hex, [[]])
-  return Uint8Array.from(resArr)
-}
-
-const mainCtrl = (r, st) => {
-  const {rnodeExample, nets, sel, address, balance, transfer} = st
-
-  // State setters (renderers)
-  const selSet      = sel      => r({...st, sel})
-  const addrSet     = address  => r({...st, address})
-  const balanceSet  = balance  => r({...st, balance})
-  const transferSet = transfer => r({...st, transfer})
-
-  const onCheckBalance = async code => {
-    log('SEND CHECK BALANCE', code)
-    const [response, {sig}] = await sendDeploy(sel.http, code)
-    log('SENT', response)
-    const data = await getDataForDeploy(sel.http, sig)
-    balanceSet({...balance, dataBal: data})
-  }
-
-  const onGetData = async deployIdHex => {
-    const deployId = bytesFromHex(deployIdHex)
-    const data = await getDataForDeploy(sel.http, deployId)
-    balanceSet({...balance, dataGet: data})
-  }
-
-  const onTransfer = async (code, privateKey) => {
-    log('SEND TRANSFER', code)
-    const [response] = await sendDeploy(sel.http, code, privateKey)
-    log('SENT', response)
-  }
+  const onSaveAccount = account =>
+    st.o('wallet')
+      .o(appendUpdateLens(R.propEq('revAddr', account.revAddr)))
+      .set(account)
 
   // App render
   return m('div',
@@ -137,49 +84,52 @@ const mainCtrl = (r, st) => {
       m('a', {href: repoUrl, target: '_blank'}, repoUrl)),
     m('h1', 'RNode client testing page'),
     m('h2', 'RNode selector'),
-    selectorCtrl(selSet, {nets, sel}),
+    selectorCtrl(selSt, {nets}),
     m('hr'),
-    m('h2', 'REV address from public key or ETH address'),
-    addressCtrl(addrSet, {...address}),
+    m('h2', 'REV wallet (import REV address, ETH address, public/private key, Metamask)'),
+    addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount}),
     m('hr'),
     m('h2', 'Check REV balance'),
-    balanceCtrl(balanceSet, {...balance, onCheckBalance, onGetData}),
+    balanceCtrl(balanceSt, {wallet, onCheckBalance}),
     m('hr'),
     m('h2', 'Transfer REV tokens'),
-    transferCtrl(transferSet, {...transfer, onTransfer}),
-    m('hr'),
-    m('h2', 'Sample requests to RNode'),
-    m('div', 'Check browser console to see the errors also.'),
-    m('button', {onclick: _ => rnodeExample(sel.http)}, 'Execute'),
+    transferCtrl(transferSt, {wallet, onTransfer}),
   )
 }
 
-const range = n => [...Array(n).keys()]
-
-const getNetworkUrls = ([net, size]) => ({
-  label: net,
-  urls: range(size).map(getUrls(net)),
-})
-
-const netsGrouped = proxyNets.map(getNetworkUrls)
-
-const initialState = {
-  // Validators to choose
-  nets: [localProxyNet, ...netsGrouped],
-  // Selected validator
-  sel: netsGrouped[0].urls[0],
-}
+const nets = [localNet, testNet, mainNet]
+  .map(({title, name, hosts, readOnlys}) => ({
+    title, name,
+    hosts: hosts.map(x => ({...x, title, name})),
+    readOnlys: readOnlys.map(x => ({...x, title, name})),
+  }))
 
 // Wraps Virtual DOM renderer to render state
 const makeRenderer = (element, view) => state => {
-  const render = st => m.render(element, view(render, st))
-  render(state)
+  const stateCell = mkCell()
+  const render = () => {
+    m.render(element, view(stateCell))
+  }
+  stateCell.setListener(render)
+  stateCell.set(state)
 }
 
-export const startApp = rnodeExample => {
-  // App renderer / this `r` works similar as `r` arg in controls
+const initNet = nets[0]
+const initialState = {
+  // Validators to choose
+  nets,
+  // Selected validator
+  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[0] },
+  // Initial wallet
+  wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
+}
+
+export const startApp = () => {
+  // App renderer / creates state cell that is passed to controls
   const r = makeRenderer(document.querySelector('#app'), mainCtrl)
 
   // Start app / the big bang!
-  r({...initialState, rnodeExample})
+  r(initialState)
+
+  warn('ETH detected', ethDetected)
 }
