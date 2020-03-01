@@ -2,7 +2,6 @@
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
 import grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
-import { startApp } from './controls/main-ctrl' // web example addition
 import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
@@ -11,6 +10,9 @@ import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
 import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
+// Web example with REV transfer and balance check
+import { startApp } from './controls/main-ctrl'
+
 const { log, warn } = console
 
 const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy test") }'
@@ -18,7 +20,7 @@ const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Browser deploy te
 // const rnodeExternalUrl = 'http://localhost:44401'
 // const rnodeExternalUrl = 'https://testnet-8.grpc.rchain.isotypic.com'
 
-// NOTE: in the future, propose service will be available only on the internal port
+// NOTE: propose service is available only on the internal port
 // const rnodeInternalUrl = 'http://localhost:44402'
 
 const rnodeExample = async rnodeUrl => {
@@ -61,13 +63,13 @@ const rnodeExample = async rnodeUrl => {
   const key = secp256k1.genKeyPair()
   // const key = '1bf36a3d89c27ddef7955684b97667c75454317d8964528e57b2308947b250b0'
 
+  const lastBlockNumber = blocks.length && blocks[0].blockinfo.blocknumber
   const deployData = {
     term: sampleRholangCode,
+    timestamp: Date.now(),
+    phloprice: 1,
     phlolimit: 10e3,
-    // TEMP: in RNode v0.9.16 'valid after block number' must be zero
-    // so that signature will be valid.
-    // Future versions will require correct block number.
-    validafterblocknumber: 0,
+    validafterblocknumber: lastBlockNumber || 0,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
@@ -86,4 +88,4 @@ const rnodeExample = async rnodeUrl => {
 }
 
 // Start main app
-startApp(rnodeExample)
+startApp()

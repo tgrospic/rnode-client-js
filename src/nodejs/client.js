@@ -62,9 +62,6 @@ const rnodeExample = async () => {
   const deployData = {
     term: sampleRholangCode,
     phlolimit: 10e3,
-    // TEMP: in RNode v0.9.16 'valid after block number' must be zero
-    // so that signature will be valid.
-    // Future versions will require correct block number.
     validafterblocknumber: 0,
   }
   const deploy = signDeploy(key, deployData)

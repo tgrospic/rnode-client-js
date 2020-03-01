@@ -7,8 +7,8 @@ import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy, UnsignedDeployData
 // Generated files with rnode-grpc-js tool
 import * as protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 // Import generated protobuf types (in global scope)
-import '../../rnode-grpc-gen/js/DeployService_pb'
-import '../../rnode-grpc-gen/js/ProposeService_pb'
+import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
+import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
 const { log, warn } = console
 
@@ -81,4 +81,4 @@ const rnodeExample = async (rnodeUrl: string) => {
 }
 
 // Start main app
-startApp(rnodeExample)
+startApp()
