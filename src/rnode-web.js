@@ -177,7 +177,7 @@ export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
               } else if (!!systemDeployError) {
                 throw Error(`${systemDeployError} (system error).`)
               } else {
-                throw Error(`Deploy is not found in the new block (${block.blockHash}).`)
+                throw Error(`Unknown error occurred in block (${block.blockHash}).`)
               }
             }
           }

@@ -15,7 +15,8 @@
     "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-dev",
     "postinstall": "npm run rnode-generate",
     "clean": "rimraf dist .cache",
-    "clean:all": "rimraf dist .cache rnode-grpc-gen node_modules"
+    "clean:all": "rimraf dist .cache rnode-grpc-gen node_modules",
+    "gh-pages": "npm run build-web && git checkout gh-pages && rm web.* && cp dist/* . && git add ."
   },
   "dependencies": {
     "@babel/runtime": "^7.8.4",
