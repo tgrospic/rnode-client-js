@@ -29,9 +29,11 @@ export const testNet = {
   name: 'testnet',
   hosts: range(5).map(getUrls('testnet')),
   readOnlys: [
-    { domain: '34.66.209.49', ...defaultPorts },
+    { domain: '34.67.113.246', ...defaultPorts },
     // Jim's read-only node
     { domain: 'rnode1.rhobot.net', ...defaultPorts },
+    // Still active ??
+    { domain: '34.66.209.49', ...defaultPorts },
   ],
 }
 
