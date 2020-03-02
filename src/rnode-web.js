@@ -69,7 +69,7 @@ const signPrivKey = (deployData, privateKey)  => {
   const deploy    = signDeploy(key, deployData)
   // Verify deploy signature
   const isValidDeploy = verifyDeploy(deploy)
-  if (!isValidDeploy) throw Error('Metamask signature verification failed.')
+  if (!isValidDeploy) throw Error('Deploy signature verification failed.')
 
   return toWebDeploy(deploy)
 }

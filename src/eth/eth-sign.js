@@ -12,14 +12,13 @@ import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 import { decodeAscii } from '../lib.js'
 
 export const recoverPublicKeyEth = (data, sigHex) => {
-  // Ethereum lib
+  // Ethereum lib to recover public key from massage and signature
   const hashed    = ethUtil.hashPersonalMessage(ethUtil.toBuffer([...data]))
   const sigBytes  = ethUtil.toBuffer(sigHex)
   const {v, r, s} = ethUtil.fromRpcSig(sigBytes)
   // Public key without prefix
   const pubkeyRecover = ethUtil.ecrecover(hashed, v, r, s)
 
-  // const pubkeyHex2 = Buffer.from([4, ...pubkeyRecover]).toString('hex')
   return ethUtil.bufferToHex([4, ...pubkeyRecover])
 }
 
