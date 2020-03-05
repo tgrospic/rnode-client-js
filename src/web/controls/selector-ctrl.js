@@ -1,3 +1,4 @@
+import * as R from 'ramda'
 import m from 'mithril'
 import { getNodeUrls } from '../../rchain-networks'
 import { labelStyle } from './common'
@@ -27,6 +28,15 @@ export const selectorCtrl = (st, {nets}) => {
   const valUrls  = getNodeUrls(valNode)
   const readUrls = getNodeUrls(readNode)
 
+  const getDdlText = ({domain, grpc, https, http}) => {
+    const grpcInfo = !!grpc ? ` gRPC:${grpc}` : ' '
+    const httpInfo = !!https ? ` https:${https}` : !!http ? ` http:${http}` : ' '
+    return `${domain}${grpcInfo}${httpInfo}`
+  }
+
+  const isEqNode = (v1, v2) =>
+    R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
+
   return m('.selector-ctrl',
     // Validator selector
     m('h3', `${valNode.title} - validator node`),
@@ -34,10 +44,10 @@ export const selectorCtrl = (st, {nets}) => {
     m('select', {onchange: onSelIdx},
       nets.map(({title, hosts}) =>
         m('optgroup', {label: title},
-          hosts.map(({domain, grpc, http}) =>
+          hosts.map(({domain, grpc, https, http}) =>
             m('option',
-              {title, selected: valNode && valNode.domain === domain && valNode.grpc === grpc},
-              `${domain} gRPC:${grpc} http:${http}`
+              {title, selected: isEqNode(valNode, {domain, grpc, https, http})},
+              `${getDdlText({domain, grpc, https, http})}`
             )
           ),
         ),
@@ -45,7 +55,7 @@ export const selectorCtrl = (st, {nets}) => {
     ),
     // Validator info
     m('table',
-      m('tr', m('td', 'RNode gRPC'), m('td', m('pre', valUrls.grpcUrl))),
+      valUrls.grpcUrl && m('tr', m('td', 'RNode gRPC'), m('td', m('pre', valUrls.grpcUrl))),
       m('tr', m('td', 'RNode HTTP'), m('td', m('pre', valUrls.httpUrl))),
       valUrls.grpcProxyUrl && m('tr', m('td', 'HTTP proxy'), m('td', m('pre', valUrls.grpcProxyUrl))),
     ),
@@ -65,10 +75,10 @@ export const selectorCtrl = (st, {nets}) => {
     m('select', {onchange: onSelReadIdx},
       nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
         m('optgroup', {label: title},
-          readOnlys.map(({domain, grpc, http}) =>
+          readOnlys.map(({domain, grpc, https, http}) =>
             m('option',
-              {title, selected: readNode && readNode.domain === domain && readNode.grpc === grpc},
-              `${domain} gRPC:${grpc} http:${http}`
+              {title, selected: isEqNode(readNode, {domain, grpc, https, http})},
+              `${getDdlText({domain, grpc, https, http})}`
             )
           ),
         ),
@@ -76,7 +86,7 @@ export const selectorCtrl = (st, {nets}) => {
     ),
     // Read-only info
     m('table',
-      m('tr', m('td', 'RNode gRPC'), m('td', m('pre', readUrls.grpcUrl))),
+      readUrls.grpcUrl && m('tr', m('td', 'RNode gRPC'), m('td', m('pre', readUrls.grpcUrl))),
       m('tr', m('td', 'RNode HTTP'), m('td', m('pre', readUrls.httpUrl))),
     ),
     'Read-only RNode ',

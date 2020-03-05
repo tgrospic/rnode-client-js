@@ -49,7 +49,7 @@ const mainCtrl = st => {
     const statusSet  = transferSt.o('status').set
     statusSet(`Deploying ...`)
     const {signature} = await sendDeploy(valNodeUrls, fromAccount, code)
-    log('DEPLOYED', {signature})
+    log('DEPLOY ID (signature)', signature)
     // Try to get result from next proposed block
     const mkProgress = i => () => {
       i = i > 60 ? 0 : i + 3
@@ -58,12 +58,13 @@ const mainCtrl = st => {
     const progressStep   = mkProgress(0)
     const updateProgress = _ => statusSet(progressStep())
     updateProgress()
-    const {expr}     = await getDataForDeploy(valNodeUrls, signature, updateProgress)
+    const {data: {expr}, cost}       = await getDataForDeploy(valNodeUrls, signature, updateProgress)
     const {ExprTuple: {data: tuple}} = expr
     const [{ExprBool: {data: success}}, {ExprString: {data: message}}] = tuple
+    const costTxt = cost || 'Failed to retrive'
 
-    if (!success) throw Error(`Transfer error: ${message}.`)
-    return `✓ ${message}`
+    if (!success) throw Error(`Transfer error: ${message}. // cost: ${costTxt}`)
+    return `✓ ${message} // cost: ${costTxt}`
   }
 
   const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {

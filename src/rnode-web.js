@@ -151,34 +151,32 @@ export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
       // Check if RNode returned any data
       const hasData = !R.isEmpty(exprs) && !exprs[0].ExprTuple
       if (hasData) {
-        // Data received
-        resolve(exprs[0])
+        // Data received, try get coct from deploy
+        const cost = await fetchDeploy({httpUrl}, deployId)
+          .then(R.prop('cost'))
+          .catch(ex => warn(ex))
+        // Return data with cost
+        resolve({data: exprs[0], cost})
       } else {
         // No data from RNode, check if block is created via sequence number
         const seqNumber = await getSeqNumber()
         const delta = seqNumber - startSeqNumber
         if (delta > 0) {
           // Block is created, let's find our deploy (it should be in the new block)
-          const block = await rnodeHttp(httpUrl, `deploy/${deployId}`)
-          if (!block) {
-            throw Error(`New block was created but the download failed.`)
+          const deploy = await fetchDeploy({httpUrl}, deployId)
+          console.warn({deploy})
+          if (!deploy) {
+            throw Error(`Deploy is not found in the new block (${block.blockHash}).`)
           } else {
-            const {deploys} = await rnodeHttp(httpUrl, `block/${block.blockHash}`)
-            const deploy    = deploys.find(({sig}) => sig === deployId)
-            console.warn({deploy})
-            if (!deploy) {
-              throw Error(`Deploy is not found in the new block (${block.blockHash}).`)
+            const {errored, systemDeployError} = deploy
+            if (!errored && !systemDeployError) {
+              throw Error(`Result data not found, deploy has no errors and can be successful.`)
+            } else if (errored) {
+              throw Error(`Deploy error when executing Rholang code.`)
+            } else if (!!systemDeployError) {
+              throw Error(`${systemDeployError} (system error).`)
             } else {
-              const {errored, systemDeployError} = deploy
-              if (!errored && !systemDeployError) {
-                throw Error(`Result data not found, deploy has no errors and can be successful.`)
-              } else if (errored) {
-                throw Error(`Deploy error when executing Rholang code.`)
-              } else if (!!systemDeployError) {
-                throw Error(`${systemDeployError} (system error).`)
-              } else {
-                throw Error(`Unknown error occurred in block (${block.blockHash}).`)
-              }
+              throw Error(`Unknown error occurred in block (${block.blockHash}).`)
             }
           }
         } else {
@@ -197,6 +195,21 @@ export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
   return await new Promise((resolve, reject) => {
     getData(resolve, reject)()
   })
+}
+
+const fetchDeploy = async ({httpUrl}, deployId) => {
+  // Request a block with the deploy
+  const block = await rnodeHttp(httpUrl, `deploy/${deployId}`)
+  if (!block) {
+    throw Error(`New block was created but the download failed.`)
+  } else {
+    const {deploys} = await rnodeHttp(httpUrl, `block/${block.blockHash}`)
+    const deploy    = deploys.find(({sig}) => sig === deployId)
+    if (!deploy) // This should not be possible if block is returned
+      throw Error(`Deploy is not found in the block (${block.blockHash}).`)
+    // Return deploy
+    return deploy
+  }
 }
 
 // Helper function to propose via gRPC/HTTP proxy
