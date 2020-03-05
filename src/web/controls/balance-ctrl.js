@@ -34,19 +34,22 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
   const labelAddr     = 'REV address'
   const isWalletEmpty = R.isNil(wallet) || R.isEmpty(wallet)
 
-  return isWalletEmpty
-    ? m('b', 'REV wallet is empty, add accounts to check balance.')
-    : m('.balance-ctrl',
-        m('', 'Sends exploratory deploy to selected read-only RNode.'),
-        m('', labelStyle(account), labelAddr),
-        m('select', {onchange: accountChangeEv},
-          wallet.map(({name, revAddr}) =>
-            m('option', `${name}: ${revAddr}`)
+  return m('.ctrl',
+    m('h2', 'Check REV balance'),
+    isWalletEmpty
+      ? m('b', 'REV wallet is empty, add accounts to check balance.')
+      : m('.balance-ctrl',
+          m('', 'Sends exploratory deploy to selected read-only RNode.'),
+          m('', labelStyle(account), labelAddr),
+          m('select', {onchange: accountChangeEv},
+            wallet.map(({name, revAddr}) =>
+              m('option', `${name}: ${revAddr}`)
+            ),
           ),
-        ),
-        m(''),
-        m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
-        m('b', dataBal),
-        m('b.warning', dataError),
-      )
+          m(''),
+          m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
+          m('b', dataBal),
+          m('b.warning', dataError),
+        )
+  )
 }

@@ -67,7 +67,8 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
   const labelSource = 'REV address / ETH address / Public key / Private key'
   const addDisabled = !name || !name.trim()
 
-  return m('.address-ctrl',
+  return m('.ctrl.address-ctrl',
+    m('h2', 'REV wallet (import REV address, ETH address, public/private key, Metamask)'),
     m('', labelStyle(text), labelSource),
     m('input[type=text]', {
       autocomplete: 'nono', placeholder: labelSource,

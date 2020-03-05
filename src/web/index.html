@@ -12,10 +12,18 @@
       padding-bottom: 40px;
     }
 
+    body {
+      margin: 0;
+    }
+
     hr {
       margin: 12px 0 5px;
       padding: 0;
       border-color: #ffffffb3;
+    }
+
+    h1 {
+      margin: 8px 0 6px;
     }
 
     h2 {
@@ -36,12 +44,27 @@
       text-align: left;
     }
 
+    .ctrl {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .selector-ctrl {
+      padding-bottom: 5px;
+    }
+
     .selector-ctrl pre {
       display:inline-block;
       padding: 0px 0px;
       font-weight: bold;
       font-size: 1.3em;
       border: none;
+    }
+
+    .address-ctrl {
+      padding-top: 15px;
+      padding-bottom: 25px;
+      background-color: #a8a8a847;
     }
 
     * + * {
@@ -83,7 +106,7 @@
 </head>
 <body>
   <div id="app"></div>
-  <div id="log"></div>
+  <div class="ctrl" id="log"></div>
   <script>
     const { log } = console
     const logEL = document.querySelector('#log')

@@ -1,7 +1,7 @@
-// @ts-check
+// // @ts-check
 import * as R from 'ramda'
 import m from 'mithril'
-import { newRevAddr } from '@tgrospic/rnode-grpc-js/dist/rnode-address'
+import { newRevAddr } from '@tgrospic/rnode-grpc-js'
 import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks.js'
 import { rnodeHttp, sendDeploy, getDataForDeploy } from '../../rnode-web.js'
 import { transferFunds_rho } from '../../rho/transfer-funds.js'
@@ -81,19 +81,15 @@ const mainCtrl = st => {
 
   // App render
   return m('div',
-    m('div', 'Demo client for RNode ',
-      m('a', {href: repoUrl, target: '_blank'}, repoUrl)),
-    m('h1', 'RNode client testing page'),
-    m('h2', 'RNode selector'),
+    m('.ctrl',
+      'Demo client for RNode ',
+      m('a', {href: repoUrl, target: '_blank'}, repoUrl),
+      m('h1', 'RNode client testing page'),
+    ),
     selectorCtrl(selSt, {nets}),
-    m('hr'),
-    m('h2', 'REV wallet (import REV address, ETH address, public/private key, Metamask)'),
     addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount}),
-    m('hr'),
-    m('h2', 'Check REV balance'),
     balanceCtrl(balanceSt, {wallet, onCheckBalance}),
     m('hr'),
-    m('h2', 'Transfer REV tokens'),
     transferCtrl(transferSt, {wallet, onTransfer}),
   )
 }

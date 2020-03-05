@@ -37,8 +37,9 @@ export const selectorCtrl = (st, {nets}) => {
   const isEqNode = (v1, v2) =>
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
-  return m('.selector-ctrl',
+  return m('.ctrl.selector-ctrl',
     // Validator selector
+    m('h2', 'RNode selector'),
     m('h3', `${valNode.title} - validator node`),
     m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
     m('select', {onchange: onSelIdx},
