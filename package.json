@@ -35,6 +35,7 @@
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@types/elliptic": "^6.4.10",
     "grpc-tools": "^1.8.0",
+    "less": "^3.11.1",
     "parcel": "^1.12.4",
     "protobufjs": "^6.8.8",
     "rimraf": "^3.0.0",

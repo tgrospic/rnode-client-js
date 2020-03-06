@@ -1,7 +1,5 @@
 import * as grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
-// @ts-ignore
-import { startApp } from '../web/controls/main-ctrl' // web example addition (not in TypeScript)
 import { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy, UnsignedDeployData } from '@tgrospic/rnode-grpc-js'
 
 // Generated files with rnode-grpc-js tool
@@ -9,6 +7,10 @@ import * as protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
 // Import generated protobuf types (in global scope)
 import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
 import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
+
+// Web example with REV transfer and balance check (not in TypeScript)
+// @ts-ignore
+import { startApp } from '../web/controls/main-ctrl'
 
 const { log, warn } = console
 

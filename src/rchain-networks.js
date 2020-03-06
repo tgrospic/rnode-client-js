@@ -95,8 +95,8 @@ export const getNodeUrls = ({name, domain, grpc, http, https, grpcInternal, grpc
     httpUrl,
     internalUrl : `${domain}:${grpcInternal}`,
     grpcProxyUrl: grpcProxy,
+    statusUrl   : `${httpUrl}/status`,
     // Testnet only
-    statusUrl   : `http://${domain}:${http}/status`,
     logsUrl     : `http://${domain}:8181/logs/name:rnode`,
     filesUrl    : `http://${domain}:18080`,
   }

@@ -4,86 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="../web/style.less">
   <title>RChain web</title>
-  <style>
-    :root {
-      font-size: .8rem;
-      font-family: sans-serif;
-      padding-bottom: 40px;
-    }
-
-    hr {
-      margin: 12px 0 5px;
-      padding: 0;
-      border-color: #ffffffb3;
-    }
-
-    h2 {
-      margin: 6px 0 4px;
-    }
-
-    h3 {
-      margin: 4px 0 2px;
-    }
-
-    pre {
-      margin: 0;
-      padding: 10px 0px;
-      border-bottom: solid 1px #cccccc6c;
-    }
-
-    table th {
-      text-align: left;
-    }
-
-    .selector-ctrl pre {
-      display:inline-block;
-      padding: 0px 0px;
-      font-weight: bold;
-      font-size: 1.3em;
-      border: none;
-    }
-
-    * + * {
-      margin-top: 4px;
-      margin-right: 4px;
-    }
-
-    input, select, button {
-      padding: 4px;
-    }
-
-    input[type="text"] {
-      width: 440px;
-      border-color: #cfcfcf9c;
-      border-width: 1px;
-    }
-
-    input[type="text"].addr-name {
-      width: 180px;
-    }
-
-    .warning {
-      margin: 0;
-      padding: 5px 0;
-      color: #ca0000;
-      font-weight: bold;
-    }
-
-    .wallet {
-      width: 500px;
-    }
-
-    .account {
-      font-weight: bold;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
   <div id="app"></div>
-  <div id="log"></div>
+  <div class="ctrl" id="log"></div>
   <script>
     const { log } = console
     const logEL = document.querySelector('#log')

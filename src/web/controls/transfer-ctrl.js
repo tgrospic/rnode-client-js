@@ -40,12 +40,12 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
   }
 
   const onSelectFrom = async ev => {
-    const account = wallet[ev.target.selectedIndex]
+    const account = R.find(R.propEq('revAddr', ev.target.value), wallet)
     st.update(s => ({...s, account}))
   }
 
   const onSelectTo = async ev => {
-    const toAccount = wallet[ev.target.selectedIndex]
+    const toAccount = R.find(R.propEq('revAddr', ev.target.value), wallet)
     st.update(s => ({...s, toAccount}))
   }
 
@@ -56,36 +56,34 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
   const canTransfer      = account && toAccount && amount && (account || ethDetected)
   const amountPreview    = showRevDecimal(amount)
 
-  return m('.ctrl',
+  return m('.ctrl.transfer-ctrl',
     m('h2', 'Transfer REV tokens'),
-    isWalletEmpty
-      ? m('b', 'REV wallet is empty, add accounts to make transfers.')
-      : m('.transfer-ctrl',
-          m('', 'Sends deploy to selected validator RNode.'),
-          m('', labelStyle(account), labelSource),
-          m('select', {onchange: onSelectFrom},
-            wallet.map(({name, revAddr}) =>
-              m('option', `${name}: ${revAddr}`)
-            ),
-          ),
-          m(''),
-          m('', labelStyle(toAccount), labelDestination),
-          m('select', {onchange: onSelectTo},
-            wallet.map(({name, revAddr}) =>
-              m('option', `${name}: ${revAddr}`)
-            ),
-          ),
-          m(''),
-          m('', labelStyle(amount), labelAmount),
-          m('input[type=number]', {
-            placeholder: labelAmount, value: amount,
-            oninput: valEv('amount'), style: {width: '120px'}
-          }),
-          m('span', amountPreview),
-          m(''),
-          m('button', {onclick: send, disabled: !canTransfer}, 'Transfer'),
-          status && m('b', status),
-          error && m('b.warning', error),
-        )
+    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make transfers.') : [
+      m('', 'Sends deploy to selected validator RNode.'),
+      m('', labelStyle(account), labelSource),
+      m('select', {onchange: onSelectFrom},
+        wallet.map(({name, revAddr}) =>
+          m('option', {value: revAddr}, `${name}: ${revAddr}`)
+        ),
+      ),
+      m(''),
+      m('', labelStyle(toAccount), labelDestination),
+      m('select', {onchange: onSelectTo},
+        wallet.map(({name, revAddr}) =>
+          m('option', {value: revAddr}, `${name}: ${revAddr}`)
+        ),
+      ),
+      m(''),
+      m('', labelStyle(amount), labelAmount),
+      m('input[type=number]', {
+        placeholder: labelAmount, value: amount,
+        oninput: valEv('amount'), style: {width: '120px'}
+      }),
+      m('span', amountPreview),
+      m(''),
+      m('button', {onclick: send, disabled: !canTransfer}, 'Transfer'),
+      status && m('b', status),
+      error && m('b.warning', error),
+    ]
   )
 }
