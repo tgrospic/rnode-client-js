@@ -37,9 +37,11 @@ const testnetHosts      = range(5).map(getUrls('testnet'))
 export const testNet = {
   title: 'RChain testing network',
   name: 'testnet',
-  hosts: [...testnetHostsNoSSL, ...testnetHosts],
+  // hosts: [...testnetHostsNoSSL, ...testnetHosts],
+  hosts: testnetHosts,
   readOnlys: [
-    { domain: 'observer.testnet.rchain.coop', ...defaultPorts },
+    // { domain: 'observer.testnet.rchain.coop', ...defaultPorts },
+    { domain: 'observer.testnet.rchain.coop', ...defaultPortsSSL },
     { domain: '34.69.245.142', ...defaultPorts },
     // Jim's read-only node
     { domain: 'rnode1.rhobot.net', ...defaultPorts },

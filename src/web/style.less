@@ -1,3 +1,10 @@
+@color-red : #bf0808;
+@color-blue: #0649af;
+@color-grey: #a8a8a847;
+
+@color-bg-light-red: #b1a8a847;
+@color-bg-light-blue: #c2c7ce61;
+
 :root {
   font-size: .8rem;
   font-family: sans-serif;
@@ -48,11 +55,35 @@ input[type="text"].addr-name {
 pre {
   margin: 0;
   padding: 10px 0px;
-  border-bottom: solid 1px #cccccc6c;
+  border-bottom: solid 1px @color-grey;
 }
 
 table th {
   text-align: left;
+}
+
+a, a.visited, a.hover {
+  color: @color-blue;
+}
+
+.testnet {
+  h2 {
+    color: @color-blue;
+  }
+
+  .address-ctrl {
+    background-color: @color-bg-light-blue;
+  }
+}
+
+.mainnet {
+  h2 {
+    color: @color-red;
+  }
+
+  .address-ctrl {
+    background-color: @color-bg-light-red;
+  }
 }
 
 .ctrl {
@@ -75,13 +106,19 @@ table th {
 .address-ctrl {
   padding-top: 15px;
   padding-bottom: 25px;
-  background-color: #a8a8a847;
+  background-color: @color-grey;
+}
+
+.custom-deploy-ctrl {
+  .deploy-code {
+    width: 550px;
+  }
 }
 
 .warning {
   margin: 0;
   padding: 5px 0;
-  color: #ca0000;
+  color: @color-red;
   font-weight: bold;
 }
 

@@ -14,6 +14,7 @@ import { selectorCtrl } from './selector-ctrl'
 import { addressCtrl } from './address-ctrl'
 import { balanceCtrl } from './balance-ctrl'
 import { transferCtrl } from './transfer-ctrl'
+import { customDeployCtrl } from './custom-deploy-ctrl'
 
 /*
   This will display the test page to select local, testnet, and mainnet validators
@@ -30,10 +31,11 @@ const mainCtrl = st => {
   const readNodeUrls = getNodeUrls(sel.readNode)
 
   // Control states
-  const selSt      = st.o('sel')
-  const addressSt  = st.o('address')
-  const balanceSt  = st.o('balance')
-  const transferSt = st.o('transfer')
+  const selSt          = st.o('sel')
+  const addressSt      = st.o('address')
+  const balanceSt      = st.o('balance')
+  const transferSt     = st.o('transfer')
+  const customDeploySt = st.o('customDeploy')
 
   const onCheckBalance = async revAddr => {
     const deloyCode   = checkBalance_rho(revAddr)
@@ -43,14 +45,38 @@ const mainCtrl = st => {
     return [dataBal, dataError]
   }
 
+  const parseResponse = data => {
+    // Data from RNode response written in deploy code
+    // - return!("One argument")   // monadic
+    // - return!(true, A, B)       // polyadic
+    // - return!((true, A, B))     // tuple
+    // new return(`rho:rchain:deployId`) in {
+    //   return!((true, "Hello from blockchain!"))
+    // }
+    // Extract arguments
+    const args = R.path(['expr', 'ExprTuple', 'data'], data)
+      || R.path(['expr', 'ExprPar', 'data'], data)
+      || [R.path(['expr'], data)]
+    if (!args) return
+    // Extract field data `{TypeName: data}`
+    const getField = obj => {
+      const key = Object.keys(obj)[0]
+      return R.path([key, 'data'], obj)
+    }
+    return args.map(getField)
+  }
+
   const onTransfer = async ({fromAccount, toAccount, amount}) => {
     log('TRANSFER', {amount, from: fromAccount.name, to: toAccount.name})
     const code = transferFunds_rho(fromAccount.revAddr, toAccount.revAddr, amount)
     const statusSet  = transferSt.o('status').set
     statusSet(`Deploying ...`)
+
+    // Send deploy
     const {signature} = await sendDeploy(valNodeUrls, fromAccount, code)
     log('DEPLOY ID (signature)', signature)
-    // Try to get result from next proposed block
+
+    // Progress dots
     const mkProgress = i => () => {
       i = i > 60 ? 0 : i + 3
       return `Checking result ${R.repeat('.', i).join('')}`
@@ -58,13 +84,48 @@ const mainCtrl = st => {
     const progressStep   = mkProgress(0)
     const updateProgress = _ => statusSet(progressStep())
     updateProgress()
-    const {data: {expr}, cost}       = await getDataForDeploy(valNodeUrls, signature, updateProgress)
-    const {ExprTuple: {data: tuple}} = expr
-    const [{ExprBool: {data: success}}, {ExprString: {data: message}}] = tuple
-    const costTxt = cost || 'Failed to retrive'
+
+    // Try to get result from next proposed block
+    const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
+    // Extract data from response object
+    const args               = parseResponse(data)
+    const costTxt            = R.isNil(cost) ? 'Failed to retrive' : cost
+    const [success, message] = args || [false, 'Failed to get data']
 
     if (!success) throw Error(`Transfer error: ${message}. // cost: ${costTxt}`)
     return `✓ ${message} // cost: ${costTxt}`
+  }
+
+  const onSendDeploy = async ({code, account}) => {
+    console.log({account, code})
+    const deployStatusSet = customDeploySt.o('status').set
+    deployStatusSet(`Deploying ...`)
+
+    const {signature} = await sendDeploy(valNodeUrls, account, code)
+    log('DEPLOY ID (signature)', signature)
+
+    // Progress dots
+    const mkProgress = i => () => {
+      i = i > 60 ? 0 : i + 3
+      return `Checking result ${R.repeat('.', i).join('')}`
+    }
+    const progressStep   = mkProgress(0)
+    const updateProgress = _ => deployStatusSet(progressStep())
+    updateProgress()
+
+    // Try to get result from next proposed block
+    const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
+    // Extract data from response object
+    const args               = parseResponse(data)
+    const costTxt            = R.isNil(cost) ? 'Failed to retrive' : cost
+    const [success, message] = R.isNil(args)
+      ? [false, 'Failed to get data']
+      : [true, args.join(', ')]
+
+    warn('DEPLOY RESPONSE DATA', {args, cost, rawData: data})
+
+    if (!success) throw Error(`Deploy error: ${message}. // cost: ${costTxt}`)
+    return `✓ (${message}) // cost: ${costTxt}`
   }
 
   const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {
@@ -80,7 +141,7 @@ const mainCtrl = st => {
       .set(account)
 
   // App render
-  return m('div',
+  return m(`.${sel.valNode.name}`,
     m('.ctrl',
       'Demo client for RNode ',
       m('a', {href: repoUrl, target: '_blank'}, repoUrl),
@@ -91,6 +152,8 @@ const mainCtrl = st => {
     balanceCtrl(balanceSt, {wallet, onCheckBalance}),
     m('hr'),
     transferCtrl(transferSt, {wallet, onTransfer}),
+    // m('hr'),
+    // customDeployCtrl(customDeploySt, {wallet, onSendDeploy}),
   )
 }
 

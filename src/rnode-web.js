@@ -31,7 +31,12 @@ export const rnodeHttp = async (httpUrl, apiMethod, data) => {
   const opt    = { method: httpMethod, body }
   const resp   = await fetch(url(apiMethod), opt)
   const result = await resp.json()
-  if (!resp.ok) throw Error(result)
+  // Add status if server error
+  if (!resp.ok) {
+    const ex = Error(result)
+    ex.status = resp.status
+    throw ex
+  }
 
   return result
 }
@@ -133,59 +138,32 @@ let GET_DATA_TIMEOUT_HANDLE
 export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
   GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
 
-  // Get validator's latest sequence number
-  const getSeqNumber = async () => {
-    const { seqNumber } = await rnodeHttp(httpUrl, 'prepare-deploy')
-    return seqNumber
-  }
-
-  // Remember current sequence number to recognize when new block is created
-  // - validator must increase this number for each block
-  const startSeqNumber = await getSeqNumber()
-
   const getData = (resolve, reject) => async () => {
     const getDataUnsafe = async () => {
-      const args = { depth: 2, name: { UnforgDeploy: { data: deployId } } }
-      // Request for data at deploy signature (deployId)
-      const { exprs } = await rnodeHttp(httpUrl, 'data-at-name', args)
-      // Check if RNode returned any data
-      const hasData = !R.isEmpty(exprs) && !exprs[0].ExprTuple
-      if (hasData) {
-        // Data received, try get coct from deploy
-        const cost = await fetchDeploy({httpUrl}, deployId)
-          .then(R.prop('cost'))
-          .catch(ex => warn(ex))
-        // Return data with cost
+      // Fetch deploy by signature (deployId)
+      const deploy = await fetchDeploy({httpUrl}, deployId)
+      if (deploy) {
+        // Deploy found (added to a block)
+        const args = { depth: 1, name: { UnforgDeploy: { data: deployId } } }
+        // Request for data at deploy signature (deployId)
+        const { exprs } = await rnodeHttp(httpUrl, 'data-at-name', args)
+        // Extract cost from deploy info
+        const { cost } = deploy
+        // Check deploy errors
+        const {errored, systemDeployError} = deploy
+        if (errored) {
+          throw Error(`Deploy error when executing Rholang code.`)
+        } else if (!!systemDeployError) {
+          throw Error(`${systemDeployError} (system error).`)
+        }
+        // Return data with cost (assumes only one produce on the return channel)
         resolve({data: exprs[0], cost})
       } else {
-        // No data from RNode, check if block is created via sequence number
-        const seqNumber = await getSeqNumber()
-        const delta = seqNumber - startSeqNumber
-        if (delta > 0) {
-          // Block is created, let's find our deploy (it should be in the new block)
-          const deploy = await fetchDeploy({httpUrl}, deployId)
-          console.warn({deploy})
-          if (!deploy) {
-            throw Error(`Deploy is not found in the new block (${block.blockHash}).`)
-          } else {
-            const {errored, systemDeployError} = deploy
-            if (!errored && !systemDeployError) {
-              throw Error(`Result data not found, deploy has no errors and can be successful.`)
-            } else if (errored) {
-              throw Error(`Deploy error when executing Rholang code.`)
-            } else if (!!systemDeployError) {
-              throw Error(`${systemDeployError} (system error).`)
-            } else {
-              throw Error(`Unknown error occurred in block (${block.blockHash}).`)
-            }
-          }
-        } else {
-          // Retry
-          const cancel = await onProgress(exprs)
-          if (!cancel) {
-            GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
-            GET_DATA_TIMEOUT_HANDLE = setTimeout(getData(resolve, reject), 7500)
-          }
+        // Retry
+        const cancel = await onProgress()
+        if (!cancel) {
+          GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
+          GET_DATA_TIMEOUT_HANDLE = setTimeout(getData(resolve, reject), 7500)
         }
       }
     }
@@ -200,9 +178,11 @@ export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
 const fetchDeploy = async ({httpUrl}, deployId) => {
   // Request a block with the deploy
   const block = await rnodeHttp(httpUrl, `deploy/${deployId}`)
-  if (!block) {
-    throw Error(`New block was created but the download failed.`)
-  } else {
+    .catch(ex => {
+      // Handle response code 400 / deploy not found
+      if (ex.status !== 400) throw ex
+    })
+  if (block) {
     const {deploys} = await rnodeHttp(httpUrl, `block/${block.blockHash}`)
     const deploy    = deploys.find(({sig}) => sig === deployId)
     if (!deploy) // This should not be possible if block is returned

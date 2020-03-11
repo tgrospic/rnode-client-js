@@ -59,7 +59,7 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
   return m('.ctrl.transfer-ctrl',
     m('h2', 'Transfer REV tokens'),
     isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make transfers.') : [
-      m('', 'Sends deploy to selected validator RNode.'),
+      m('', 'Sends transfer deploy to selected validator RNode.'),
       m('', labelStyle(account), labelSource),
       m('select', {onchange: onSelectFrom},
         wallet.map(({name, revAddr}) =>
