@@ -61,6 +61,7 @@ const rnodeExample = async () => {
 
   const deployData = {
     term: sampleRholangCode,
+    phloprice: 1,
     phlolimit: 10e3,
     validafterblocknumber: 0,
   }
