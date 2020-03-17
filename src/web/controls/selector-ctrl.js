@@ -37,11 +37,18 @@ export const selectorCtrl = (st, {nets}) => {
   const isEqNode = (v1, v2) =>
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
+  const httpMixedContentInfo = [
+    m('b.warning', `* For http access allow mixed content in the browser`),
+    m('a', {href: 'https://stackoverflow.com/a/24434461', target: '_blank'}, ' more info'),
+  ]
+
   return m('.ctrl.selector-ctrl',
     // Validator selector
     m('h2', 'RNode selector'),
     m('h3', `${valNode.title} - validator node`),
     m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
+    // TODO: temp message until all access is on SSL
+    isMainnet && !!valNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelIdx},
       nets.map(({title, hosts}) =>
         m('optgroup', {label: title},
@@ -73,6 +80,8 @@ export const selectorCtrl = (st, {nets}) => {
     // Read-only selector
     m('h3', `${readNode.title} - read-only node`),
     m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
+    // TODO: temp message until all access is on SSL
+    (isTestnet || isMainnet) && !!readNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelReadIdx},
       nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
         m('optgroup', {label: title},

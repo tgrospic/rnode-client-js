@@ -46,18 +46,20 @@ const mainCtrl = st => {
   }
 
   const parseResponse = data => {
+    if (R.isNil(data)) return
     // Data from RNode response written in deploy code
     // - return!("One argument")   // monadic
+    // - return!((true, A, B))     // monadic as tuple
     // - return!(true, A, B)       // polyadic
-    // - return!((true, A, B))     // tuple
     // new return(`rho:rchain:deployId`) in {
     //   return!((true, "Hello from blockchain!"))
     // }
-    // Extract arguments
     const args = R.path(['expr', 'ExprTuple', 'data'], data)
       || R.path(['expr', 'ExprPar', 'data'], data)
       || [R.path(['expr'], data)]
+
     if (!args) return
+
     // Extract field data `{TypeName: data}`
     const getField = obj => {
       const key = Object.keys(obj)[0]
@@ -97,7 +99,7 @@ const mainCtrl = st => {
   }
 
   const onSendDeploy = async ({code, account}) => {
-    console.log({account, code})
+    log('SEND DEPLOY', {account: account.name, code})
     const deployStatusSet = customDeploySt.o('status').set
     deployStatusSet(`Deploying ...`)
 
@@ -122,7 +124,7 @@ const mainCtrl = st => {
       ? [false, 'Failed to get data']
       : [true, args.join(', ')]
 
-    warn('DEPLOY RESPONSE DATA', {args, cost, rawData: data})
+    log('DEPLOY RETURN DATA', {args, cost, rawData: data})
 
     if (!success) throw Error(`Deploy error: ${message}. // cost: ${costTxt}`)
     return `✓ (${message}) // cost: ${costTxt}`
@@ -152,8 +154,8 @@ const mainCtrl = st => {
     balanceCtrl(balanceSt, {wallet, onCheckBalance}),
     m('hr'),
     transferCtrl(transferSt, {wallet, onTransfer}),
-    // m('hr'),
-    // customDeployCtrl(customDeploySt, {wallet, onSendDeploy}),
+    m('hr'),
+    customDeployCtrl(customDeploySt, {wallet, onSendDeploy}),
   )
 }
 
