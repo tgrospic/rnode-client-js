@@ -19,7 +19,7 @@
     "gh-pages": "npm run build-web && git checkout gh-pages && rm web.* && cp dist/* . && git add ."
   },
   "dependencies": {
-    "@babel/runtime": "^7.8.4",
+    "@babel/runtime": "^7.8.7",
     "@grpc/grpc-js": "^0.6.5",
     "@tgrospic/rnode-grpc-js": "^0.8.3",
     "elliptic": "^6.5.0",
@@ -31,13 +31,13 @@
     "ramda": "^0.26.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.5",
+    "@babel/core": "^7.8.7",
     "@babel/plugin-transform-runtime": "^7.5.5",
     "@types/elliptic": "^6.4.10",
     "grpc-tools": "^1.8.0",
     "less": "^3.11.1",
     "parcel": "^1.12.4",
-    "protobufjs": "^6.8.8",
+    "protobufjs": "^6.8.9",
     "rimraf": "^3.0.0",
     "typescript": "^3.6.3"
   },
