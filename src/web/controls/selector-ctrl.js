@@ -42,12 +42,17 @@ export const selectorCtrl = (st, {nets}) => {
     m('a', {href: 'https://stackoverflow.com/a/24434461', target: '_blank'}, ' more info'),
   ]
 
+  const showSSLinfo = Date.now() < new Date(2020, 2, 22).getTime()
+
   return m('.ctrl.selector-ctrl',
     // Validator selector
     m('h2', 'RNode selector'),
     m('h3', `${valNode.title} - validator node`),
-    m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
-    // TODO: temp message until all access is on SSL
+    showSSLinfo && m('', labelStyle(true),
+      `* SSL is now available on testnet and mainnet servers, `,
+      m('i', `insecure content `),
+      `settings in the browser is not needed anymore`
+    ),
     isMainnet && !!valNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelIdx},
       nets.map(({title, hosts}) =>
@@ -79,8 +84,6 @@ export const selectorCtrl = (st, {nets}) => {
 
     // Read-only selector
     m('h3', `${readNode.title} - read-only node`),
-    m('', labelStyle(true), `* Select an IP address if the domain name does not work`),
-    // TODO: temp message until all access is on SSL
     (isTestnet || isMainnet) && !!readNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelReadIdx},
       nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>

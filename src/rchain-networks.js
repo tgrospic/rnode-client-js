@@ -42,9 +42,9 @@ export const testNet = {
   readOnlys: [
     // { domain: 'observer.testnet.rchain.coop', ...defaultPorts },
     { domain: 'observer.testnet.rchain.coop', ...defaultPortsSSL },
-    { domain: '34.69.245.142', ...defaultPorts },
+    // { domain: '34.69.245.142', ...defaultPorts },
     // Jim's read-only node
-    { domain: 'rnode1.rhobot.net', ...defaultPorts },
+    { domain: 'rnode1.rhobot.net', ...defaultPortsSSL },
   ],
 }
 
@@ -66,25 +66,26 @@ export const mainNet = {
     // Theo's node doesn't expose http api
     // { domain: '77.81.6.137', ...defaultPorts },
     // DIRECT IPs (until SSL is configured)
-    { domain: '35.189.203.83', ...defaultPorts },
-    { domain: '34.76.146.225', ...defaultPorts },
-    { domain: '35.195.88.187', ...defaultPorts },
-    { domain: '35.190.222.161', ...defaultPorts },
-    { domain: '35.205.181.71', ...defaultPorts },
-    { domain: '34.77.43.236', ...defaultPorts },
-    { domain: '35.187.0.49', ...defaultPorts },
-    { domain: '34.77.204.43', ...defaultPorts },
-    { domain: '34.76.192.90', ...defaultPorts },
+    // { domain: '35.189.203.83', ...defaultPorts },
+    // { domain: '34.76.146.225', ...defaultPorts },
+    // { domain: '35.195.88.187', ...defaultPorts },
+    // { domain: '35.190.222.161', ...defaultPorts },
+    // { domain: '35.205.181.71', ...defaultPorts },
+    // { domain: '34.77.43.236', ...defaultPorts },
+    // { domain: '35.187.0.49', ...defaultPorts },
+    // { domain: '34.77.204.43', ...defaultPorts },
+    // { domain: '34.76.192.90', ...defaultPorts },
   ],
   readOnlys: [
+    // Load balancer (not gRPC) server for us, asia and eu servers
     { domain: 'observer.services.mainnet.rchain.coop', https: 443 },
     { domain: 'observer-us.services.mainnet.rchain.coop', ...defaultPortsSSL },
     { domain: 'observer-asia.services.mainnet.rchain.coop', ...defaultPortsSSL },
     { domain: 'observer-eu.services.mainnet.rchain.coop', ...defaultPortsSSL },
     // DIRECT IPs (until SSL is configured)
-    { domain: '35.225.231.18', ...defaultPorts },
-    { domain: '35.220.140.14', ...defaultPorts },
-    { domain: '35.234.124.72', ...defaultPorts },
+    // { domain: '35.225.231.18', ...defaultPorts },
+    // { domain: '35.220.140.14', ...defaultPorts },
+    // { domain: '35.234.124.72', ...defaultPorts },
   ],
 }
 

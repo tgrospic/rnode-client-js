@@ -91,8 +91,8 @@ const mainCtrl = st => {
     const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
     // Extract data from response object
     const args               = parseResponse(data)
-    const costTxt            = R.isNil(cost) ? 'Failed to retrive' : cost
-    const [success, message] = args || [false, 'Failed to get data']
+    const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
+    const [success, message] = args || [false, 'deploy found in the block but failed to get confirmation data']
 
     if (!success) throw Error(`Transfer error: ${message}. // cost: ${costTxt}`)
     return `✓ ${message} // cost: ${costTxt}`
@@ -119,9 +119,9 @@ const mainCtrl = st => {
     const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
     // Extract data from response object
     const args               = parseResponse(data)
-    const costTxt            = R.isNil(cost) ? 'Failed to retrive' : cost
+    const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
     const [success, message] = R.isNil(args)
-      ? [false, 'Failed to get data']
+      ? [false, 'deploy found in the block but data is not sent on `rho:rchain:deployId` channel']
       : [true, args.join(', ')]
 
     log('DEPLOY RETURN DATA', {args, cost, rawData: data})
