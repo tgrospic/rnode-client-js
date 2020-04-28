@@ -51,7 +51,7 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
 
   const labelSource      = 'Source REV address'
   const labelDestination = 'Destination REV address'
-  const labelAmount      = 'Amount'
+  const labelAmount      = 'Amount (in revlettes x10^8)'
   const isWalletEmpty    = R.isNil(wallet) || R.isEmpty(wallet)
   const canTransfer      = account && toAccount && amount && (account || ethDetected)
   const amountPreview    = showRevDecimal(amount)
