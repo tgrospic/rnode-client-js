@@ -11,7 +11,7 @@
     "start-web-ts": "parcel src/web-ts/index.html",
     "build-web": "npm-run-all clean build",
     "build": "parcel build --public-url ./ src/web/index.html",
-    "rnode-generate": "rnode-grpc --rnode-version v0.9.22",
+    "rnode-generate": "rnode-grpc --rnode-version v0.9.24",
     "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-dev",
     "postinstall": "npm run rnode-generate",
     "clean": "rimraf dist .cache",
@@ -21,7 +21,8 @@
   "dependencies": {
     "@babel/runtime": "^7.8.7",
     "@grpc/grpc-js": "^0.6.5",
-    "@tgrospic/rnode-grpc-js": "^0.8.3",
+    "@tgrospic/rnode-grpc-js": "^0.8.5",
+    "blakejs": "^1.1.0",
     "elliptic": "^6.5.0",
     "ethereumjs-util": "^6.1.0",
     "google-protobuf": "^3.9.1",
