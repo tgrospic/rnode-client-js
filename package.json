@@ -23,7 +23,7 @@
     "@grpc/grpc-js": "^0.6.5",
     "@tgrospic/rnode-grpc-js": "^0.8.5",
     "blakejs": "^1.1.0",
-    "elliptic": "^6.5.0",
+    "elliptic": "^6.5.3",
     "ethereumjs-util": "^6.1.0",
     "google-protobuf": "^3.9.1",
     "grpc-web": "^1.0.6",
