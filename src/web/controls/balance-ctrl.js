@@ -47,7 +47,7 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
       m(''),
       m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
       m('b', dataBal),
-      m('b.warning', dataError),
+      m('b.warning',  dataError == 'Failed to fetch' ? dataError + ': select a running RNode from the above selector.' : dataError),
     ]
   )
 }
