@@ -114,7 +114,7 @@ export const sendDeploy = async (node, account, code) => {
   const deployData = {
     term: code,
     //phlolimit: 250e3, phloprice: 1,
-    phlolimit: 3500000, phloprice: 1, // TEMP
+    phlolimit: 6000000, phloprice: 1, // TEMP
     validafterblocknumber: blockNumber,
     timestamp: Date.now(),
   }

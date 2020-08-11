@@ -64,7 +64,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
     st.set(acc)
   }
 
-  const labelSource = 'REV address / ETH address / Public key / Private key'
+  const labelSource = 'ρ REV address / ETH address / Public key / Private key'
   const addDisabled = !name || !name.trim()
 
   return m('.ctrl.address-ctrl',

@@ -98,7 +98,7 @@ export const customDeployCtrl = (st, {wallet = [], onSendDeploy}) => {
       m('', labelStyle(code), labelCode),
       m('textarea.deploy-code', {value: code, rows: 13, placeholder: 'Rholang code', oninput: onCodeChangeEv}),
       m(''),
-      m('button', {onclick: onSendDeployEv(code), disabled: !account}, 'Deploy Rholang code ρ'),
+      m('button', {onclick: onSendDeployEv(code), disabled: !account}, 'Deploy Rholang code'),
       m('b', status),
       m('b.warning', dataError),
     ]
