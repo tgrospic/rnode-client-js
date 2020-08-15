@@ -1,28 +1,17 @@
-// Reference to TypeScript definitions for IntelliSense in VSCode
-/// <reference path="../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
 import * as R from 'ramda'
-import grpcWeb from 'grpc-web'
 import { ec } from 'elliptic'
-
-import { signDeploy, verifyDeploy, rnodeProtobuf, rnodePropose } from '@tgrospic/rnode-grpc-js'
-
-// Generated files with rnode-grpc-js tool
-import protoSchema from '../rnode-grpc-gen/js/pbjs_generated.json'
-// Import generated protobuf types (in global scope)
-// - because of imports in index.js these are not needed here
-// import '../rnode-grpc-gen/js/DeployServiceV1_pb'
-// import '../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
 import { encodeBase16, decodeBase16 } from './lib.js'
 import { verifyDeployEth, recoverPublicKeyEth } from './eth/eth-sign.js'
 import { ethDetected, ethereumAddress, ethereumSign } from './eth/eth-wrapper.js'
+import { signDeploy, verifyDeploy, deployDataProtobufSerialize } from './rnode-sign'
 
 const { log, warn } = console
 
 // Helper function to create JSON request to RNode Web API
 export const rnodeHttp = async (httpUrl, apiMethod, data) => {
   // Prepare fetch options
-  const postMethods = ['prepare-deploy', 'deploy', 'data-at-name', 'explore-deploy']
+  const postMethods = ['prepare-deploy', 'deploy', 'data-at-name', 'explore-deploy', 'propose']
   const isPost      = !!data && R.includes(apiMethod, postMethods)
   const httpMethod  = isPost ? 'POST' : 'GET'
   const url         = method => `${httpUrl}/api/${method}`
@@ -43,11 +32,9 @@ export const rnodeHttp = async (httpUrl, apiMethod, data) => {
 
 // Creates deploy signature with Metamask
 const signMetamask = async deployData => {
-  // Get protobuf serialized for DeployDataProto object
-  const { DeployDataProto } = rnodeProtobuf({protoSchema})
   // Serialize and sign with Metamask extension
   // - this will open a popup for user to confirm/review
-  const data    = DeployDataProto.serialize(deployData)
+  const data    = deployDataProtobufSerialize(deployData)
   const ethAddr = await ethereumAddress()
   const sigHex  = await ethereumSign(data, ethAddr)
   // Extract public key from signed message and signature
@@ -57,7 +44,7 @@ const signMetamask = async deployData => {
     ...deployData,
     sig: decodeBase16(sigHex),
     deployer: decodeBase16(pubKeyHex),
-    sigalgorithm: 'secp256k1:eth'
+    sigAlgorithm: 'secp256k1:eth',
   }
   // Verify signature signed with Metamask
   const isValidDeploy = verifyDeployEth(deploy)
@@ -80,24 +67,27 @@ const signPrivKey = (deployData, privateKey)  => {
 }
 
 // Converts JS object from protobuf spec. to Web API spec.
-const toWebDeploy = deployData => ({
-  data: {
-    term: deployData.term,
-    timestamp: deployData.timestamp,
-    phloPrice: deployData.phloprice,
-    phloLimit: deployData.phlolimit,
-    validAfterBlockNumber: deployData.validafterblocknumber,
-  },
-  sigAlgorithm: deployData.sigalgorithm,
-  signature: encodeBase16(deployData.sig),
-  deployer: encodeBase16(deployData.deployer),
-})
+const toWebDeploy = deployData => {
+  const {
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
+    deployer, sig, sigAlgorithm,
+  } = deployData
+
+  const result = {
+    data: { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber },
+    sigAlgorithm,
+    signature: encodeBase16(sig),
+    deployer: encodeBase16(deployer),
+  }
+  return result
+}
 
 // Creates deploy, signing and sending to RNode
-export const sendDeploy = async (node, account, code) => {
+export const sendDeploy = async (node, account, code, phloLimit) => {
   // Check if deploy can be signed
   if (!account.privKey) {
-    if (ethDetected) {
+    const ethAddr = account.ethAddr
+    if (ethDetected && !!ethAddr) {
       // If Metamask is detected check ETH address
       const ethAddr = await ethereumAddress()
       if (ethAddr.replace(/^0x/, '') !== account.ethAddr)
@@ -111,11 +101,11 @@ export const sendDeploy = async (node, account, code) => {
   const [{ blockNumber }] = await rnodeHttp(node.httpUrl, 'blocks/1')
 
   // Create a deploy
+  const phloLimitNum = !!phloLimit || phloLimit == 0 ? phloLimit : 250e3
   const deployData = {
     term: code,
-    //phlolimit: 250e3, phloprice: 1,
-    phlolimit: 6000000, phloprice: 1, // TEMP
-    validafterblocknumber: blockNumber,
+    phloLimit: phloLimitNum, phloPrice: 1,
+    validAfterBlockNumber: blockNumber,
     timestamp: Date.now(),
   }
 
@@ -125,9 +115,6 @@ export const sendDeploy = async (node, account, code) => {
 
   // Send deploy
   await rnodeHttp(node.httpUrl, 'deploy', deploy)
-
-  // Don't wait on propose to finish
-  proposeLocal(node).catch(ex => warn('Propose failed', ex))
 
   return deploy
 }
@@ -157,7 +144,7 @@ export const getDataForDeploy = async ({httpUrl}, deployId, onProgress) => {
         } else if (!!systemDeployError) {
           throw Error(`${systemDeployError} (system error).`)
         }
-        // Return data with cost (assumes only one produce on the return channel)
+        // Return data with cost (assumes data in one block)
         resolve({data: exprs[0], cost})
       } else {
         // Retry
@@ -193,13 +180,11 @@ const fetchDeploy = async ({httpUrl}, deployId) => {
   }
 }
 
-// Helper function to propose via gRPC/HTTP proxy
-export const proposeLocal = async node => {
-  // Propose block if local network
-  if (node.network === 'localnet') {
-    // Instantiate http clients
-    const options = { grpcLib: grpcWeb, host: node.grpcProxyUrl, protoSchema }
-    const { propose } = rnodePropose(options)
-    await propose()
-  }
+// Helper function to propose via HTTP
+export const propose = async ({httpAdminUrl}) => {
+  const resp = await rnodeHttp(httpAdminUrl, 'propose', {})
+
+  log('Propose result', resp)
+
+  return resp
 }
