@@ -1,15 +1,8 @@
 import { ec } from 'elliptic'
 import * as ethUtil from 'ethereumjs-util'
-import { rnodeProtobuf } from '@tgrospic/rnode-grpc-js'
-
-// Generated files with rnode-grpc-js tool
-import protoSchema from '../../rnode-grpc-gen/js/pbjs_generated.json'
-// Import generated protobuf types (in global scope)
-// - because of imports in index.js these are not needed here
-// import '../../rnode-grpc-gen/js/DeployServiceV1_pb'
-// import '../../rnode-grpc-gen/js/ProposeServiceV1_pb'
 
 import { decodeAscii } from '../lib.js'
+import { deployDataProtobufSerialize } from '../rnode-sign.js'
 
 export const recoverPublicKeyEth = (data, sigHex) => {
   // Ethereum lib to recover public key from massage and signature
@@ -22,18 +15,15 @@ export const recoverPublicKeyEth = (data, sigHex) => {
   return ethUtil.bufferToHex([4, ...pubkeyRecover])
 }
 
-const { DeployDataProto } = rnodeProtobuf({protoSchema})
-
 export const verifyDeployEth = deploySigned => {
   const {
-    term, timestamp, phloprice, phlolimit,
-    validafterblocknumber,
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
     deployer, sig, // : Array[Byte]
   } = deploySigned
 
   // Serialize deploy data for signing
-  const deploySerialized = DeployDataProto.serialize({
-    term, timestamp, phloprice, phlolimit, validafterblocknumber
+  const deploySerialized = deployDataProtobufSerialize({
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
   })
 
   // Create a hash of message with prefix
