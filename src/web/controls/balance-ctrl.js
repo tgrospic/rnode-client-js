@@ -1,6 +1,6 @@
 import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal } from './common'
+import { labelStyle, showRevDecimal, showNetworkError } from './common'
 
 const initSelected = (st, wallet) => {
   const {account} = st
@@ -13,8 +13,6 @@ const initSelected = (st, wallet) => {
 }
 
 export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
-  const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
-
   const checkBalanceEv = async _ => {
     st.update(s => ({...s, dataBal: '...', dataError: ''}))
 
@@ -34,20 +32,27 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
   const labelAddr     = 'REV address'
   const isWalletEmpty = R.isNil(wallet) || R.isEmpty(wallet)
 
+  // Control state
+  const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
+
   return m('.ctrl.balance-ctrl',
     m('h2', 'Check REV balance'),
     isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to check balance.') : [
       m('', 'Sends exploratory deploy to selected read-only RNode.'),
+
+      // REV address dropdown
       m('', labelStyle(account), labelAddr),
       m('select', {onchange: accountChangeEv},
         wallet.map(({name, revAddr}) =>
           m('option', {value: revAddr}, `${name}: ${revAddr}`)
         ),
       ),
+
+      // Action button / results
       m(''),
       m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
       m('b', dataBal),
-      m('b.warning',  dataError == 'Failed to fetch' ? dataError + ': select a running RNode from the above selector.' : dataError),
+      m('b.warning',  showNetworkError(dataError)),
     ]
   )
 }

@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import m from 'mithril'
 
 // Common styles
 
@@ -24,6 +25,14 @@ export const showRevDecimal = amount => {
     return trimZeroes(`${prefix}.${suffix}`)
   }
 }
+
+export const labelRev = amount =>
+  amount && m('span.rev', amount, m('b', ' REV'))
+
+export const showNetworkError = errMessage =>
+  errMessage == 'Failed to fetch'
+    ? `${errMessage}: select a running RNode from the above selector.`
+    : errMessage
 
 // State cell
 export const mkCell = () => {
@@ -61,3 +70,47 @@ export const mkCell = () => {
     setListener: f => { _listener = f },
   }
 }
+
+// Converts RhoExpr response from RNode WebAPI
+// https://github.com/rchain/rchain/blob/b7331ae05/node/src/main/scala/coop/rchain/node/api/WebApi.scala#L128-L147
+// - return!("One argument")   // monadic
+// - return!((true, A, B))     // monadic as tuple
+// - return!(true, A, B)       // polyadic
+// new return(`rho:rchain:deployId`) in {
+//   return!((true, "Hello from blockchain!"))
+// }
+// TODO: make it stack safe
+export const rhoExprToJS = input => {
+  const loop = rhoExpr => convert(rhoExpr)(converters)
+  const converters = R.toPairs(converterMapping(loop))
+  return loop(input)
+}
+
+const convert = rhoExpr => R.pipe(
+  R.map(matchTypeConverter(rhoExpr)),
+  R.find(x => !R.isNil(x)),
+  // Return the whole object if unknown type
+  x => R.isNil(x) ? [R.identity, rhoExpr] : x,
+  ([f, d]) => f(d)
+)
+
+const matchTypeConverter = rhoExpr => ([type, f]) => {
+  const d = R.path([type, 'data'], rhoExpr)
+  return R.isNil(d) ? void 666 : [f, d]
+}
+
+const converterMapping = loop => ({
+  "ExprInt": R.identity,
+  "ExprBool": R.identity,
+  "ExprString": R.identity,
+  "ExprBytes": R.identity,
+  "ExprUri": R.identity,
+  "UnforgDeploy": R.identity,
+  "UnforgDeployer": R.identity,
+  "UnforgPrivate": R.identity,
+  "ExprUnforg": loop,
+  "ExprPar": R.map(loop),
+  "ExprTuple": R.map(loop),
+  "ExprList": R.map(loop),
+  "ExprMap": R.mapObjIndexed(loop),
+})

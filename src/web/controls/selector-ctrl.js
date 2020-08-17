@@ -4,10 +4,6 @@ import { getNodeUrls } from '../../rchain-networks'
 import { labelStyle } from './common'
 
 export const selectorCtrl = (st, {nets}) => {
-  const {valNode, readNode} = st.view({})
-  const isTestnet = valNode.name === 'testnet'
-  const isMainnet = valNode.name === 'mainnet'
-
   const findValidatorByIndex = index =>
     nets.flatMap(({hosts}) => hosts)[index]
 
@@ -25,59 +21,55 @@ export const selectorCtrl = (st, {nets}) => {
     st.set({valNode, readNode: sel})
   }
 
-  const valUrls  = getNodeUrls(valNode)
-  const readUrls = getNodeUrls(readNode)
-
-  const getDdlText = ({domain, grpc, https, http}) => {
-    const grpcInfo = !!grpc ? ` gRPC:${grpc}` : ' '
-    const httpInfo = !!https ? ` https:${https}` : !!http ? ` http:${http}` : ' '
-    return `${domain}${grpcInfo}${httpInfo}`
+  const getDdlText = ({name, domain, grpc, https, http}) => {
+    const httpInfo = !!https ? `:${https}` : !!http ? `:${http}` : ' '
+    const isLocal  = name === 'localnet'
+    return isLocal ? `${domain}${httpInfo}` : domain
   }
 
   const isEqNode = (v1, v2) =>
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
-  const httpMixedContentInfo = [
-    m('b.warning', `* For http access allow mixed content in the browser`),
-    m('a', {href: 'https://stackoverflow.com/a/24434461', target: '_blank'}, ' more info'),
-  ]
+  // Control state
+  const {valNode, readNode} = st.view({})
 
-  const showSSLinfo = Date.now() < new Date(2020, 2, 22).getTime()
+  const isLocal   = valNode.name === 'localnet'
+  const isTestnet = valNode.name === 'testnet'
+  const isMainnet = valNode.name === 'mainnet'
+  const valUrls   = getNodeUrls(valNode)
+  const readUrls  = getNodeUrls(readNode)
 
   return m('.ctrl.selector-ctrl',
     // Validator selector
-    m('h2', 'RNode selector'),
+    m('h2', 'RChain Network selector'),
     m('h3', `${valNode.title} - validator node`),
-    showSSLinfo && m('', labelStyle(true),
-      `* SSL is now available on testnet and mainnet servers, `,
-      m('i', `insecure content `),
-      `settings in the browser is not needed anymore`
-    ),
-    isMainnet && !!valNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelIdx},
-      nets.map(({title, hosts}) =>
-        m('optgroup', {label: title},
-          hosts.map(({domain, grpc, https, http}) =>
-            m('option',
+      nets.map(({title, hosts, name}) =>
+        m(`optgroup.${name}-color`, {label: title},
+          hosts.map(({name, domain, grpc, https, http}) =>
+            m(`option`,
               {title, selected: isEqNode(valNode, {domain, grpc, https, http})},
-              `${getDdlText({domain, grpc, https, http})}`
+              getDdlText({name, domain, grpc, https, http})
             )
           ),
         ),
       ),
     ),
+
     // Validator info
-    m('table',
-      valUrls.grpcUrl && m('tr', m('td', 'RNode gRPC'), m('td', m('pre', valUrls.grpcUrl))),
-      m('tr', m('td', 'RNode HTTP'), m('td', m('pre', valUrls.httpUrl))),
-      valUrls.grpcProxyUrl && m('tr', m('td', 'HTTP proxy'), m('td', m('pre', valUrls.grpcProxyUrl))),
-    ),
-    'Validator RNode ',
+    m(''),
+    m('span', 'Direct links'),
     m('a', {target: '_blank', href: valUrls.statusUrl}, 'status'),
+    m('a', {target: '_blank', href: valUrls.getBlocksUrl}, 'blocks'),
     isTestnet && [
       m('a', {target: '_blank', href: valUrls.logsUrl}, 'logs'),
       m('a', {target: '_blank', href: valUrls.filesUrl}, 'files'),
     ],
+    m('table',
+      valUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', valUrls.grpcUrl))),
+      m('tr', m('td', 'HTTP'), m('td', m('pre', valUrls.httpUrl))),
+      isLocal && m('tr', m('td', 'Admin'), m('td', m('pre', valUrls.httpAdminUrl))),
+    ),
     isMainnet && [
       m('p.warning', 'You are connected to MAIN RChain network. Any deploy will use REAL REVs.'),
     ],
@@ -88,25 +80,29 @@ export const selectorCtrl = (st, {nets}) => {
     m('select', {onchange: onSelReadIdx},
       nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
         m('optgroup', {label: title},
-          readOnlys.map(({domain, grpc, https, http}) =>
+          readOnlys.map(({name, domain, grpc, https, http}) =>
             m('option',
               {title, selected: isEqNode(readNode, {domain, grpc, https, http})},
-              `${getDdlText({domain, grpc, https, http})}`
+              getDdlText({name, domain, grpc, https, http})
             )
           ),
         ),
       ),
     ),
+
     // Read-only info
-    m('table',
-      readUrls.grpcUrl && m('tr', m('td', 'RNode gRPC'), m('td', m('pre', readUrls.grpcUrl))),
-      m('tr', m('td', 'RNode HTTP'), m('td', m('pre', readUrls.httpUrl))),
-    ),
-    'Read-only RNode ',
+    m(''),
+    m('span', 'Direct links'),
     m('a', {target: '_blank', href: readUrls.statusUrl}, 'status'),
+    m('a', {target: '_blank', href: readUrls.getBlocksUrl}, 'blocks'),
     isTestnet && [
       m('a', {target: '_blank', href: readUrls.logsUrl}, 'logs'),
       m('a', {target: '_blank', href: readUrls.filesUrl}, 'files'),
     ],
+    m('table',
+      readUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', readUrls.grpcUrl))),
+      m('tr', m('td', 'HTTP'), m('td', m('pre', readUrls.httpUrl))),
+      isLocal && m('tr', m('td', 'Admin'), m('td', m('pre', readUrls.httpAdminUrl))),
+    ),
   )
 }

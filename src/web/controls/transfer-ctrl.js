@@ -1,6 +1,6 @@
 import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal } from './common'
+import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
 import { ethDetected } from '../../eth/eth-wrapper'
 
 const initSelected = (st, wallet) => {
@@ -18,10 +18,6 @@ const initSelected = (st, wallet) => {
 }
 
 export const transferCtrl = (st, {wallet, onTransfer}) => {
-  const {
-    account, toAccount, amount, status, error
-  } = initSelected(st.view({}), wallet)
-
   const valEv = name => ev => {
     const val = ev.target.value
     st.update(s => ({...s, [name]: val}))
@@ -49,6 +45,9 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
     st.update(s => ({...s, toAccount}))
   }
 
+  // Control state
+  const {account, toAccount, amount, status, error} = initSelected(st.view({}), wallet)
+
   const labelSource      = 'Source REV address'
   const labelDestination = 'Destination REV address'
   const labelAmount      = 'Amount (in revlettes x10^8)'
@@ -60,12 +59,16 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
     m('h2', 'Transfer REV tokens'),
     isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make transfers.') : [
       m('', 'Sends transfer deploy to selected validator RNode.'),
+
+      // Source REV address dropdown
       m('', labelStyle(account), labelSource),
       m('select', {onchange: onSelectFrom},
         wallet.map(({name, revAddr}) =>
           m('option', {value: revAddr}, `${name}: ${revAddr}`)
         ),
       ),
+
+      // Target REV address dropdown
       m(''),
       m('', labelStyle(toAccount), labelDestination),
       m('select', {onchange: onSelectTo},
@@ -73,17 +76,21 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
           m('option', {value: revAddr}, `${name}: ${revAddr}`)
         ),
       ),
+
+      // REV amount
       m(''),
       m('', labelStyle(amount), labelAmount),
-      m('input[type=number]', {
+      m('input[type=number].rev-amount', {
         placeholder: labelAmount, value: amount,
-        oninput: valEv('amount'), style: {width: '120px'}
+        oninput: valEv('amount'),
       }),
-      m('span', amountPreview),
+      labelRev(amountPreview),
+
+      // Action button / result
       m(''),
       m('button', {onclick: send, disabled: !canTransfer}, 'Transfer'),
       status && m('b', status),
-      error && m('b.warning', error),
+      error && m('b.warning', showNetworkError(error)),
     ]
   )
 }

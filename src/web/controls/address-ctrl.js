@@ -8,7 +8,6 @@ import { labelStyle } from './common'
 import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
 
 export const addressCtrl = (st, {wallet, onAddAccount}) => {
-  const {text, privKey, pubKey, ethAddr, revAddr, name} = st.view({})
   const updateAddress = text => {
     const val = text.replace(/^0x/, '').trim()
     // Account from private key, public key, ETH or REV address
@@ -64,30 +63,53 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
     st.set(acc)
   }
 
-  const labelSource = 'ρ REV address / ETH address / Public key / Private key'
+  // Control state
+  const {text, privKey, pubKey, ethAddr, revAddr, name} = st.view({})
+
+  const description = m('span.info',
+    `Any address used on this page must be first added as an account and assign a name. All accounts are then shown in dropdown menus to select as send or receive address.`,
+    m('br'),
+    `Entered information is not stored anywhere except on the page. After exit or refresh the page, all information is lost.`
+  )
+  const labelSource = 'REV address / ETH address / Public key / Private key'
+  const metamaskTitle = 'Copy ETH address from selected Metamask account'
+  const newAccountTitle = 'Generate new private key (public key, ETH, REV)'
+  const saveTitle = 'Save account with assigned name'
+  const closeTitle = 'Cancel edit of account'
+  const namePlaceholder = 'Friendly name for account'
   const addDisabled = !name || !name.trim()
+  const isEdit = !!revAddr
 
   return m('.ctrl.address-ctrl',
     m('h2', 'REV wallet (import REV address, ETH address, public/private key, Metamask)'),
+    description,
+
+    // Input textbox
     m('', labelStyle(text), labelSource),
     m('input[type=text]', {
       autocomplete: 'nono', placeholder: labelSource,
       value: text, oninput: addrKeyPressEv
     }),
-    ethDetected && m('button', {onclick: fillMetamaskAccountEv}, 'Metamask account'),
-    m('button', {onclick: newRevAddrEv}, 'New account'),
-    revAddr && m('.address-gen',
+
+    // New accounts
+    ethDetected && m('button', {title: metamaskTitle, disabled: isEdit, onclick: fillMetamaskAccountEv}, 'Metamask account'),
+    m('button', {title: newAccountTitle, disabled: isEdit, onclick: newRevAddrEv}, 'New account'),
+
+    // Edit wallet item
+    isEdit && m('.address-gen',
       m('table',
         privKey && m('tr', m('td', 'Private key'), m('td', privKey)),
         pubKey  && m('tr', m('td', 'Public key'), m('td', pubKey)),
         ethAddr && m('tr', m('td', 'ETH'), m('td', ethAddr)),
         m('tr', m('td', 'REV'), m('td', m('b', revAddr))),
       ),
-      m('input[type=text].addr-name', {placeholder: 'Name', value: name, oninput: nameKeyPressEv}),
-      m('button', {onclick: addAccount, disabled: addDisabled}, 'Save account'),
-      m('button', {onclick: clear}, 'Clear'),
+      // Action buttons
+      m('input[type=text].addr-name', {placeholder: namePlaceholder, value: name, oninput: nameKeyPressEv}),
+      m('button.add-account', {title: saveTitle, onclick: addAccount, disabled: addDisabled}, 'Save account'),
+      m('button', {title: closeTitle, onclick: clear}, 'Close'),
     ),
-    // Wallet
+
+    // Wallet display
     wallet && !!wallet.length && m('table.wallet',
       m('thead',
         m('th', 'Account'),
@@ -106,7 +128,9 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
           m('td', rev),
           m('td', eth),
           m('td', pub),
-          m('td', priv ? '✓' : ''),
+          m('td',
+            priv ? m('span', {title: 'Private key saved with this account'}, '✓') : ''
+          ),
         )
       })
     ),

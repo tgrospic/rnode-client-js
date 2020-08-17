@@ -6,7 +6,7 @@
 @color-bg-light-blue: #c2c7ce61;
 
 :root {
-  font-size: .8rem;
+  font-size: .9rem;
   font-family: sans-serif;
   padding-bottom: 40px;
 }
@@ -38,18 +38,27 @@ h3 {
   margin: 4px 0 2px;
 }
 
+input, select, textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
 input, select, button {
   padding: 4px;
 }
 
 input[type="text"] {
-  width: 440px;
+  width: 480px;
   border-color: #cfcfcf9c;
   border-width: 1px;
 }
 
 input[type="text"].addr-name {
   width: 180px;
+}
+
+button {
+  min-width: 85px;
 }
 
 pre {
@@ -66,23 +75,49 @@ a, a.visited, a.hover {
   color: @color-blue;
 }
 
+optgroup > option {
+  color: #000;
+}
+
+.testnet-color {
+  color: @color-blue;
+}
+
+.mainnet-color {
+  color: @color-red;
+}
+
+.rev {
+  font-size: 1.2rem;
+}
+
 .testnet {
   h2 {
-    color: @color-blue;
+    .testnet-color
   }
 
   .address-ctrl {
     background-color: @color-bg-light-blue;
   }
+
+  .add-account:not([disabled]) {
+    .testnet-color;
+    font-weight: bold;
+  }
 }
 
 .mainnet {
   h2 {
-    color: @color-red;
+    .mainnet-color
   }
 
   .address-ctrl {
     background-color: @color-bg-light-red;
+  }
+
+  .add-account:not([disabled]) {
+    .mainnet-color;
+    font-weight: bold;
   }
 }
 
@@ -93,13 +128,16 @@ a, a.visited, a.hover {
 
 .selector-ctrl {
   padding-bottom: 5px;
+
+  table {
+    font-size: .8em;
+    color: #3c3c3c;
+  }
 }
 
 .selector-ctrl pre {
   display:inline-block;
   padding: 0px 0px;
-  font-weight: bold;
-  font-size: 1.3em;
   border: none;
 }
 
@@ -107,11 +145,25 @@ a, a.visited, a.hover {
   padding-top: 15px;
   padding-bottom: 25px;
   background-color: @color-grey;
+
+  .info {
+    font-size: .9rem;
+  }
 }
+
+
+.transfer-ctrl .rev-amount {
+  width: 195px;
+}
+
 
 .custom-deploy-ctrl {
   .deploy-code {
     width: 730px;
+  }
+
+  .phlo-limit {
+    width: 200px;
   }
 }
 
