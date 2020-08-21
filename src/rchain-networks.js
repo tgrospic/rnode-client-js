@@ -63,6 +63,17 @@ export const mainNet = {
     { domain: 'node6.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
     { domain: 'node7.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
     { domain: 'node8.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node9.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node10.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node11.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node12.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node13.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node14.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node15.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node16.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node17.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node18.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'node19.root-shard.mainnet.rchain.coop', ...defaultPortsSSL },
     // Theo's node doesn't expose http api
     // { domain: '77.81.6.137', ...defaultPorts },
     // DIRECT IPs (until SSL is configured)
