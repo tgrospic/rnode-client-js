@@ -20,5 +20,8 @@ const rnodeWeb = makeRNodeWeb({fetch})
 // Make application actions as a wrapper around RNode API
 const appNodeEff = makeRNodeActions(rnodeWeb, {log, warn})
 
+// Application root element
+const appRoot = document.querySelector('#app')
+
 // Start main app / supply effects
-startApp({...appNodeEff, log, warn})
+startApp(appRoot, {...appNodeEff, log, warn})

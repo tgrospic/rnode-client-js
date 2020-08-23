@@ -111,11 +111,11 @@ const initialState = {
   wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
 }
 
-export const startApp = effects => {
+export const startApp = (element, effects) => {
   const { warn } = effects
 
   // App renderer / creates state cell that is passed to controls
-  const r = makeRenderer(document.querySelector('#app'), mainCtrl)
+  const r = makeRenderer(element, mainCtrl)
 
   // Start app / the big bang!
   r(initialState, effects)
