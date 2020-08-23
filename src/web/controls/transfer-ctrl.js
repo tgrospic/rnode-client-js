@@ -17,7 +17,7 @@ const initSelected = (st, wallet) => {
   return {...st, account: selAccount, toAccount: selToAccount}
 }
 
-export const transferCtrl = (st, {wallet, onTransfer}) => {
+export const transferCtrl = (st, {wallet, onTransfer, warn}) => {
   const valEv = name => ev => {
     const val = ev.target.value
     st.update(s => ({...s, [name]: val}))
@@ -31,7 +31,7 @@ export const transferCtrl = (st, {wallet, onTransfer}) => {
       })
       .catch(ex => {
         st.update(s => ({...s, status: '', error: ex.message}))
-        console.warn('Transfer error', ex)
+        warn('Transfer error', ex)
       })
   }
 

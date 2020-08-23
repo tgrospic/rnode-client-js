@@ -2,11 +2,8 @@
 import * as R from 'ramda'
 import m from 'mithril'
 import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks'
-import { rnodeHttp, sendDeploy, getDataForDeploy, propose } from '../../rnode-web'
-import { transferFunds_rho } from '../../rho/transfer-funds'
-import { checkBalance_rho } from '../../rho/check-balance'
 import { ethDetected } from '../../eth/eth-wrapper'
-import { mkCell, rhoExprToJS } from './common'
+import { makeRenderer } from './common'
 
 // Controls
 import { selectorCtrl } from './selector-ctrl'
@@ -20,94 +17,23 @@ import { customDeployCtrl } from './custom-deploy-ctrl'
   and make REV transfers and check balance.
 */
 
-const { log, warn } = console
-
 const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
-const mainCtrl = st => {
-  const {nets, sel, wallet} = st.view()
-  const valNodeUrls  = getNodeUrls(sel.valNode)
-  const readNodeUrls = getNodeUrls(sel.readNode)
+const mainCtrl = (st, effects) => {
+  const { appCheckBalance, appTransfer, appSendDeploy, appPropose, log, warn } = effects
 
-  const onCheckBalance = async revAddr => {
-    const deloyCode   = checkBalance_rho(revAddr)
-    const {expr: [e]} = await rnodeHttp(readNodeUrls.httpUrl, 'explore-deploy', deloyCode)
-    const dataBal     = e && e.ExprInt && e.ExprInt.data
-    const dataError   = e && e.ExprString && e.ExprString.data
-    return [dataBal, dataError]
-  }
+  const onCheckBalance = node => revAddr => appCheckBalance({node, revAddr})
 
-  const onTransfer = async ({fromAccount, toAccount, amount}) => {
-    log('TRANSFER', {amount, from: fromAccount.name, to: toAccount.name})
-    const code = transferFunds_rho(fromAccount.revAddr, toAccount.revAddr, amount)
-    const statusSet  = transferSt.o('status').set
-    statusSet(`Deploying ...`)
+  const onTransfer = (node, setStatus) => ({fromAccount, toAccount, amount}) =>
+    appTransfer({node, fromAccount, toAccount, amount, setStatus})
 
-    // Send deploy
-    const {signature} = await sendDeploy(valNodeUrls, fromAccount, code)
-    log('DEPLOY ID (signature)', signature)
+  const onSendDeploy = (node, setStatus) => ({code, account, phloLimit}) =>
+    appSendDeploy({node, code, account, phloLimit, setStatus})
 
-    if (valNodeUrls.network === 'localnet') {
-      // Propose on local network, don't wait for result
-      propose(valNodeUrls).catch(ex => console.error(ex))
-    }
-
-    // Progress dots
-    const mkProgress = i => () => {
-      i = i > 60 ? 0 : i + 3
-      return `Checking result ${R.repeat('.', i).join('')}`
-    }
-    const progressStep   = mkProgress(0)
-    const updateProgress = _ => statusSet(progressStep())
-    updateProgress()
-
-    // Try to get result from next proposed block
-    const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
-    // Extract data from response object
-    const args               = data ? rhoExprToJS(data.expr) : void 0
-    const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
-    const [success, message] = args || [false, 'deploy found in the block but failed to get confirmation data']
-
-    if (!success) throw Error(`Transfer error: ${message}. // cost: ${costTxt}`)
-    return `✓ ${message} // cost: ${costTxt}`
-  }
-
-  const onSendDeploy = async ({code, account, phloLimit}) => {
-    log('SENDING DEPLOY', {account: account.name, phloLimit, node: valNodeUrls.httpUrl, code})
-
-    const deployStatusSet = customDeploySt.o('status').set
-    deployStatusSet(`Deploying ...`)
-
-    const {signature} = await sendDeploy(valNodeUrls, account, code, phloLimit)
-    log('DEPLOY ID (signature)', signature)
-
-    // Progress dots
-    const mkProgress = i => () => {
-      i = i > 60 ? 0 : i + 3
-      return `Checking result ${R.repeat('.', i).join('')}`
-    }
-    const progressStep   = mkProgress(0)
-    const updateProgress = _ => deployStatusSet(progressStep())
-    updateProgress()
-
-    // Try to get result from next proposed block
-    const {data, cost} = await getDataForDeploy(valNodeUrls, signature, updateProgress)
-    // Extract data from response object
-    const args               = data ? rhoExprToJS(data.expr) : void 0
-    const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
-    const [success, message] = R.isNil(args)
-      ? [false, 'deploy found in the block but data is not sent on `rho:rchain:deployId` channel']
-      : [true, args.join(', ')]
-
-    log('DEPLOY RETURN DATA', {args, cost, rawData: data})
-
-    if (!success) throw Error(`Deploy error: ${message}. // cost: ${costTxt}`)
-    return `✓ (${message}) // cost: ${costTxt}`
-  }
+  const onPropose = node => () => appPropose(node)
 
   const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {
     const idx = R.findIndex(pred, xs)
-    // @ts-ignore
     const apply = idx === -1 ? R.append : R.update(idx)
     return apply(x, xs)
   })
@@ -123,6 +49,13 @@ const mainCtrl = st => {
   const balanceSt      = st.o('balance')
   const transferSt     = st.o('transfer')
   const customDeploySt = st.o('customDeploy')
+
+  const {nets, sel, wallet} = st.view()
+  const valNodeUrls  = getNodeUrls(sel.valNode)
+  const readNodeUrls = getNodeUrls(sel.readNode)
+
+  const setTransferStatus = transferSt.o('status').set
+  const setDeployStatus   = customDeploySt.o('status').set
 
   // App render
   return m(`.${sel.valNode.name}`,
@@ -140,15 +73,22 @@ const mainCtrl = st => {
     addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount}),
 
     // Check balance control
-    balanceCtrl(balanceSt, {wallet, onCheckBalance}),
+    balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)}),
     m('hr'),
 
     // Transfer REV control
-    transferCtrl(transferSt, {wallet, onTransfer}),
+    transferCtrl(transferSt, {
+      wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
+    }),
 
     // Custom deploy control
     m('hr'),
-    customDeployCtrl(customDeploySt, {wallet, node: valNodeUrls, onSendDeploy, onPropose: propose}),
+    customDeployCtrl(customDeploySt, {
+      wallet, node: valNodeUrls,
+      onSendDeploy: onSendDeploy(valNodeUrls, setDeployStatus),
+      onPropose: onPropose(valNodeUrls),
+      warn,
+    }),
   )
 }
 
@@ -159,17 +99,9 @@ const nets = [localNet, testNet, mainNet]
     readOnlys: readOnlys.map(x => ({...x, title, name})),
   }))
 
-// Wraps Virtual DOM renderer to render state
-const makeRenderer = (element, view) => state => {
-  const stateCell = mkCell()
-  const render = () => {
-    m.render(element, view(stateCell))
-  }
-  stateCell.setListener(render)
-  stateCell.set(state)
-}
-
 const initNet = nets[0]
+
+// Initial application state
 const initialState = {
   // Validators to choose
   nets,
@@ -179,12 +111,14 @@ const initialState = {
   wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
 }
 
-export const startApp = () => {
+export const startApp = effects => {
+  const { warn } = effects
+
   // App renderer / creates state cell that is passed to controls
   const r = makeRenderer(document.querySelector('#app'), mainCtrl)
 
   // Start app / the big bang!
-  r(initialState)
+  r(initialState, effects)
 
   warn('ETH detected', ethDetected)
 }

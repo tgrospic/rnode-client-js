@@ -71,46 +71,41 @@ export const mkCell = () => {
   }
 }
 
-// Converts RhoExpr response from RNode WebAPI
-// https://github.com/rchain/rchain/blob/b7331ae05/node/src/main/scala/coop/rchain/node/api/WebApi.scala#L128-L147
-// - return!("One argument")   // monadic
-// - return!((true, A, B))     // monadic as tuple
-// - return!(true, A, B)       // polyadic
-// new return(`rho:rchain:deployId`) in {
-//   return!((true, "Hello from blockchain!"))
-// }
-// TODO: make it stack safe
-export const rhoExprToJS = input => {
-  const loop = rhoExpr => convert(rhoExpr)(converters)
-  const converters = R.toPairs(converterMapping(loop))
-  return loop(input)
+// Wraps Virtual DOM renderer to render state
+export const makeRenderer = (element, view) => (state, deps) => {
+  const stateCell = mkCell()
+  const render = () => {
+    m.render(element, view(stateCell, deps))
+  }
+  stateCell.setListener(render)
+  stateCell.set(state)
 }
 
-const convert = rhoExpr => R.pipe(
-  R.map(matchTypeConverter(rhoExpr)),
-  R.find(x => !R.isNil(x)),
-  // Return the whole object if unknown type
-  x => R.isNil(x) ? [R.identity, rhoExpr] : x,
-  ([f, d]) => f(d)
-)
-
-const matchTypeConverter = rhoExpr => ([type, f]) => {
-  const d = R.path([type, 'data'], rhoExpr)
-  return R.isNil(d) ? void 666 : [f, d]
+export const pageLog = ({log, document}) => {
+  // Page logger
+  const logEL = document.querySelector('#log')
+  const logWrap = (...args) => {
+    const lines = Array.from(args).map(x => {
+      const f = (_, v) => v && v.buffer instanceof ArrayBuffer
+        ? Array.from(v).toString() : v
+      return JSON.stringify(x, f, 2).replace(/\\n/g, '<br/>')
+    })
+    const el = document.createElement('pre')
+    el.innerHTML = lines.join(' ')
+    logEL.prepend(el)
+    log(...args)
+  }
+  return logWrap
 }
 
-const converterMapping = loop => ({
-  "ExprInt": R.identity,
-  "ExprBool": R.identity,
-  "ExprString": R.identity,
-  "ExprBytes": R.identity,
-  "ExprUri": R.identity,
-  "UnforgDeploy": R.identity,
-  "UnforgDeployer": R.identity,
-  "UnforgPrivate": R.identity,
-  "ExprUnforg": loop,
-  "ExprPar": R.map(loop),
-  "ExprTuple": R.map(loop),
-  "ExprList": R.map(loop),
-  "ExprMap": R.mapObjIndexed(loop),
-})
+export const handleHashHref = pageBody => {
+  // Prevents default redirect for link <a href="#">
+  pageBody.addEventListener('click', ev => {
+    const target = ev.target
+    const isHrefHash = target
+      && target.nodeName === 'A'
+      && target.attributes['href'].value === '#'
+
+    if (isHrefHash) ev.preventDefault()
+  })
+}

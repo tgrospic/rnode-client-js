@@ -45,7 +45,7 @@ const initSelected = (st, wallet) => {
   return {...st, selRevAddr: initRevAddr, phloLimit}
 }
 
-export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose}) => {
+export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose, warn}) => {
   const onSendDeployEv = code => async _ => {
     st.update(s => ({...s, status: '...', dataError: ''}))
 
@@ -53,7 +53,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
     const [status, dataError] = await onSendDeploy({code, account, phloLimit})
       .then(x => [x, ''])
       .catch(ex => {
-        console.warn('DEPLOY ERROR', ex)
+        warn('DEPLOY ERROR', ex)
         return ['', ex.message]
       })
 
@@ -106,7 +106,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
       m('',
         m('span', 'Sample code: '),
         samples.map(([title, code]) =>
-          m('a', {onclick: updateCodeEv(code), href: 'javascript:void 0'}, title),
+          m('a', {onclick: updateCodeEv(code), href: '#'}, title),
         )
       ),
 

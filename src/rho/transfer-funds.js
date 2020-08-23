@@ -20,7 +20,7 @@ export const transferFunds_rho = (revAddrFrom, revAddrTo, amount) => `
                     @vault!("transfer", revAddrTo, amount, *key, *resultCh) |
                     for (@result <- resultCh) {
                       match result {
-                        (true , _  ) => deployId!((true, "Transfer successful."))
+                        (true , _  ) => deployId!((true, "Transfer successful (not yet finalized)."))
                         (false, err) => deployId!((false, err))
                       }
                     }
