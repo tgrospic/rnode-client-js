@@ -13,15 +13,18 @@ services:
   boot:
     << : *default-rnode
     container_name: boot
-    command: run -s --validator-private-key $VALIDATOR_PRIVATE_BOOT --allow-private-addresses --host boot -p 40400 -n --synchrony-constraint-threshold 0
+    command: run -s --validator-private-key $VALIDATOR_BOOT_PRIVATE --allow-private-addresses --host boot
+              --protocol-port 40400 --discovery-port 40404
               --wallets-file /data/genesis/wallets.txt --bonds-file /data/genesis/bonds.txt
-              --certificate /data/node.certificate.pem --key /data/node.key.pem
-              --duration '10 seconds' --interval '10 seconds'
+              --tls-certificate-path /data/node.certificate.pem --tls-key-path /data/node.key.pem
+              --approve-duration 10seconds --approve-interval 10seconds
     ports:
-    - $MY_NET_IP:40400:40400
     - $MY_NET_IP:40401:40401
     - $MY_NET_IP:40402:40402
     - $MY_NET_IP:40403:40403
+    - $MY_NET_IP:40405:40405
+    # Ports exposed externally
+    - $MY_NET_IP:40400:40400
     - $MY_NET_IP:40404:40404
     volumes:
     - ./data:/data
@@ -29,29 +32,17 @@ services:
   read:
     << : *default-rnode
     container_name: read
-    command: run -b $BOOTSTRAP --allow-private-addresses --host read -p 50400 -n
-              --duration '10 seconds' --interval '10 seconds'
-              --fork-choice-check-if-stale-interval '30 seconds' --fork-choice-stale-threshold '30 seconds'
+    command: run -b $VALIDATOR_BOOT_ADDRESS --allow-private-addresses --host read --no-upnp
+              --protocol-port 40410 --discovery-port 40414
+              --approve-duration 10seconds --approve-interval 10seconds
+              --fork-choice-check-if-stale-interval 30seconds --fork-choice-stale-threshold 30seconds
     ports:
-    - $MY_NET_IP:50400:50400
-    - $MY_NET_IP:50401:40401
-    - $MY_NET_IP:50402:40402
-    - $MY_NET_IP:50403:40403
-    - $MY_NET_IP:50404:40404
-
-  envoy:
-    container_name: envoy
-    image: envoyproxy/envoy:latest
-    restart: always
-    command: -c /etc/envoy/envoy.yaml -l trace
-    volumes:
-    # Envoy configuration
-    - ./envoy.yaml:/etc/envoy/envoy.yaml
-    ports:
-    - $MY_NET_IP:44401:44401
-    - $MY_NET_IP:54401:54401
-    - $MY_NET_IP:9901:9901
-    network_mode: host
+    - $MY_NET_IP:40411:40401
+    - $MY_NET_IP:40413:40403
+    - $MY_NET_IP:40415:40405
+    # Ports exposed externally
+    - $MY_NET_IP:40410:40410
+    - $MY_NET_IP:40414:40414
 
 networks:
   rchain-net:

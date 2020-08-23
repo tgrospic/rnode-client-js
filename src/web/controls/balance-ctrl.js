@@ -20,7 +20,7 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
       .catch(ex => ['', ex.message])
 
     const dataBal = typeof bal === 'number'
-      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(bal)})` : ''
+      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(bal)} REV)` : ''
     st.update(s => ({...s, dataBal, dataError}))
   }
 

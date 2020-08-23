@@ -106,7 +106,7 @@ const initialState = {
   // Validators to choose
   nets,
   // Selected validator
-  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[0] },
+  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
   // Initial wallet
   wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
 }
