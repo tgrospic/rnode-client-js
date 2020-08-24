@@ -63,8 +63,7 @@ This will start local Nodejs dev server in watch mode [http://localhost:1234](ht
 Test page contains a list of nodes to select, check balance, send transfers and deploys.
 
 ```sh
-# Run web example / sample request to Envoy proxy
-# - proxy is available for RChain testnet
+# Run web example
 npm run start:web
 ```
 
