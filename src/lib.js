@@ -1,6 +1,19 @@
-export const encodeBase16 = bytes =>
-  Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, 0)).join('')
+// @ts-check
+import base58 from 'bs58'
 
+/**
+ * Encode bytes to base 16 string.
+ *
+ * @param {Uint8Array | number[]} bytes
+ */
+export const encodeBase16 = bytes =>
+  Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, '0')).join('')
+
+/**
+ * Decode base 16 string to bytes.
+ *
+ * @param {string} hexStr
+ */
 export const decodeBase16 = hexStr => {
   const removed0x = hexStr.replace(/^0x/, '')
   const byte2hex = ([arr, bhi], x) =>
@@ -9,5 +22,29 @@ export const decodeBase16 = hexStr => {
   return Uint8Array.from(resArr)
 }
 
+/**
+ * Encode base 16 string to base 58.
+ *
+ * @param {string} hexStr
+ * @returns {string}
+ */
+export const encodeBase58 = hexStr => {
+  const bytes = decodeBase16(hexStr)
+  return base58.encode(bytes)
+}
+
+/**
+ * Decode base 58 string (handle errors).
+ *
+ * @param {string} str
+ * @returns {Uint8Array | undefined}
+ */
+export const decodeBase58safe = str => { try { return base58.decode(str) } catch {} }
+
+/**
+ * Decode ASCII string to bytes.
+ *
+ * @param {string} str
+ */
 export const decodeAscii = (str = '') =>
   Array.from(str).map(x => `${x}`.charCodeAt(0))

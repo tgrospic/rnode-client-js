@@ -16,6 +16,7 @@
   "dependencies": {
     "@babel/runtime": "^7.11.2",
     "blakejs": "^1.1.0",
+    "bs58": "^4.0.1",
     "elliptic": "^6.5.3",
     "ethereumjs-util": "^6.2.1",
     "google-protobuf": "^3.13.0",
