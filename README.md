@@ -1,5 +1,9 @@
 # RNode JS client examples
 
+See also recording of code walk-thru sessions:
+ - [2020\-07\-28 RChain Education](https://youtu.be/5JEtt53EacI?t=1043)
+ - [2020\-08\-25 RChain Education](https://www.youtube.com/watch?v=2EUd2vOiJX8)
+
 ## Web (HTTP)
 
 In the browser connection to RNode can be done with **RNode Web API**. It's also possible to use gRPC with the proxy.  
