@@ -23,5 +23,8 @@ const appNodeEff = makeRNodeActions(rnodeWeb, {log, warn})
 // Application root element
 const appRoot = document.querySelector('#app')
 
-// Start main app / supply effects
-startApp(appRoot, {...appNodeEff, log, warn})
+// Attach to window load event (to refresh on duplicated tab)
+window.addEventListener('load', ev => {
+  // Start main app / supply effects
+  startApp(appRoot, {...appNodeEff, log, warn})
+})
