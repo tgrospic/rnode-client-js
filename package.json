@@ -20,6 +20,7 @@
     "elliptic": "^6.5.3",
     "ethereumjs-util": "^6.2.1",
     "google-protobuf": "^3.13.0",
+    "htm": "^3.0.4",
     "js-sha3": "^0.8.0",
     "mithril": "^2.0.4",
     "ramda": "^0.26.1"

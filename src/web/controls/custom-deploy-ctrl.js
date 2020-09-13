@@ -1,6 +1,5 @@
-import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
+import { labelStyle, showRevDecimal, labelRev, showNetworkError, html } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {
   return!((42, true, "Hello from blockchain!"))
@@ -97,48 +96,53 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
   const canDeploy        = (code || '').trim() !== '' && !!selRevAddr
   const phloLimitPreview = showRevDecimal(phloLimit)
 
-  return m('.ctrl.custom-deploy-ctrl',
-    m('h2', 'Custom deploy'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make deploys.') : [
-      m('span', 'Send deploy to selected validator RNode.'),
+  return html`
+    <div class="ctrl custom-deploy-ctrl">
+      <h2>Custom deploy</h2>
+      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to make deploys.</b>` : html`
+        <span>Send deploy to selected validator RNode.</span>
 
-      // Rholang examples
-      m('',
-        m('span', 'Sample code: '),
-        samples.map(([title, code]) =>
-          m('a', {onclick: updateCodeEv(code), href: '#'}, title),
-        )
-      ),
+        <!-- Rholang examples -->
+        <div>
+          <span>Sample code: </span>
+          ${samples.map(([title, code]) =>
+            html`<a href=# onclick=${updateCodeEv(code)}>${title}</a>`
+          )}
+        </div>
 
-      // REV address dropdown
-      m('', labelStyle(!!selRevAddr), labelAddr),
-      m('select', {onchange: accountChangeEv},
-        wallet.map(({name, revAddr}) =>
-          m('option', `${name}: ${revAddr}`)
-        ),
-      ),
+        <!-- REV address dropdown -->
+        <div ...${labelStyle(!!selRevAddr)}>${labelAddr}</div>
+        <select onchange=${accountChangeEv}>
+          ${wallet.map(({name, revAddr}) =>
+            html`<option>${name}: ${revAddr}</option>`
+          )}
+        </select>
 
-      // Rholang code (editor)
-      m('', labelStyle(code), labelCode),
-      m('textarea.deploy-code', {value: code, rows: 13, placeholder: 'Rholang code', oninput: valEv('code')}),
+        <!-- Rholang code (editor) -->
+        <div ...${labelStyle(code)}>${labelCode}</div>
+        <textarea class="deploy-code"
+          value=${code} rows=13 placeholder="Rholang code"
+          oninput=${valEv('code')}>
+        </textarea>
 
-      // Phlo limit
-      m('', labelStyle(true), labelPhloLimit),
-      m('input[type=number].phlo-limit', {
-        value: phloLimit, placeholder: labelPhloLimit, oninput: valEv('phloLimit')
-      }),
-      labelRev(phloLimitPreview),
+        <!-- Phlo limit -->
+        <div ...${labelStyle(true)}>${labelPhloLimit}</div>
+        <input type=number class="phlo-limit"
+          value=${phloLimit} placeholder=${labelPhloLimit} oninput=${valEv('phloLimit')} />
+        ${labelRev(phloLimitPreview)}
 
-      // Action buttons / results
-      m(''),
-      m('button', {onclick: onSendDeployEv(code), disabled: !canDeploy}, 'Deploy Rholang code'),
-      status && m('b', status),
-      dataError && m('b.warning', showNetworkError(dataError)),
+        <!-- Action buttons / results -->
+        <div></div>
+        <button onclick=${onSendDeployEv(code)} disabled=${!canDeploy}>Deploy Rholang code</button>
+        ${status && html`<b>${status}</b>`}
+        ${dataError && html`<b class=warning>${showNetworkError(dataError)}</b>`}
 
-      m(''),
-      showPropose && m('button', {onclick: onProposeEv}, 'Propose'),
-      showPropose && proposeStatus && m('b', proposeStatus),
-      showPropose && proposeError && m('b.warning', showNetworkError(proposeError)),
-    ]
-  )
+        <!-- Propose -->
+        <div></div>
+        ${showPropose && html`<button onclick=${onProposeEv}>Propose</button>`}
+        ${showPropose && proposeStatus && html`<b>${proposeStatus}</b>`}
+        ${showPropose && proposeError && html`<b class=warning>${showNetworkError(proposeError)}</b>`}
+      `}
+    </div>
+  `
 }

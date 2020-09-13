@@ -1,6 +1,5 @@
-import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
+import { labelStyle, showRevDecimal, labelRev, showNetworkError, html } from './common'
 import { ethDetected } from '../../eth/eth-wrapper'
 
 const initSelected = (st, wallet) => {
@@ -55,42 +54,41 @@ export const transferCtrl = (st, {wallet, onTransfer, warn}) => {
   const canTransfer      = account && toAccount && amount && (account || ethDetected)
   const amountPreview    = showRevDecimal(amount)
 
-  return m('.ctrl.transfer-ctrl',
-    m('h2', 'Transfer REV tokens'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make transfers.') : [
-      m('', 'Sends transfer deploy to selected validator RNode.'),
+  return html`
+    <div class="ctrl transfer-ctrl">
+      <h2>Transfer REV tokens</h2>
+      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to make transfers.</b>` : html`
+        <div>Sends transfer deploy to selected validator RNode.</div>
 
-      // Source REV address dropdown
-      m('', labelStyle(account), labelSource),
-      m('select', {onchange: onSelectFrom},
-        wallet.map(({name, revAddr}) =>
-          m('option', {value: revAddr}, `${name}: ${revAddr}`)
-        ),
-      ),
+        <!-- Source REV address dropdown -->
+        <div ...${labelStyle(account)}>${labelSource}</div>
+        <select onchange=${onSelectFrom}>
+          ${wallet.map(({name, revAddr}) =>
+            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
+          )}
+        </select>
 
-      // Target REV address dropdown
-      m(''),
-      m('', labelStyle(toAccount), labelDestination),
-      m('select', {onchange: onSelectTo},
-        wallet.map(({name, revAddr}) =>
-          m('option', {value: revAddr}, `${name}: ${revAddr}`)
-        ),
-      ),
+        <!-- Target REV address dropdown -->
+        <div ...${labelStyle(toAccount)}>${labelDestination}</div>
+        <select onchange=${onSelectTo}>
+          ${wallet.map(({name, revAddr}) =>
+            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
+          )}
+        </select>
 
-      // REV amount
-      m(''),
-      m('', labelStyle(amount), labelAmount),
-      m('input[type=number].rev-amount', {
-        placeholder: labelAmount, value: amount,
-        oninput: valEv('amount'),
-      }),
-      labelRev(amountPreview),
+        <!-- REV amount -->
+        <div></div>
+        <div ...${labelStyle(amount)}>${labelAmount}</div>
+        <input type=number class="rev-amount"
+          value=${amount} placeholder=${labelAmount} oninput=${valEv('amount')} />
+        ${labelRev(amountPreview)}
 
-      // Action button / result
-      m(''),
-      m('button', {onclick: send, disabled: !canTransfer}, 'Transfer'),
-      status && m('b', status),
-      error && m('b.warning', showNetworkError(error)),
-    ]
-  )
+        <!-- Action buttons / results -->
+        <div></div>
+        <button onclick=${send} disabled=${!canTransfer}>Transfer</button>
+        ${status && html`<b>${status}</b>`}
+        ${error && html`<b class=warning>${showNetworkError(error)}</b>`}
+      `}
+    </div>
+  `
 }

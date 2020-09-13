@@ -8,9 +8,6 @@ import { startApp } from './controls/main-ctrl'
 const { log: logOrig, warn } = console
 const { fetch } = window
 
-// Prevents default redirect for link <a href="#">
-handleHashHref(document.body)
-
 // Page printer mirrors the console `log`
 const log = pageLog({log: logOrig, document})
 
