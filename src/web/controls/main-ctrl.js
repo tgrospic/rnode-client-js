@@ -1,9 +1,9 @@
 // // @ts-check
 import * as R from 'ramda'
-import m from 'mithril'
 import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks'
 import { ethDetected } from '../../eth/eth-wrapper'
-import { makeRenderer } from './common'
+import { makeRenderer, html, handleHashHref } from './common'
+import { newRevAccount } from '../../rev-address'
 
 // Controls
 import { selectorCtrl } from './selector-ctrl'
@@ -58,38 +58,38 @@ const mainCtrl = (st, effects) => {
   const setDeployStatus   = customDeploySt.o('status').set
 
   // App render
-  return m(`.${sel.valNode.name}`,
-    m('.ctrl',
-      'Demo client for RNode ',
-      m('a', {href: repoUrl, target: '_blank'}, repoUrl),
-      m('h1', 'RNode client testing page'),
-    ),
+  return html`
+    <div class=${sel.valNode.name} onclick=${handleHashHref}>
+      <div class="ctrl">
+        Demo client for RNode <a href=${repoUrl} target=_blank>${repoUrl}</a>
+        <h1>RNode client testing page</h1>
+      </div>
+      <!-- Selector control -->
+      <hr/>
+      ${selectorCtrl(selSt, {nets})}
 
-    // Selector control
-    m('hr'),
-    selectorCtrl(selSt, {nets}),
+      <!-- REV wallet control -->
+      ${addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount})}
 
-    // REV wallet control
-    addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount}),
+      <!-- Check balance control -->
+      ${balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)})}
 
-    // Check balance control
-    balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)}),
-    m('hr'),
+      <!-- Transfer REV control -->
+      <hr/>
+      ${transferCtrl(transferSt, {
+        wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
+      })}
 
-    // Transfer REV control
-    transferCtrl(transferSt, {
-      wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
-    }),
-
-    // Custom deploy control
-    m('hr'),
-    customDeployCtrl(customDeploySt, {
-      wallet, node: valNodeUrls,
-      onSendDeploy: onSendDeploy(valNodeUrls, setDeployStatus),
-      onPropose: onPropose(valNodeUrls),
-      warn,
-    }),
-  )
+      <!-- Custom deploy control -->
+      <hr/>
+      ${customDeployCtrl(customDeploySt, {
+        wallet, node: valNodeUrls,
+        onSendDeploy: onSendDeploy(valNodeUrls, setDeployStatus),
+        onPropose: onPropose(valNodeUrls),
+        warn,
+      })}
+    </div>
+  `
 }
 
 const nets = [localNet, testNet, mainNet]
@@ -98,6 +98,10 @@ const nets = [localNet, testNet, mainNet]
     hosts: hosts.map(x => ({...x, title, name})),
     readOnlys: readOnlys.map(x => ({...x, title, name})),
   }))
+
+const defaultWallet = [
+  { name: 'New account', ...newRevAccount() },
+]
 
 const initNet = nets[0]
 
@@ -108,7 +112,7 @@ const initialState = {
   // Selected validator
   sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
   // Initial wallet
-  wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
+  wallet: defaultWallet,
 }
 
 export const startApp = (element, effects) => {

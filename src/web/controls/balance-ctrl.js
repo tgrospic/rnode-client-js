@@ -1,6 +1,5 @@
-import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, showNetworkError } from './common'
+import { labelStyle, showRevDecimal, showNetworkError, html } from './common'
 
 const initSelected = (st, wallet) => {
   const {account} = st
@@ -35,24 +34,26 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
   // Control state
   const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
 
-  return m('.ctrl.balance-ctrl',
-    m('h2', 'Check REV balance'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to check balance.') : [
-      m('', 'Sends exploratory deploy to selected read-only RNode.'),
+  return html`
+    <div class="ctrl balance-ctrl">
+      <h2>Check REV balance</h2>
+      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to check balance.</b>` : html`
+        <div>Sends exploratory deploy to selected read-only RNode.</div>
 
-      // REV address dropdown
-      m('', labelStyle(account), labelAddr),
-      m('select', {onchange: accountChangeEv},
-        wallet.map(({name, revAddr}) =>
-          m('option', {value: revAddr}, `${name}: ${revAddr}`)
-        ),
-      ),
+        <!-- REV address dropdown -->
+        <div ...${labelStyle(account)}>${labelAddr}</div>
+        <select onchange=${accountChangeEv}>
+          ${wallet.map(({name, revAddr}) =>
+            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
+          )}
+        </select>
 
-      // Action button / results
-      m(''),
-      m('button', {onclick: checkBalanceEv, disabled: !account}, 'Check balance'),
-      m('b', dataBal),
-      m('b.warning',  showNetworkError(dataError)),
-    ]
-  )
+        <!-- Action button / results -->
+        <div></div>
+        <button onclick=${checkBalanceEv} disabled=${!account}>Check balance</button>
+        <b>${dataBal}</b>
+        <b class=warning>${showNetworkError(dataError)}</b>
+      `}
+    </div>
+  `
 }

@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import m from 'mithril'
 import { getNodeUrls } from '../../rchain-networks'
-import { labelStyle } from './common'
+import { labelStyle, html } from './common'
 
 export const selectorCtrl = (st, {nets}) => {
   const findValidatorByIndex = index =>
@@ -39,70 +39,80 @@ export const selectorCtrl = (st, {nets}) => {
   const valUrls   = getNodeUrls(valNode)
   const readUrls  = getNodeUrls(readNode)
 
-  return m('.ctrl.selector-ctrl',
-    // Validator selector
-    m('h2', 'RChain Network selector'),
-    m('h3', `${valNode.title} - validator node`),
-    m('select', {onchange: onSelIdx},
-      nets.map(({title, hosts, name}) =>
-        m(`optgroup.${name}-color`, {label: title},
-          hosts.map(({name, domain, grpc, https, http}) =>
-            m(`option`,
-              {title, selected: isEqNode(valNode, {domain, grpc, https, http})},
-              getDdlText({name, domain, grpc, https, http})
-            )
-          ),
-        ),
-      ),
-    ),
+  return html`
+    <div class="ctrl selector-ctrl">
+      <!-- Validator selector -->
+      <h2>RChain Network selector</h2>
+      <h3>${valNode.title} - validator node</h3>
+      <select onchange=${onSelIdx}>
+        ${nets.map(({title, hosts, name}) => html`
+          <optgroup class="${name}-color" label=${title}>
+            ${hosts.map(({name, domain, grpc, https, http}) => html`
+              <option title=${title} selected=${isEqNode(valNode, {domain, grpc, https, http})}>
+                ${getDdlText({name, domain, grpc, https, http})}
+              </option>
+            `)}
+          </optgroup>
+        `)}
+      </select>
 
-    // Validator info
-    m(''),
-    m('span', 'Direct links'),
-    m('a', {target: '_blank', href: valUrls.statusUrl}, 'status'),
-    m('a', {target: '_blank', href: valUrls.getBlocksUrl}, 'blocks'),
-    isTestnet && [
-      m('a', {target: '_blank', href: valUrls.logsUrl}, 'logs'),
-      m('a', {target: '_blank', href: valUrls.filesUrl}, 'files'),
-    ],
-    m('table',
-      valUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', valUrls.grpcUrl))),
-      m('tr', m('td', 'HTTP'), m('td', m('pre', valUrls.httpUrl))),
-      isLocal && m('tr', m('td', 'Admin'), m('td', m('pre', valUrls.httpAdminUrl))),
-    ),
-    isMainnet && [
-      m('p.warning', 'You are connected to MAIN RChain network. Any deploy will use REAL REVs.'),
-    ],
+      <!-- Validator info -->
+      <div></div>
+      <span>Direct links</span>
+      <a target=_blank href=${valUrls.statusUrl}>status</a>
+      <a target=_blank href=${valUrls.getBlocksUrl}>blocks</a>
+      ${isTestnet && html`
+        <a target=_blank href=${valUrls.logsUrl}>logs</a>
+        <a target=_blank href=${valUrls.filesUrl}>files</a>
+      `}
+      <table>
+        ${valUrls.grpcUrl && html`
+          <tr><td>gRPC</td><td><pre>${valUrls.grpcUrl}</pre></td></tr>
+        `}
+        <tr><td>HTTP</td><td><pre>${valUrls.httpUrl}</pre></td></tr>
+        ${isLocal && html`
+          <tr><td>Admin</td><td><pre>${valUrls.httpAdminUrl}</pre></td></tr>
+        `}
+      </table>
+      ${isMainnet && html`
+        <p class=warning>You are connected to MAIN RChain network. Any deploy will use REAL REVs.</p>
+      `}
 
-    // Read-only selector
-    m('h3', `${readNode.title} - read-only node`),
-    (isTestnet || isMainnet) && !!readNode.http && m('', labelStyle(true), httpMixedContentInfo),
-    m('select', {onchange: onSelReadIdx},
-      nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
-        m('optgroup', {label: title},
-          readOnlys.map(({name, domain, grpc, https, http}) =>
-            m('option',
-              {title, selected: isEqNode(readNode, {domain, grpc, https, http})},
-              getDdlText({name, domain, grpc, https, http})
-            )
-          ),
-        ),
-      ),
-    ),
+      <!-- Read-only selector -->
+      <h3>${readNode.title} - read-only node</h3>
+      ${(isTestnet || isMainnet) && !!readNode.http && html`
+        <div ...${labelStyle(true)}>${httpMixedContentInfo}</div>
+      `}
+      <select onclick=${onSelReadIdx}>
+        ${nets.filter(x => x.name === valNode.name).map(({title, readOnlys, name}) => html`
+          <optgroup class="${name}-color" label=${title}>
+            ${readOnlys.map(({name, domain, grpc, https, http}) => html`
+              <option title=${title} selected=${isEqNode(valNode, {domain, grpc, https, http})}>
+                ${getDdlText({name, domain, grpc, https, http})}
+              </option>
+            `)}
+          </optgroup>
+        `)}
+      </select>
 
-    // Read-only info
-    m(''),
-    m('span', 'Direct links'),
-    m('a', {target: '_blank', href: readUrls.statusUrl}, 'status'),
-    m('a', {target: '_blank', href: readUrls.getBlocksUrl}, 'blocks'),
-    isTestnet && [
-      m('a', {target: '_blank', href: readUrls.logsUrl}, 'logs'),
-      m('a', {target: '_blank', href: readUrls.filesUrl}, 'files'),
-    ],
-    m('table',
-      readUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', readUrls.grpcUrl))),
-      m('tr', m('td', 'HTTP'), m('td', m('pre', readUrls.httpUrl))),
-      isLocal && m('tr', m('td', 'Admin'), m('td', m('pre', readUrls.httpAdminUrl))),
-    ),
-  )
+      <!-- Read-only info -->
+      <div></div>
+      <span>Direct links</span>
+      <a target=_blank href=${readUrls.statusUrl}>status</a>
+      <a target=_blank href=${readUrls.getBlocksUrl}>blocks</a>
+      ${isTestnet && html`
+        <a target=_blank href=${readUrls.logsUrl}>logs</a>
+        <a target=_blank href=${readUrls.filesUrl}>files</a>
+      `}
+      <table>
+        ${readUrls.grpcUrl && html`
+          <tr><td>gRPC</td><td><pre>${readUrls.grpcUrl}</pre></td></tr>
+        `}
+        <tr><td>HTTP</td><td><pre>${readUrls.httpUrl}</pre></td></tr>
+        ${isLocal && html`
+          <tr><td>Admin</td><td><pre>${readUrls.httpAdminUrl}</pre></td></tr>
+        `}
+      </table>
+    </div>
+  `
 }

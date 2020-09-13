@@ -1,5 +1,9 @@
 import * as R from 'ramda'
 import m from 'mithril'
+import htm from 'htm'
+
+// Html syntax
+export const html = htm.bind(m)
 
 // Common styles
 
@@ -98,14 +102,12 @@ export const pageLog = ({log, document}) => {
   return logWrap
 }
 
-export const handleHashHref = pageBody => {
-  // Prevents default redirect for link <a href="#">
-  pageBody.addEventListener('click', ev => {
-    const target = ev.target
-    const isHrefHash = target
-      && target.nodeName === 'A'
-      && target.attributes['href'].value === '#'
+// Prevents default redirect for link <a href="#">
+export const handleHashHref = ev => {
+  const target = ev.target
+  const isHrefHash = target
+    && target.nodeName === 'A'
+    && target.attributes['href'].value === '#'
 
-    if (isHrefHash) ev.preventDefault()
-  })
+  if (isHrefHash) ev.preventDefault()
 }
