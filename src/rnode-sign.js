@@ -1,12 +1,44 @@
+// @ts-check
 import blake from 'blakejs'
 import { ec } from 'elliptic'
 import jspb from 'google-protobuf'
 
+/**
+ * These deploy types are based on protobuf specification which must be
+ * used to create the hash and signature of deploy data.
+ * Deploy object sent to Web API is slightly different, see [rnode-web.js](rnode-web.js).
+ *
+ * @typedef {Object} DeployData - Deploy data (required for signing)
+ * @property {string} term
+ * @property {number} timestamp
+ * @property {number} phloPrice
+ * @property {number} phloLimit
+ * @property {number} validAfterBlockNumber
+ *
+ * @typedef {Object} DeploySignedProto - Signed DeployData object (protobuf specification)
+ * @property {string} term
+ * @property {number} timestamp
+ * @property {number} phloPrice
+ * @property {number} phloLimit
+ * @property {number} validAfterBlockNumber
+ * @property {string} sigAlgorithm
+ * @property {Uint8Array} deployer
+ * @property {Uint8Array} sig
+ */
+
+/**
+ * Sign deploy data.
+ *
+ * @param {ec.KeyPair | string} privateKey
+ * @param {DeployData} deployObj
+ */
 export const signDeploy = (privateKey, deployObj) => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
-    sigAlgorithm = 'secp256k1',
   } = deployObj
+
+  // Currently supported algorithm
+  const sigAlgorithm = 'secp256k1'
 
   // Serialize deploy data for signing
   const deploySerialized = deployDataProtobufSerialize({
@@ -25,14 +57,19 @@ export const signDeploy = (privateKey, deployObj) => {
   // Return deploy object / ready for sending to RNode
   return {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
-    deployer, sig, sigAlgorithm,
+    sigAlgorithm, deployer, sig,
   }
 }
 
+/**
+ * Verify deploy object.
+ *
+ * @param {DeploySignedProto} deployObj
+ */
 export const verifyDeploy = deployObj => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
-    deployer, sig, sigAlgorithm,
+    sigAlgorithm, deployer, sig,
   } = deployObj
 
   // Serialize deploy data for signing
@@ -50,12 +87,21 @@ export const verifyDeploy = deployObj => {
   return isValid
 }
 
-// Fix for ec.keyFromPrivate not accepting KeyPair
-// - detect KeyPair if it have `sign` function
+/**
+ * Fix for ec.keyFromPrivate not accepting KeyPair.
+ * - detect KeyPair if it have `sign` function
+ *
+ * @param {ec} crypt
+ * @param {ec.KeyPair | string} pk
+ */
 const getSignKey = (crypt, pk) =>
-  pk && pk.sign && pk.sign.constructor == Function ? pk : crypt.keyFromPrivate(pk)
+  pk && typeof pk != 'string' && pk.sign && pk.sign.constructor == Function ? pk : crypt.keyFromPrivate(pk)
 
-// Serialization of DeployDataProto object without generated JS code
+/**
+ * Serialization of DeployDataProto object without generated JS code.
+ *
+ * @param {DeployData} deployData
+ */
 export const deployDataProtobufSerialize = deployData => {
   const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = deployData
 

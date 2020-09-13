@@ -4,6 +4,12 @@ import * as ethUtil from 'ethereumjs-util'
 import { decodeAscii } from '../lib.js'
 import { deployDataProtobufSerialize } from '../rnode-sign.js'
 
+/**
+ * Recover public key from Ethereum signed data and signature.
+ *
+ * @param {Uint8Array | number[]} data
+ * @param {string} sigHex
+ */
 export const recoverPublicKeyEth = (data, sigHex) => {
   // Ethereum lib to recover public key from massage and signature
   const hashed    = ethUtil.hashPersonalMessage(ethUtil.toBuffer([...data]))
@@ -15,10 +21,15 @@ export const recoverPublicKeyEth = (data, sigHex) => {
   return ethUtil.bufferToHex([4, ...pubkeyRecover])
 }
 
+/**
+ * Verify deploy signed with Ethereum compatible signature.
+ *
+ * @param {import('../rnode-sign.js').DeploySignedProto} deploySigned
+ */
 export const verifyDeployEth = deploySigned => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
-    deployer, sig, // : Array[Byte]
+    deployer, sig,
   } = deploySigned
 
   // Serialize deploy data for signing

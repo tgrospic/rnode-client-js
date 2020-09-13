@@ -1,3 +1,4 @@
+// @ts-check
 // Web example with REV transfer and balance check
 import { pageLog, handleHashHref } from './controls/common'
 import { makeRNodeWeb } from '../rnode-web'
@@ -12,7 +13,7 @@ const { fetch } = window
 const log = pageLog({log: logOrig, document})
 
 // Make RNode web API client / wrapped around DOM fetch
-const rnodeWeb = makeRNodeWeb({fetch})
+const rnodeWeb = makeRNodeWeb({fetch, now: Date.now})
 
 // Make application actions as a wrapper around RNode API
 const appNodeEff = makeRNodeActions(rnodeWeb, {log, warn})
