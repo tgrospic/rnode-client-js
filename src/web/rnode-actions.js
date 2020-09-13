@@ -81,13 +81,14 @@ const appSendDeploy = effects => async ({node, code, account, phloLimit, setStat
   // Try to get result from next proposed block
   const {data, cost} = await getDataForDeploy(node, signature, updateProgress)
   // Extract data from response object
-  const args               = data ? rhoExprToJS(data.expr) : void 0
+  const args = data ? rhoExprToJS(data.expr) : void 0
+
+  log('DEPLOY RETURN DATA', {args, cost, rawData: data})
+
   const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
   const [success, message] = R.isNil(args)
     ? [false, 'deploy found in the block but data is not sent on `rho:rchain:deployId` channel']
-    : [true, args.join(', ')]
-
-  log('DEPLOY RETURN DATA', {args, cost, rawData: data})
+    : [true, R.is(Array, args) ? args.join(', ') : args]
 
   if (!success) throw Error(`Deploy error: ${message}. // cost: ${costTxt}`)
   return `✓ (${message}) // cost: ${costTxt}`
