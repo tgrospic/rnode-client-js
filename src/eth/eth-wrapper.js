@@ -18,8 +18,12 @@ const ethRequest = (method, args) => {
   return eth_.request({method, ...args})
 }
 
-// Request an address selected in Metamask
-// - the first request will ask the user for permission
+/**
+ * Request an address selected in Metamask
+ * - the first request will ask the user for permission
+ *
+ * @returns {Promise<string>} Base 16 ETH address
+ */
 export const ethereumAddress = async () => {
   const accounts = await ethRequest('eth_requestAccounts')
 
@@ -30,8 +34,14 @@ export const ethereumAddress = async () => {
   return accounts[0]
 }
 
-// Ethereum personal signature
-// https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
+/**
+ * Ethereum personal signature
+ * https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
+ *
+ * @param {Uint8Array | number[]} bytes - Data to sign
+ * @param {string} ethAddr - Base 16 ETH address
+ * @returns {Promise<string>} Base 16 signature
+ */
 export const ethereumSign = async (bytes, ethAddr) => {
   // Create args, fix arrays/buffers
   const args = { params: [[...bytes], ethAddr] }

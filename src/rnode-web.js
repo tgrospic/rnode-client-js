@@ -1,3 +1,4 @@
+// @ts-check
 import * as R from 'ramda'
 import { ec } from 'elliptic'
 
@@ -6,9 +7,41 @@ import { verifyDeployEth, recoverPublicKeyEth } from './eth/eth-sign.js'
 import { ethDetected, ethereumAddress, ethereumSign } from './eth/eth-wrapper.js'
 import { signDeploy, verifyDeploy, deployDataProtobufSerialize } from './rnode-sign'
 
+/**
+ * @typedef {(httpUrl: string, apiMethod: string, data?) => Promise<any>} RNodeHttp
+ *
+ * @typedef {Object} Deploy - Deploy object with signature
+ * @property {import('./rnode-sign.js').DeployData} data
+ * @property {string} sigAlgorithm
+ * @property {string} deployer
+ * @property {string} signature
+ *
+ * @typedef {Object} DeployResult - Deploy info from block
+ * @property {string} sig - Deploy ID (signature)
+ * @property {number} cost - Cost in REV (base units)
+ * @property {boolean} errored - Flag if deploy has error in execution
+ * @property {string} systemDeployError - Error message if charging for deploy failed
+ * @property {string} deployer - Deployer public key
+ * @property {string} sigAlgorithm
+ * @property {string} term
+ * @property {number} timestamp
+ * @property {number} phloPrice
+ * @property {number} phloLimit
+ * @property {number} validAfterBlockNumber
+ *
+ * Effects
+ * @typedef {(url: string, options: any) => Promise<any>} fetch - HTTP client
+ * @typedef {() => number} now - Value for new timestamp for deploy
+ */
+
+/**
+ * Create instance of RNode Web client.
+ *
+ * @param {{fetch: fetch, now: now}} effects
+ */
 export const makeRNodeWeb = effects => {
   // Dependency DOM fetch function
-  const { fetch } = effects
+  const { fetch, now } = effects
 
   // Basic wrapper around DOM `fetch` method
   const rnodeHttp = makeRNodeHttpInternal(fetch)
@@ -16,13 +49,18 @@ export const makeRNodeWeb = effects => {
   // RNode HTTP API methods
   return {
     rnodeHttp,
-    sendDeploy      : sendDeploy(rnodeHttp),
+    sendDeploy      : sendDeploy(rnodeHttp, now),
     getDataForDeploy: getDataForDeploy(rnodeHttp),
     propose         : propose(rnodeHttp),
   }
 }
 
-// Helper function to create JSON request to RNode Web API
+/**
+ * Helper function to create JSON request to RNode Web API.
+ *
+ * @param {fetch} domFetch
+ * @returns {RNodeHttp} RNode wrapper to Web API
+ */
 const makeRNodeHttpInternal = domFetch => async (httpUrl, apiMethod, data) => {
   // Prepare fetch options
   const postMethods = ['prepare-deploy', 'deploy', 'data-at-name', 'explore-deploy', 'propose']
@@ -37,6 +75,7 @@ const makeRNodeHttpInternal = domFetch => async (httpUrl, apiMethod, data) => {
   // Add status if server error
   if (!resp.ok) {
     const ex = Error(result)
+    // @ts-ignore
     ex.status = resp.status
     throw ex
   }
@@ -44,8 +83,20 @@ const makeRNodeHttpInternal = domFetch => async (httpUrl, apiMethod, data) => {
   return result
 }
 
-// Creates deploy, signing and sending to RNode
-const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
+/**
+ * Creates deploy, signing and sending to RNode.
+ *
+ * @param {RNodeHttp} rnodeHttp
+ * @param {now} now
+ * @returns {
+      ( node: {httpUrl: string}
+      , account: {privKey?: string, ethAddr?: string}
+      , code: string
+      , phloLimit: number
+      )
+      => Promise<Deploy>}
+ */
+const sendDeploy = (rnodeHttp, now) => async ({httpUrl}, account, code, phloLimit) => {
   // Check if deploy can be signed
   if (!account.privKey) {
     const ethAddr = account.ethAddr
@@ -60,7 +111,8 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
   }
 
   // Get the latest block number
-  const [{ blockNumber }] = await rnodeHttp(node.httpUrl, 'blocks/1')
+  /** @type {{blockNumber: number}[]} */
+  const [{ blockNumber }] = await rnodeHttp(httpUrl, 'blocks/1')
 
   // Create a deploy
   const phloLimitNum = !!phloLimit || phloLimit == 0 ? phloLimit : 250e3
@@ -68,7 +120,7 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
     term: code,
     phloLimit: phloLimitNum, phloPrice: 1,
     validAfterBlockNumber: blockNumber,
-    timestamp: Date.now(),
+    timestamp: now(),
   }
 
   const deploy = !!account.privKey
@@ -76,7 +128,7 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
     : await signMetamask(deployData)
 
   // Send deploy / result is deploy signature (ID)
-  await rnodeHttp(node.httpUrl, 'deploy', deploy)
+  await rnodeHttp(httpUrl, 'deploy', deploy)
 
   return deploy
 }
@@ -84,7 +136,16 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
 // Singleton timeout handle to ensure only one execution
 let GET_DATA_TIMEOUT_HANDLE
 
-// Listen for data on `deploy signature`
+/**
+ * Listen for data on `deploy signature` (`rho:rchain:deployId`).
+ *
+ * @param {RNodeHttp} rnodeHttp
+ * @returns {
+    (node: {httpUrl: string}
+    , deployId: string
+    , onProgress: () => () => boolean
+    ) => Promise<{data: any, cost: number}>}
+ */
 const getDataForDeploy = rnodeHttp => async ({httpUrl}, deployId, onProgress) => {
   GET_DATA_TIMEOUT_HANDLE && clearTimeout(GET_DATA_TIMEOUT_HANDLE)
 
@@ -125,6 +186,12 @@ const getDataForDeploy = rnodeHttp => async ({httpUrl}, deployId, onProgress) =>
   })
 }
 
+/**
+ * Get deploy result from the block where is proposed (throws error if not found).
+ *
+ * @param {RNodeHttp} rnodeHttp
+ * @returns {(node: {httpUrl: string}, deployId: string) => Promise<DeployResult>}
+ */
 const fetchDeploy = rnodeHttp => async ({httpUrl}, deployId) => {
   // Request a block with the deploy
   const block = await rnodeHttp(httpUrl, `deploy/${deployId}`)
@@ -142,10 +209,20 @@ const fetchDeploy = rnodeHttp => async ({httpUrl}, deployId) => {
   }
 }
 
-// Helper function to propose via HTTP
+/**
+ * Helper function to propose via HTTP.
+ *
+ * @param {RNodeHttp} rnodeHttp
+ * @returns {(node: {httpAdminUrl: string}) => Promise<string>}
+ */
 const propose = rnodeHttp => ({httpAdminUrl}) => rnodeHttp(httpAdminUrl, 'propose', {})
 
-// Creates deploy signature with Metamask
+/**
+ * Creates deploy signature with Metamask.
+ *
+ * @param {import('./rnode-sign.js').DeployData} deployData
+ * @returns {Promise<Deploy>}
+ */
 const signMetamask = async deployData => {
   // Serialize and sign with Metamask extension
   // - this will open a popup for user to confirm/review
@@ -168,7 +245,13 @@ const signMetamask = async deployData => {
   return toWebDeploy(deploy)
 }
 
-// Creates deploy signature with plain private key
+/**
+ * Creates deploy signature with plain private key.
+ *
+ * @param {import('./rnode-sign.js').DeployData} deployData
+ * @param {ec.KeyPair | string} privateKey
+ * @returns {Deploy}
+ */
 const signPrivKey = (deployData, privateKey)  => {
   // Create signing key
   const secp256k1 = new ec('secp256k1')
@@ -181,7 +264,12 @@ const signPrivKey = (deployData, privateKey)  => {
   return toWebDeploy(deploy)
 }
 
-// Converts JS object from protobuf spec. to Web API spec.
+/**
+ * Converts JS object from protobuf spec. to Web API spec.
+ *
+ * @param {import('./rnode-sign.js').DeploySignedProto} deployData
+ * @returns {Deploy}
+ */
 const toWebDeploy = deployData => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
