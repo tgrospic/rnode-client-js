@@ -30,14 +30,13 @@ import { signDeploy, verifyDeploy, deployDataProtobufSerialize } from './rnode-s
  * @property {number} validAfterBlockNumber
  *
  * Effects
- * @typedef {(url: string, options: any) => Promise<any>} fetch - HTTP client
  * @typedef {() => number} now - Value for new timestamp for deploy
  */
 
 /**
  * Create instance of RNode Web client.
  *
- * @param {{fetch: fetch, now: now}} effects
+ * @param {{fetch: typeof fetch, now: now}} effects
  */
 export const makeRNodeWeb = effects => {
   // Dependency DOM fetch function
@@ -58,7 +57,7 @@ export const makeRNodeWeb = effects => {
 /**
  * Helper function to create JSON request to RNode Web API.
  *
- * @param {fetch} domFetch
+ * @param {typeof fetch} domFetch
  * @returns {RNodeHttp} RNode wrapper to Web API
  */
 const makeRNodeHttpInternal = domFetch => async (httpUrl, apiMethod, data) => {

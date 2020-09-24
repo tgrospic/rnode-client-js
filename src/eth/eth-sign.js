@@ -7,8 +7,9 @@ import { deployDataProtobufSerialize } from '../rnode-sign.js'
 /**
  * Recover public key from Ethereum signed data and signature.
  *
- * @param {Uint8Array | number[]} data
- * @param {string} sigHex
+ * @param {Uint8Array | number[]} data - Signed message bytes
+ * @param {string} sigHex - Signature base 16
+ * @returns {string} Public key base 16
  */
 export const recoverPublicKeyEth = (data, sigHex) => {
   // Ethereum lib to recover public key from massage and signature
@@ -25,6 +26,7 @@ export const recoverPublicKeyEth = (data, sigHex) => {
  * Verify deploy signed with Ethereum compatible signature.
  *
  * @param {import('../rnode-sign.js').DeploySignedProto} deploySigned
+ * @returns {boolean}
  */
 export const verifyDeployEth = deploySigned => {
   const {

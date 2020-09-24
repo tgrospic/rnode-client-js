@@ -31,6 +31,7 @@ import jspb from 'google-protobuf'
  *
  * @param {ec.KeyPair | string} privateKey
  * @param {DeployData} deployObj
+ * @returns {DeploySignedProto}
  */
 export const signDeploy = (privateKey, deployObj) => {
   const {
@@ -65,6 +66,7 @@ export const signDeploy = (privateKey, deployObj) => {
  * Verify deploy object.
  *
  * @param {DeploySignedProto} deployObj
+ * @returns {boolean}
  */
 export const verifyDeploy = deployObj => {
   const {
@@ -93,6 +95,7 @@ export const verifyDeploy = deployObj => {
  *
  * @param {ec} crypt
  * @param {ec.KeyPair | string} pk
+ * @returns {ec.KeyPair}
  */
 const getSignKey = (crypt, pk) =>
   pk && typeof pk != 'string' && pk.sign && pk.sign.constructor == Function ? pk : crypt.keyFromPrivate(pk)
@@ -101,6 +104,7 @@ const getSignKey = (crypt, pk) =>
  * Serialization of DeployDataProto object without generated JS code.
  *
  * @param {DeployData} deployData
+ * @returns {Uint8Array}
  */
 export const deployDataProtobufSerialize = deployData => {
   const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = deployData
