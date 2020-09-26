@@ -1,10 +1,23 @@
 import * as R from 'ramda'
-import { newRevAccount, createRevAccount } from '../../rev-address'
-import { labelStyle, html } from './common'
+import { newRevAccount, createRevAccount, RevAddress } from '../../rev-address'
+import { labelStyle, html, Cell } from './common'
 import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
 
-export const addressCtrl = (st, {wallet, onAddAccount}) => {
-  const updateAddress = text => {
+export interface RevAccount extends RevAddress {
+  name: string
+}
+
+export interface AddressSt extends RevAccount {
+  text: string
+}
+
+export interface AddressActions {
+  readonly wallet: RevAccount[]
+  readonly onAddAccount: (acc: RevAccount) => void
+}
+
+export const addressCtrl = (st: Cell<AddressSt>, {wallet, onAddAccount}: AddressActions) => {
+  const updateAddress = (text: string) => {
     // Account from private key, public key, ETH or REV address
     const revAccount = createRevAccount(text) || {}
 
@@ -12,38 +25,38 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
     st.set({text, ...revAccount})
   }
 
-  const addAccount = async _ => {
+  const addAccount = () => {
     const account = {name, privKey, pubKey, ethAddr, revAddr}
-    await onAddAccount(account)
+    onAddAccount(account)
     clear()
   }
 
-  const clear = _ => {
+  const clear = () => {
     st.set({text: ''})
   }
 
-  const fillMetamaskAccountEv = async _ => {
+  const fillMetamaskAccountEv = async () => {
     const ethAddr = await ethereumAddress()
     updateAddress(ethAddr)
   }
 
-  const addrKeyPressEv = ev => {
+  const addrKeyPressEv = (ev: any) => {
     const text = ev.target.value
     updateAddress(text)
   }
 
-  const nameKeyPressEv = ev => {
+  const nameKeyPressEv = (ev: any) => {
     const nameVal = ev.target.value
     st.update(s => ({...s, name: nameVal}))
   }
 
-  const newRevAddrEv = _ => {
+  const newRevAddrEv = () => {
     const {privKey} = newRevAccount()
-    updateAddress(privKey)
+    updateAddress(privKey as string)
   }
 
-  const updateEv = revAddr => _ => {
-    const acc = wallet.find(R.propEq('revAddr', revAddr))
+  const updateEv = (revAddr: string) => () => {
+    const acc = wallet.find(R.propEq('revAddr', revAddr)) as RevAccount
     st.set(acc)
   }
 
@@ -72,7 +85,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
       ${description}
 
       <!-- Input textbox -->
-      <div ...${labelStyle(text)}>${labelSource}</div>
+      <div ...${labelStyle(!!text)}>${labelSource}</div>
       <input type=text autocomplete=nono placeholder=${labelSource} value=${text} oninput=${addrKeyPressEv} />
 
       <!-- New accounts -->

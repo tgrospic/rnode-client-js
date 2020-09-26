@@ -1,5 +1,5 @@
 // Rholang code to bond a validator
-export const posBond_rho = amount => `
+export const posBond_rho = (amount: string) => `
   new retCh, PoSCh, rl(\`rho:registry:lookup\`), stdout(\`rho:io:stdout\`) in {
     stdout!("About to lookup pos contract...") |
 

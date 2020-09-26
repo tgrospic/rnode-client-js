@@ -1,30 +1,42 @@
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, showNetworkError, html } from './common'
+import { RevAccount } from './address-ctrl'
+import { labelStyle, showRevDecimal, showNetworkError, html, Cell } from './common'
 
-const initSelected = (st, wallet) => {
+export interface BalanceSt {
+  readonly dataBal: string
+  readonly dataError: string
+  readonly account: RevAccount
+}
+
+export interface BalanceActions {
+  readonly wallet: RevAccount[]
+  readonly onCheckBalance: (revAddress: string) => Promise<[number, string]>
+}
+
+const initSelected = (st: BalanceSt, wallet: RevAccount[]) => {
   const {account} = st
 
   // Pre-select first account if not selected
   const selAccount = R.isNil(account) && !R.isNil(wallet)
-    ? R.head(wallet) : account
+    ? R.head(wallet) as RevAccount : account
 
   return {...st, account: selAccount}
 }
 
-export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
-  const checkBalanceEv = async _ => {
+export const balanceCtrl = (st: Cell<BalanceSt>, {wallet = [], onCheckBalance}: BalanceActions) => {
+  const checkBalanceEv = (account: RevAccount) => async () => {
     st.update(s => ({...s, dataBal: '...', dataError: ''}))
 
     const [bal, dataError] = await onCheckBalance(account.revAddr)
       .catch(ex => ['', ex.message])
 
     const dataBal = typeof bal === 'number'
-      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(bal)} REV)` : ''
+      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(`${bal}`)} REV)` : ''
     st.update(s => ({...s, dataBal, dataError}))
   }
 
-  const accountChangeEv = ev => {
-    const account = R.find(R.propEq('revAddr', ev.target.value), wallet)
+  const accountChangeEv = (ev: any) => {
+    const account = R.find(R.propEq('revAddr', ev.target.value), wallet) as RevAccount
     st.set({account})
   }
 
@@ -41,7 +53,7 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
         <div>Sends exploratory deploy to selected read-only RNode.</div>
 
         <!-- REV address dropdown -->
-        <div ...${labelStyle(account)}>${labelAddr}</div>
+        <div ...${labelStyle(!!account)}>${labelAddr}</div>
         <select onchange=${accountChangeEv}>
           ${wallet.map(({name, revAddr}) =>
             html`<option value=${revAddr}>${name}: ${revAddr}</option>`
@@ -50,7 +62,7 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
 
         <!-- Action button / results -->
         <div></div>
-        <button onclick=${checkBalanceEv} disabled=${!account}>Check balance</button>
+        <button onclick=${checkBalanceEv(account)} disabled=${!account}>Check balance</button>
         <b>${dataBal}</b>
         <b class=warning>${showNetworkError(dataError)}</b>
       `}

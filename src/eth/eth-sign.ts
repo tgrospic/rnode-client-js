@@ -1,34 +1,30 @@
 import { ec } from 'elliptic'
 import * as ethUtil from 'ethereumjs-util'
 
-import { decodeAscii } from '../lib.js'
-import { deployDataProtobufSerialize } from '../rnode-sign.js'
+import { decodeAscii } from '../lib'
+import { deployDataProtobufSerialize, DeploySignedProto } from '../rnode-sign'
 
 /**
  * Recover public key from Ethereum signed data and signature.
  *
- * @param {Uint8Array | number[]} data - Signed message bytes
- * @param {string} sigHex - Signature base 16
- * @returns {string} Public key base 16
+ * @param data - Signed message bytes
+ * @param sigHex - Signature base 16
+ * @returns Public key base 16
  */
-export const recoverPublicKeyEth = (data, sigHex) => {
+export const recoverPublicKeyEth = (data: Uint8Array | number[], sigHex: string) => {
   // Ethereum lib to recover public key from massage and signature
   const hashed    = ethUtil.hashPersonalMessage(ethUtil.toBuffer([...data]))
-  const sigBytes  = ethUtil.toBuffer(sigHex)
-  const {v, r, s} = ethUtil.fromRpcSig(sigBytes)
+  const {v, r, s} = ethUtil.fromRpcSig(sigHex)
   // Public key without prefix
   const pubkeyRecover = ethUtil.ecrecover(hashed, v, r, s)
-
+  // @ts-ignore
   return ethUtil.bufferToHex([4, ...pubkeyRecover])
 }
 
 /**
  * Verify deploy signed with Ethereum compatible signature.
- *
- * @param {import('../rnode-sign.js').DeploySignedProto} deploySigned
- * @returns {boolean}
  */
-export const verifyDeployEth = deploySigned => {
+export const verifyDeployEth = (deploySigned: DeploySignedProto) => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
     deployer, sig,

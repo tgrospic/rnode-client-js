@@ -1,32 +1,43 @@
 import * as R from 'ramda'
-import { getNodeUrls } from '../../rchain-networks'
-import { labelStyle, html } from './common'
+import { getNodeUrls, NetworkName, NodeUrls, RChainNetwork, RNodeInfo } from '../../rchain-networks'
+import { html, Cell } from './common'
 
-export const selectorCtrl = (st, {nets}) => {
-  const findValidatorByIndex = index =>
-    nets.flatMap(({hosts}) => hosts)[index]
+export interface SelectorSt {
+  readonly valNode: RNodeInfo
+  readonly readNode: RNodeInfo
+}
 
-  const findReadOnlyByIndex = (index, netName) =>
-    nets.filter(x => x.name === netName).flatMap(({readOnlys}) => readOnlys)[index]
+export interface SelectorActions {
+  readonly nets: RChainNetwork[]
+}
 
-  const onSelIdx = ev => {
+export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
+  const findValidatorByIndex = (index: number) =>
+    R.chain(({hosts}) => hosts, nets)[index]
+
+  const findReadOnlyByIndex = (index: number, netName?: NetworkName) => R.pipe(
+    (xs: RChainNetwork[]) => R.filter<RChainNetwork>(x => x.name === netName, xs),
+    R.chain(({readOnlys}) => readOnlys)
+  )(nets)[index]
+
+  const onSelIdx = (ev: any) => {
     const sel  = findValidatorByIndex(ev.target.selectedIndex)
     const read = sel.name === valNode.name ? readNode : findReadOnlyByIndex(0, sel.name)
     st.set({valNode: sel, readNode: read})
   }
 
-  const onSelReadIdx = ev => {
+  const onSelReadIdx = (ev: any) => {
     const sel = findReadOnlyByIndex(ev.target.selectedIndex, valNode.name)
     st.set({valNode, readNode: sel})
   }
 
-  const getDdlText = ({name, domain, grpc, https, http}) => {
+  const getDdlText = ({name, domain, grpc, https, http}: RNodeInfo) => {
     const httpInfo = !!https ? `:${https}` : !!http ? `:${http}` : ' '
     const isLocal  = name === 'localnet'
     return isLocal ? `${domain}${httpInfo}` : domain
   }
 
-  const isEqNode = (v1, v2) =>
+  const isEqNode = (v1: any, v2: any) =>
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
   // Control state
@@ -43,7 +54,7 @@ export const selectorCtrl = (st, {nets}) => {
       <!-- Validator selector -->
       <h2>RChain Network selector</h2>
       <h3>${valNode.title} - validator node</h3>
-      <select onchange=${onSelIdx}>
+      <select oninput=${onSelIdx}>
         ${nets.map(({title, hosts, name}) => html`
           <optgroup class="${name}-color" label=${title}>
             ${hosts.map(({name, domain, grpc, https, http}) => html`
@@ -79,14 +90,11 @@ export const selectorCtrl = (st, {nets}) => {
 
       <!-- Read-only selector -->
       <h3>${readNode.title} - read-only node</h3>
-      ${(isTestnet || isMainnet) && !!readNode.http && html`
-        <div ...${labelStyle(true)}>${httpMixedContentInfo}</div>
-      `}
-      <select onclick=${onSelReadIdx}>
+      <select oninput=${onSelReadIdx}>
         ${nets.filter(x => x.name === valNode.name).map(({title, readOnlys, name}) => html`
           <optgroup class="${name}-color" label=${title}>
             ${readOnlys.map(({name, domain, grpc, https, http}) => html`
-              <option title=${title} selected=${isEqNode(valNode, {domain, grpc, https, http})}>
+              <option title=${title} selected=${isEqNode(readNode, {domain, grpc, https, http})}>
                 ${getDdlText({name, domain, grpc, https, http})}
               </option>
             `)}

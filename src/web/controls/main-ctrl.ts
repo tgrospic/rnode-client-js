@@ -1,46 +1,63 @@
-// // @ts-check
 import * as R from 'ramda'
-import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks'
+import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../../rchain-networks'
 import { ethDetected } from '../../eth/eth-wrapper'
-import { makeRenderer, html, handleHashHref } from './common'
+import { makeRenderer, html, handleHashHref, Cell } from './common'
 import { newRevAccount } from '../../rev-address'
 
 // Controls
-import { selectorCtrl } from './selector-ctrl'
-import { addressCtrl } from './address-ctrl'
-import { balanceCtrl } from './balance-ctrl'
-import { transferCtrl } from './transfer-ctrl'
-import { customDeployCtrl } from './custom-deploy-ctrl'
+import { selectorCtrl, SelectorSt } from './selector-ctrl'
+import { addressCtrl, AddressSt, RevAccount } from './address-ctrl'
+import { balanceCtrl, BalanceSt } from './balance-ctrl'
+import { transferCtrl, TransferData, TransferSt } from './transfer-ctrl'
+import { customDeployCtrl, CustomDeploySt, SendDeployArgs } from './custom-deploy-ctrl'
+import { Lens } from 'monocle-ts'
+import { Predicate } from 'fp-ts/lib/function'
+import { AppRNodeEffects, ConsoleEff } from '../rnode-actions'
 
 /*
   This will display the test page to select local, testnet, and mainnet validators
   and make REV transfers and check balance.
 */
 
+export interface AppState {
+  nets: RChainNetwork[]
+  wallet: RevAccount[]
+  // Control states
+  sel: SelectorSt
+  balance: BalanceSt
+  address: AddressSt
+  transfer: TransferSt
+  customDeploy: CustomDeploySt
+}
+
+export type AppEffects = AppRNodeEffects & ConsoleEff
+
 const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
-const mainCtrl = (st, effects) => {
+const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
   const { appCheckBalance, appTransfer, appSendDeploy, appPropose, log, warn } = effects
 
-  const onCheckBalance = node => revAddr => appCheckBalance({node, revAddr})
+  const onCheckBalance = (node: NodeUrls) => (revAddr: string) => appCheckBalance({node, revAddr})
 
-  const onTransfer = (node, setStatus) => ({fromAccount, toAccount, amount}) =>
+  const onTransfer = (node: NodeUrls, setStatus: (s: string) => any) => ({fromAccount, toAccount, amount}: TransferData) =>
     appTransfer({node, fromAccount, toAccount, amount, setStatus})
 
-  const onSendDeploy = (node, setStatus) => ({code, account, phloLimit}) =>
+  const onSendDeploy = (node: NodeUrls, setStatus: (s: string) => any) => ({code, account, phloLimit}: SendDeployArgs) =>
     appSendDeploy({node, code, account, phloLimit, setStatus})
 
-  const onPropose = node => () => appPropose(node)
+  const onPropose = (node: NodeUrls) => () => appPropose(node)
 
-  const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {
-    const idx = R.findIndex(pred, xs)
-    const apply = idx === -1 ? R.append : R.update(idx)
-    return apply(x, xs)
-  })
+  const appendUpdateLens = (pred: Predicate<RevAccount>) => new Lens<RevAccount[], RevAccount>(
+    xs => R.find(pred, xs) as RevAccount,
+    x => xs => {
+      const idx = R.findIndex(pred, xs)
+      const apply = idx === -1 ? R.append : ((ys: any) => R.update<RevAccount>(idx, ys))
+      return apply(x)(xs)
+    })
 
-  const onSaveAccount = account =>
+  const onSaveAccount = (account: RevAccount) =>
     st.o('wallet')
-      .o(appendUpdateLens(R.propEq('revAddr', account.revAddr)))
+      .ol(appendUpdateLens(R.propEq('revAddr', account.revAddr)))
       .set(account)
 
   // State lenses for each control
@@ -99,23 +116,27 @@ const nets = [localNet, testNet, mainNet]
     readOnlys: readOnlys.map(x => ({...x, title, name})),
   }))
 
-const defaultWallet = [
+const defaultWallet: RevAccount[] = [
   { name: 'New account', ...newRevAccount() },
 ]
 
 const initNet = nets[0]
 
 // Initial application state
-const initialState = {
+const initialState: Partial<AppState> = {
   // Validators to choose
   nets,
   // Selected validator
   sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
   // Initial wallet
   wallet: defaultWallet,
+
+  // transfer: {
+  //   amount: ''
+  // }
 }
 
-export const startApp = (element, effects) => {
+export const startApp = (element: Element, effects: AppEffects) => {
   const { warn } = effects
 
   // App renderer / creates state cell that is passed to controls

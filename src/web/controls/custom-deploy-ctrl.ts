@@ -1,5 +1,7 @@
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError, html } from './common'
+import { NodeUrls } from '../../rchain-networks'
+import { RevAccount } from './address-ctrl'
+import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {
   return!((42, true, "Hello from blockchain!"))
@@ -34,21 +36,41 @@ const samples = [
   ['registry lookup', sampleRegistryLookup],
 ]
 
-const initSelected = (st, wallet) => {
-  const {selRevAddr, phloLimit = 250000} = st
+export interface CustomDeploySt {
+  selRevAddr: string
+  code: string
+  phloLimit: string
+  status: string
+  dataError: string
+  proposeStatus: string
+  proposeError: string
+}
+
+export type SendDeployArgs = {code: string, account: RevAccount, phloLimit: string}
+
+export interface CustomDeployActions {
+  readonly wallet: RevAccount[]
+  readonly node: NodeUrls
+  onSendDeploy(d: SendDeployArgs): Promise<string>
+  onPropose(node: NodeUrls): Promise<string>
+  warn: typeof console.warn
+}
+
+const initSelected = (st: CustomDeploySt, wallet: RevAccount[]) => {
+  const {selRevAddr, phloLimit = '250000'} = st
 
   // Pre-select first account if not selected
   const initRevAddr = R.isNil(selRevAddr) && !R.isNil(wallet) && !!wallet.length
-    ? R.head(wallet).revAddr : selRevAddr
+    ? R.head(wallet)?.revAddr : selRevAddr
 
   return {...st, selRevAddr: initRevAddr, phloLimit}
 }
 
-export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose, warn}) => {
-  const onSendDeployEv = code => async _ => {
+export const customDeployCtrl = (st: Cell<CustomDeploySt>, {wallet = [], node, onSendDeploy, onPropose, warn}: CustomDeployActions) => {
+  const onSendDeployEv = (code: string) => async () => {
     st.update(s => ({...s, status: '...', dataError: ''}))
 
-    const account = R.find(R.propEq('revAddr', selRevAddr), wallet)
+    const account = R.find(R.propEq('revAddr', selRevAddr), wallet) as RevAccount
     const [status, dataError] = await onSendDeploy({code, account, phloLimit})
       .then(x => [x, ''])
       .catch(ex => {
@@ -59,7 +81,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
     st.update(s => ({...s, status, dataError}))
   }
 
-  const onProposeEv = async _ => {
+  const onProposeEv = async () => {
     st.update(s => ({...s, proposeStatus: '...', proposeError: ''}))
 
     const [proposeStatus, proposeError] = await onPropose(node)
@@ -69,17 +91,17 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
     st.update(s => ({...s, proposeStatus, proposeError}))
   }
 
-  const accountChangeEv = ev => {
+  const accountChangeEv = (ev: any) => {
     const { revAddr } = wallet[ev.target.selectedIndex]
     st.update(s => ({...s, selRevAddr: revAddr}))
   }
 
-  const updateCodeEv = code => _ => {
+  const updateCodeEv = (code: string) => () => {
     st.update(s => ({...s, code}))
   }
 
   // Field update by name
-  const valEv = name => ev => {
+  const valEv = (name: keyof CustomDeploySt) => (ev: any) => {
     const val = ev.target.value
     st.update(s => ({...s, [name]: val}))
   }
@@ -119,7 +141,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
         </select>
 
         <!-- Rholang code (editor) -->
-        <div ...${labelStyle(code)}>${labelCode}</div>
+        <div ...${labelStyle(!!code)}>${labelCode}</div>
         <textarea class="deploy-code"
           value=${code} rows=13 placeholder="Rholang code"
           oninput=${valEv('code')}>

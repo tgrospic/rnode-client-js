@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-ignore
 import blake from 'blakejs'
 import { ec } from 'elliptic'
 import jspb from 'google-protobuf'
@@ -7,33 +7,37 @@ import jspb from 'google-protobuf'
  * These deploy types are based on protobuf specification which must be
  * used to create the hash and signature of deploy data.
  * Deploy object sent to Web API is slightly different, see [rnode-web.js](rnode-web.js).
- *
- * @typedef {Object} DeployData - Deploy data (required for signing)
- * @property {string} term
- * @property {number} timestamp
- * @property {number} phloPrice
- * @property {number} phloLimit
- * @property {number} validAfterBlockNumber
- *
- * @typedef {Object} DeploySignedProto - Signed DeployData object (protobuf specification)
- * @property {string} term
- * @property {number} timestamp
- * @property {number} phloPrice
- * @property {number} phloLimit
- * @property {number} validAfterBlockNumber
- * @property {string} sigAlgorithm
- * @property {Uint8Array} deployer
- * @property {Uint8Array} sig
  */
 
 /**
- * Sign deploy data.
- *
- * @param {ec.KeyPair | string} privateKey
- * @param {DeployData} deployObj
- * @returns {DeploySignedProto}
+ * Deploy data (required for signing)
  */
-export const signDeploy = (privateKey, deployObj) => {
+export interface DeployData {
+  readonly term: string
+  readonly timestamp: number
+  readonly phloPrice: number
+  readonly phloLimit: number
+  readonly validAfterBlockNumber: number
+}
+
+/**
+ * Signed DeployData object (protobuf specification)
+ */
+export interface DeploySignedProto {
+  readonly term: string
+  readonly timestamp: number
+  readonly phloPrice: number
+  readonly phloLimit: number
+  readonly validAfterBlockNumber: number
+  readonly sigAlgorithm: string
+  readonly deployer: Uint8Array
+  readonly sig: Uint8Array
+}
+
+/**
+ * Sign deploy data.
+ */
+export const signDeploy = function (privateKey: ec.KeyPair | string, deployObj: DeployData): DeploySignedProto {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
   } = deployObj
@@ -64,11 +68,8 @@ export const signDeploy = (privateKey, deployObj) => {
 
 /**
  * Verify deploy object.
- *
- * @param {DeploySignedProto} deployObj
- * @returns {boolean}
  */
-export const verifyDeploy = deployObj => {
+export const verifyDeploy = (deployObj: DeploySignedProto) => {
   const {
     term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
     sigAlgorithm, deployer, sig,
@@ -92,28 +93,21 @@ export const verifyDeploy = deployObj => {
 /**
  * Fix for ec.keyFromPrivate not accepting KeyPair.
  * - detect KeyPair if it have `sign` function
- *
- * @param {ec} crypt
- * @param {ec.KeyPair | string} pk
- * @returns {ec.KeyPair}
  */
-const getSignKey = (crypt, pk) =>
+const getSignKey = (crypt: ec, pk: ec.KeyPair | string) =>
   pk && typeof pk != 'string' && pk.sign && pk.sign.constructor == Function ? pk : crypt.keyFromPrivate(pk)
 
 /**
  * Serialization of DeployDataProto object without generated JS code.
- *
- * @param {DeployData} deployData
- * @returns {Uint8Array}
  */
-export const deployDataProtobufSerialize = deployData => {
+export const deployDataProtobufSerialize = (deployData: DeployData) => {
   const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = deployData
 
   // Create binary stream writer
   const writer = new jspb.BinaryWriter()
   // Write fields (protobuf doesn't serialize default values)
-  const writeString = (order, val) => val != "" && writer.writeString(order, val)
-  const writeInt64  = (order, val) => val != 0  && writer.writeInt64(order, val)
+  const writeString = (order: number, val: string) => val != "" && writer.writeString(order, val)
+  const writeInt64  = (order: number, val: number) => val != 0  && writer.writeInt64(order, val)
 
   // https://github.com/rchain/rchain/blob/f7e46a9/models/src/main/protobuf/CasperMessage.proto#L134-L143
   // message DeployDataProto {

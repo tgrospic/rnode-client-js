@@ -4,54 +4,40 @@
   "description": "RNode sample client for Web",
   "author": "Tomislav Grospic",
   "license": "MIT",
-  "main": "src/index.js",
+  "types": "dist-types",
   "scripts": {
     "start": "parcel src/web/index.html",
     "build": "npm-run-all clean build:only",
     "build:only": "parcel build --public-url ./ src/web/index.html",
     "clean": "rimraf dist .cache",
-    "clean:all": "rimraf dist .cache node_modules",
+    "clean:all": "rimraf dist dist-types .cache node_modules",
     "gh-pages": "npm run build && git checkout gh-pages && rm web.* style.* && cp dist/* . && rm -r dist .cache node_modules && git add ."
   },
   "dependencies": {
-    "@babel/runtime": "^7.11.2",
     "blakejs": "^1.1.0",
     "bs58": "^4.0.1",
     "elliptic": "^6.5.3",
     "ethereumjs-util": "^6.2.1",
+    "fp-ts": "^2.8.3",
     "google-protobuf": "^3.13.0",
     "htm": "^3.0.4",
     "js-sha3": "^0.8.0",
     "mithril": "^2.0.4",
-    "ramda": "^0.26.1"
+    "monocle-ts": "^2.3.3",
+    "ramda": "^0.27.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.4",
-    "@babel/plugin-transform-runtime": "^7.11.0",
+    "@types/bs58": "^4.0.1",
     "@types/elliptic": "^6.4.10",
+    "@types/ethereumjs-util": "^6.1.0",
+    "@types/google-protobuf": "^3.7.3",
+    "@types/hyperscript": "0.0.4",
+    "@types/mithril": "^2.0.4",
+    "@types/ramda": "^0.27.19",
     "less": "^3.12.2",
     "npm-run-all": "^4.1.5",
     "parcel": "^1.12.4",
     "rimraf": "^3.0.0",
-    "typescript": "^3.9.7"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "useBuiltIns": "usage",
-          "corejs": 3,
-          "shippedProposals": true
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/transform-runtime",
-      {}
-    ]
-  },
-  "engines": {
-    "node": ">=8.0.0"
+    "typescript": "^4.0.3"
   }
 }

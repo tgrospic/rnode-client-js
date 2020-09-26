@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "dist-types",
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "module": "CommonJS",
+    "strictPropertyInitialization": true,
+    "moduleResolution": "Node",
+    "target": "es5",
+    "allowJs": false,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+  },
+  "include": [
+    "src/**/*"
+  ],
+}

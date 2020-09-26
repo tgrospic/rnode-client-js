@@ -1,8 +1,18 @@
-// @ts-check
 import { keccak256 } from 'js-sha3'
+// @ts-ignore
 import blake from 'blakejs'
 import { ec } from 'elliptic'
 import { decodeBase16, encodeBase58, encodeBase16, decodeBase58safe } from './lib'
+
+/**
+ * Represents different formats of REV address
+ */
+export interface RevAddress {
+  revAddr: string
+  ethAddr?: string
+  pubKey?: string
+  privKey?: string
+}
 
 const secp256k1 = new ec('secp256k1')
 
@@ -13,20 +23,9 @@ const secp256k1 = new ec('secp256k1')
 const prefix = { coinId : "000000", version: "00" }
 
 /**
- * @typedef {Object} RevAccount - Represents different formats of REV address
- * @property {string=} privKey
- * @property {string=} pubKey
- * @property {string=} ethAddr
- * @property {string} revAddr
- */
-
-/**
  * Get REV address from ETH address.
- *
- * @param {string} ethAddrRaw
- * @returns {string}
  */
-export const getAddrFromEth = ethAddrRaw => {
+export const getAddrFromEth = (ethAddrRaw: string) => {
   const ethAddr = ethAddrRaw.replace(/^0x/, '')
   if (!ethAddr || ethAddr.length !== 40) return
 
@@ -45,10 +44,8 @@ export const getAddrFromEth = ethAddrRaw => {
 
 /**
  * Get REV address (with ETH address) from public key.
- *
- * @param {string} publicKeyRaw
  */
-export const getAddrFromPublicKey = publicKeyRaw => {
+export const getAddrFromPublicKey = (publicKeyRaw: string) => {
   const publicKey = publicKeyRaw.replace(/^0x/, '')
   if (!publicKey || publicKey.length !== 130) return
 
@@ -60,7 +57,7 @@ export const getAddrFromPublicKey = publicKeyRaw => {
   const pkHash40 = pkHash.slice(-40)
 
   // Return both REV and ETH address
-  return {
+  return <RevAddress>{
     revAddr: getAddrFromEth(pkHash40),
     ethAddr: pkHash40,
   }
@@ -68,10 +65,8 @@ export const getAddrFromPublicKey = publicKeyRaw => {
 
 /**
  * Get REV address (with ETH address and public key) from private key.
- *
- * @param {string} privateKeyRaw
  */
-export const getAddrFromPrivateKey = privateKeyRaw => {
+export const getAddrFromPrivateKey = (privateKeyRaw: string) => {
   const privateKey = privateKeyRaw.replace(/^0x/, '')
   if (!privateKey || privateKey.length !== 64) return
 
@@ -81,14 +76,13 @@ export const getAddrFromPrivateKey = privateKeyRaw => {
   const addr   = getAddrFromPublicKey(pubKey)
 
   // Return public key, REV and ETH address
-  return { pubKey, ...addr }
+  return <RevAddress>{ pubKey, ...addr }
 }
 
 /**
  * Verify REV address
- * @param {string} revAddr
  */
-export const verifyRevAddr = revAddr => {
+export const verifyRevAddr = (revAddr: string) => {
   const revBytes = decodeBase58safe(revAddr)
   if (!revBytes) return
 
@@ -105,8 +99,6 @@ export const verifyRevAddr = revAddr => {
 
 /**
  * Generates new private and public key, ETH and REV address.
- *
- * @returns {RevAccount}
  */
 export const newRevAccount = () => {
   // Generate new key and REV address from it
@@ -115,17 +107,14 @@ export const newRevAccount = () => {
   const addr    = getAddrFromPrivateKey(privKey)
 
   // Return public key, REV and ETH address
-  return { privKey, ...addr }
+  return <RevAddress>{ privKey, ...addr }
 }
 
 /**
  * Creates REV address from different formats
  * (private key -> public key -> ETH address -> REV address)
- *
- * @param {string} text
- * @returns {RevAccount=}
  */
-export const createRevAccount = text => {
+export const createRevAccount = (text: string) => {
   const val = text.replace(/^0x/, '').trim()
 
   // Account from private key, public key, ETH or REV address
@@ -135,12 +124,12 @@ export const createRevAccount = text => {
   const isRev    = verifyRevAddr(val)
 
   if (isRev) {
-    return {revAddr: text}
+    return <RevAddress>{revAddr: text}
   } else if (!!fromPriv) {
     return {privKey: val, ...fromPriv}
   } else if (!!fromPub) {
     return {pubKey: val, ...fromPub}
   } else if (!!fromEth) {
     return {privKey: '', pubKey: '', ethAddr: val, revAddr: fromEth}
-  }
+  } else return void 666
 }
