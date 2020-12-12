@@ -1,8 +1,8 @@
 import * as R from 'ramda'
 import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../../rchain-networks'
-import { ethDetected } from '../../eth/eth-wrapper'
+import { ethDetected } from '@tgrospic/rnode-http-js'
+import { newRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
 import { makeRenderer, html, handleHashHref, Cell } from './common'
-import { newRevAccount, RevAccount } from '../../rev-address'
 
 // Controls
 import { selectorCtrl, SelectorSt } from './selector-ctrl'

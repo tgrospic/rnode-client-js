@@ -1,7 +1,7 @@
 import * as R from 'ramda'
+import { ethDetected } from '@tgrospic/rnode-http-js'
+import { RevAccount } from '@tgrospic/rnode-http-js'
 import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
-import { ethDetected } from '../../eth/eth-wrapper'
-import { RevAccount } from '../../rev-address'
 
 export interface TransferSt {
   readonly account: RevAccount

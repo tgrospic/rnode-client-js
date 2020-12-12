@@ -1,7 +1,7 @@
 // Web example with REV transfer and balance check
-import { pageLog } from './controls/common'
-import { makeRNodeWeb } from '../rnode-web'
+import { makeRNodeWeb } from '@tgrospic/rnode-http-js'
 import { makeRNodeActions } from './rnode-actions'
+import { pageLog } from './controls/common'
 import { startApp } from './controls/main-ctrl'
 
 // DOM global functions / dependencies

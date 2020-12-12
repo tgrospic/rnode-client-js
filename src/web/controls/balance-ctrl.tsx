@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { RevAccount } from '../../rev-address'
+import { RevAccount } from '@tgrospic/rnode-http-js'
 import { h, labelStyle, showRevDecimal, showNetworkError, Cell } from './common'
 
 export interface BalanceSt {

@@ -6,18 +6,22 @@
   "license": "MIT",
   "types": "dist-types",
   "scripts": {
-    "start": "parcel src/web/index.html",
-    "build": "npm-run-all clean tsc build:only",
-    "build:only": "parcel build --public-url ./ src/web/index.html",
+    "start": "run-p start:parcel start:ts",
+    "start:parcel": "parcel src/index.html",
+    "start:ts": "npm run build:ts -- -w",
+    "build": "npm-run-all clean build:parcel build:ts",
+    "build:parcel": "parcel build --public-url ./ src/index.html",
+    "build:ts": "tsc",
     "clean": "rimraf dist dist-types .cache",
     "clean:all": "rimraf dist dist-types .cache node_modules",
-    "gh-pages": "npm run build && git checkout gh-pages && rm web.* style.* && cp dist/* . && rm -r dist .cache node_modules && git add ."
+    "gh-pages": "npm run build && git checkout gh-pages && rm web.* style.* && cp dist/* . && rm -r dist dist-types .cache node_modules && git add ."
   },
   "dependencies": {
+    "@tgrospic/rnode-http-js": "^0.1.1",
     "blakejs": "^1.1.0",
     "bs58": "^4.0.1",
     "elliptic": "^6.5.3",
-    "ethereumjs-util": "^6.2.1",
+    "ethereumjs-util": "^7.0.7",
     "fp-ts": "^2.8.3",
     "google-protobuf": "^3.13.0",
     "htm": "^3.0.4",

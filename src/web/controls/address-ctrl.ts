@@ -1,7 +1,7 @@
 import * as R from 'ramda'
-import { newRevAccount, createRevAccount, RevAccount } from '../../rev-address'
+import { newRevAccount, createRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
+import { ethereumAddress, ethDetected } from '@tgrospic/rnode-http-js'
 import { labelStyle, html, Cell } from './common'
-import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
 
 export interface AddressSt extends RevAccount {
   text: string
