@@ -1,6 +1,6 @@
 import * as R from 'ramda'
 import { NodeUrls } from '../../rchain-networks'
-import { RevAccount } from './address-ctrl'
+import { RevAccount } from '../../rev-address'
 import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {

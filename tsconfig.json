@@ -8,13 +8,21 @@
     "strict": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "module": "CommonJS",
+    "module": "ES6",
     "strictPropertyInitialization": true,
     "moduleResolution": "Node",
     "target": "es5",
     "allowJs": false,
     "esModuleInterop": true,
     "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "h.Fragment",
+    "lib": [
+      "dom",
+      "dom.iterable",
+    ],
   },
   "include": [
     "src/**/*"

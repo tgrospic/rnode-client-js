@@ -1,16 +1,25 @@
 import * as R from 'ramda'
-import m, { Vnode } from 'mithril'
-import htm from 'htm'
 
-import * as O from 'fp-ts/lib/Option'
+import { VNode, render } from 'preact'
+export { h } from 'preact'
+import { html as html_ } from 'htm/preact'
+export const html = html_
+
+import * as Opt from 'fp-ts/lib/Option'
 import { Lens, Optional } from 'monocle-ts'
-// import * as L from 'monocle-ts/lib/Lens'
 
 export type ConsoleLog = {log: typeof console.log}
 export type ConsoleWarn = {warn: typeof console.warn}
 
-// Html syntax
-export const html = htm.bind(m)
+export type CtrlView<S, E> = (st: Cell<S>, actions: E) => VNode<any>
+
+// Wraps Virtual DOM renderer to render state
+export const makeRenderer = <S, Eff>(element: Element, view: CtrlView<S, Eff>) => (state: Partial<S>, actions: Eff) => {
+  const stateCell = mkCell<S>()
+  const renderCtrl = () => render(view(stateCell, actions), element)
+  stateCell.setListener(renderCtrl)
+  stateCell.set(state)
+}
 
 // Common styles
 
@@ -38,7 +47,7 @@ export const showRevDecimal = (amount: string) => {
 }
 
 export const labelRev = (amount: string) =>
-  amount && m('span.rev', amount, m('b', ' REV'))
+  amount && html`<span>${amount} <b>REV</b></span>`
 
 export const showNetworkError = (errMessage: string) =>
   errMessage == 'Failed to fetch'
@@ -68,7 +77,7 @@ export const mkCell = <State>() => {
     return <Cell<State1>>{
       view: (def?: Partial<State1>) => {
         const res = lens.getOption(_stRef)
-        return O.option.reduce(res, def, (_, a) => R.isNil(a) ? def : a)
+        return Opt.option.reduce(res, def, (_, a) => R.isNil(a) ? def : a)
       },
       set: (v: State1) => {
         _stRef = lens.set(v)(_stRef)
@@ -104,20 +113,6 @@ export const mkCell = <State>() => {
     // Set event (on-change) listener
     setListener: f => { _listener = f },
   } as CellWithListener<State>
-}
-
-// export type CtrlView = <S, E>(st: Cell<S>, actions: E) => Vnode<unknown, any> | m.Vnode<unknown, any>[]
-
-export type CtrlView<S, E> = (st: Cell<S>, actions: E) => Vnode<unknown, any> | m.Vnode<unknown, any>[]
-
-// Wraps Virtual DOM renderer to render state
-export const makeRenderer = <S, Eff>(element: Element, view: CtrlView<S, Eff>) => (state: Partial<S>, actions: Eff) => {
-  const stateCell = mkCell<S>()
-  const render = () => {
-    m.render(element, view(stateCell, actions))
-  }
-  stateCell.setListener(render)
-  stateCell.set(state)
 }
 
 export type PageLogArgs = {document: Document} & ConsoleLog

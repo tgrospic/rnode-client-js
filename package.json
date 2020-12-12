@@ -7,9 +7,9 @@
   "types": "dist-types",
   "scripts": {
     "start": "parcel src/web/index.html",
-    "build": "npm-run-all clean build:only",
+    "build": "npm-run-all clean tsc build:only",
     "build:only": "parcel build --public-url ./ src/web/index.html",
-    "clean": "rimraf dist .cache",
+    "clean": "rimraf dist dist-types .cache",
     "clean:all": "rimraf dist dist-types .cache node_modules",
     "gh-pages": "npm run build && git checkout gh-pages && rm web.* style.* && cp dist/* . && rm -r dist .cache node_modules && git add ."
   },
@@ -22,8 +22,8 @@
     "google-protobuf": "^3.13.0",
     "htm": "^3.0.4",
     "js-sha3": "^0.8.0",
-    "mithril": "^2.0.4",
     "monocle-ts": "^2.3.3",
+    "preact": "^10.5.3",
     "ramda": "^0.27.1"
   },
   "devDependencies": {
@@ -32,7 +32,6 @@
     "@types/ethereumjs-util": "^6.1.0",
     "@types/google-protobuf": "^3.7.3",
     "@types/hyperscript": "0.0.4",
-    "@types/mithril": "^2.0.4",
     "@types/ramda": "^0.27.19",
     "less": "^3.12.2",
     "npm-run-all": "^4.1.5",

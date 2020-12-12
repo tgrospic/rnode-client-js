@@ -1,6 +1,6 @@
 import * as R from 'ramda'
-import { RevAccount } from './address-ctrl'
-import { labelStyle, showRevDecimal, showNetworkError, html, Cell } from './common'
+import { RevAccount } from '../../rev-address'
+import { h, labelStyle, showRevDecimal, showNetworkError, Cell } from './common'
 
 export interface BalanceSt {
   readonly dataBal: string
@@ -46,26 +46,24 @@ export const balanceCtrl = (st: Cell<BalanceSt>, {wallet = [], onCheckBalance}: 
   // Control state
   const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
 
-  return html`
-    <div class="ctrl balance-ctrl">
-      <h2>Check REV balance</h2>
-      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to check balance.</b>` : html`
+  return <div class="ctrl balance-ctrl">
+    <h2>Check REV balance</h2>
+    {isWalletEmpty ? <b>REV wallet is empty, add accounts to check balance.</b> :
+      <>
         <div>Sends exploratory deploy to selected read-only RNode.</div>
-
-        <!-- REV address dropdown -->
-        <div ...${labelStyle(!!account)}>${labelAddr}</div>
-        <select onchange=${accountChangeEv}>
-          ${wallet.map(({name, revAddr}) =>
-            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
+        {/* REV address dropdown */}
+        <div {...labelStyle(!!account)}>{labelAddr}</div>
+        <select onChange={accountChangeEv}>
+          {wallet.map(({name, revAddr}) =>
+            <option value={revAddr}>{name}: {revAddr}</option>
           )}
         </select>
-
-        <!-- Action button / results -->
+        {/* Action button / results */}
         <div></div>
-        <button onclick=${checkBalanceEv(account)} disabled=${!account}>Check balance</button>
-        <b>${dataBal}</b>
-        <b class=warning>${showNetworkError(dataError)}</b>
-      `}
-    </div>
-  `
+        <button onClick={checkBalanceEv(account)} disabled={!account}>Check balance</button>
+        <b>{dataBal}</b>
+        <b class="warning">{showNetworkError(dataError)}</b>
+      </>
+    }
+  </div>
 }

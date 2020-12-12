@@ -14,6 +14,10 @@ export interface RevAddress {
   privKey?: string
 }
 
+export interface RevAccount extends RevAddress {
+  name: string
+}
+
 const secp256k1 = new ec('secp256k1')
 
 // Algorithm to generate ETH and REV address is taken from RNode source

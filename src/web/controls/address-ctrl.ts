@@ -1,11 +1,7 @@
 import * as R from 'ramda'
-import { newRevAccount, createRevAccount, RevAddress } from '../../rev-address'
+import { newRevAccount, createRevAccount, RevAccount } from '../../rev-address'
 import { labelStyle, html, Cell } from './common'
 import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
-
-export interface RevAccount extends RevAddress {
-  name: string
-}
 
 export interface AddressSt extends RevAccount {
   text: string

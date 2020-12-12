@@ -2,11 +2,11 @@ import * as R from 'ramda'
 import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../../rchain-networks'
 import { ethDetected } from '../../eth/eth-wrapper'
 import { makeRenderer, html, handleHashHref, Cell } from './common'
-import { newRevAccount } from '../../rev-address'
+import { newRevAccount, RevAccount } from '../../rev-address'
 
 // Controls
 import { selectorCtrl, SelectorSt } from './selector-ctrl'
-import { addressCtrl, AddressSt, RevAccount } from './address-ctrl'
+import { addressCtrl, AddressSt } from './address-ctrl'
 import { balanceCtrl, BalanceSt } from './balance-ctrl'
 import { transferCtrl, TransferData, TransferSt } from './transfer-ctrl'
 import { customDeployCtrl, CustomDeploySt, SendDeployArgs } from './custom-deploy-ctrl'

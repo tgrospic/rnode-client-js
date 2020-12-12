@@ -5,7 +5,7 @@ import { encodeBase16, decodeBase16 } from './lib'
 import { verifyDeployEth, recoverPublicKeyEth } from './eth/eth-sign'
 import { ethDetected, ethereumAddress, ethereumSign } from './eth/eth-wrapper'
 import { signDeploy, verifyDeploy, deployDataProtobufSerialize, DeployData, DeploySignedProto } from './rnode-sign'
-import { RevAccount } from './web/controls/address-ctrl'
+import { RevAccount } from './rev-address'
 
 export type RNodeHttp = (httpUrl: string, apiMethod: string, data?: any) => Promise<any>
 

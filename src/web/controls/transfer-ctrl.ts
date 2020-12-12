@@ -1,8 +1,7 @@
 import * as R from 'ramda'
 import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
 import { ethDetected } from '../../eth/eth-wrapper'
-import { Setter } from 'monocle-ts'
-import { RevAccount } from './address-ctrl'
+import { RevAccount } from '../../rev-address'
 
 export interface TransferSt {
   readonly account: RevAccount
