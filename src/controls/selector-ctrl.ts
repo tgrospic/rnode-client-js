@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { getNodeUrls, NetworkName, NodeUrls, RChainNetwork, RNodeInfo } from '../../rchain-networks'
+import { getNodeUrls, NetworkName, NodeUrls, RChainNetwork, RNodeInfo } from '../rchain-networks'
 import { html, Cell } from './common'
 
 export interface SelectorSt {

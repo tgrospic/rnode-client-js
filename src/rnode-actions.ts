@@ -1,9 +1,9 @@
 import * as R from 'ramda'
-import { NodeUrls } from '../rchain-networks'
-import { RevAccount } from '../rev-address'
-import { checkBalance_rho } from '../rho/check-balance'
-import { transferFunds_rho } from '../rho/transfer-funds'
-import { GetDeployDataEff, ProposeEff, RawRNodeHttpEff, RNodeWebAPI, SendDeployEff } from '../rnode-web'
+import { GetDeployDataEff, ProposeEff, RawRNodeHttpEff, RNodeWebAPI, SendDeployEff } from '@tgrospic/rnode-http-js'
+import { RevAccount } from '@tgrospic/rnode-http-js'
+import { NodeUrls } from './rchain-networks'
+import { checkBalance_rho } from './rho/check-balance'
+import { transferFunds_rho } from './rho/transfer-funds'
 import { ConsoleLog, ConsoleWarn } from './controls/common'
 
 export type ConsoleEff = ConsoleLog & ConsoleWarn

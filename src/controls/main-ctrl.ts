@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../../rchain-networks'
+import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../rchain-networks'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { newRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
 import { makeRenderer, html, handleHashHref, Cell } from './common'
