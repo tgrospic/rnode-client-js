@@ -1,5 +1,3 @@
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
 # RNode Web API client examples
 
 See also recording of code walk-thru sessions:
@@ -16,25 +14,26 @@ For gRPC connection from nodejs please check [**@tgrospic/rnode-grpc-js**](https
 
 ```sh
 # Run nodes and web page example
-npm install && docker-compose up -d && npm run start:web
+npm install && docker-compose up -d && npm start
 
-# Logs from all nodes
+# Logs from both nodes
 docker-compose logs -f
 ```
 </details>
 
-Web example is published from `gh-pages` branch on this url [https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js).
+Web example is published from `gh-pages` branch to this url [https://tgrospic.github.io/rnode-client-js](https://tgrospic.github.io/rnode-client-js).
 
-## Example of RNode connection to Metamask (with hardware wallet)
+**Changes on the web page are only saved in memory so it will be lost after refreshing the page.**
+
+## Wallet example with connection to RNode and Metamask (with hardware wallet)
 
 RNode has support for Ethereum type of signatures so Metamask can be used for signing deploys e.g. making transfers of REVs. In Web example, button to add selected Metamask account should be visible next to REV import textbox.
 
-Helper functions are in [eth-wrapper.js](src/eth/eth-wrapper.js) which contains the code for communication with Metamask, getting selected ETH address and sending deploys for signing.
-In [eth-sign.js](src/eth/eth-sign.js) are functions to verify deploy signature and to extract public key.  
-This is all that is needed for communication with Metamask and also for connected hardware wallets (Ledger, Trezor). How to use these functions and send deploys to RNode is in [rnode-web.js](src/rnode-web.js).
+Helper functions are in [@tgrospic/rnode-http-js] which contains the code for communication with Metamask, getting selected ETH address and sending deploys for signing.
 
-Changes on the web page are only saved in memory so it will be lost after refreshing the page.  
 RChain networks available for selection are in [rchain-networks.js](src/rchain-networks.js) file.
+
+[@tgrospic/rnode-http-js]: https://github.com/tgrospic/rnode-http-js
 
 ## Install
 
@@ -44,7 +43,7 @@ Install project dependencies (in `./node_modules` folder).
 npm install
 ```
 
-## Run ([`src/web`](src/web))
+## Run
 
 This will start local Nodejs dev server in watch mode [http://localhost:1234](http://localhost:1234).
 
