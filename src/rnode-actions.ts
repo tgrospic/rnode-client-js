@@ -1,6 +1,6 @@
 import * as R from 'ramda'
 import { GetDeployDataEff, ProposeEff, RawRNodeHttpEff, RNodeWebAPI, SendDeployEff } from '@tgrospic/rnode-http-js'
-import { RevAccount } from '@tgrospic/rnode-http-js'
+import { RevAccount, rhoExprToJson } from '@tgrospic/rnode-http-js'
 import { NodeUrls } from './rchain-networks'
 import { checkBalance_rho } from './rho/check-balance'
 import { transferFunds_rho } from './rho/transfer-funds'
@@ -76,7 +76,7 @@ const appTransfer = (effects: AppTransferEff) => async function ({node, fromAcco
   // Try to get result from next proposed block
   const {data, cost} = await getDataForDeploy(node, signature, updateProgress)
   // Extract data from response object
-  const args               = data ? rhoExprToJS(data.expr) : void 0
+  const args               = data ? rhoExprToJson(data.expr) : void 0
   const costTxt            = R.isNil(cost) ? 'failed to retrive' : cost
   const [success, message] = args || [false, 'deploy found in the block but failed to get confirmation data']
 
@@ -118,7 +118,7 @@ const appSendDeploy = (effects: AppSendDeployEff) => async function ({node, code
   // Try to get result from next proposed block
   const {data, cost} = await getDataForDeploy(node, signature, updateProgress)
   // Extract data from response object
-  const args = data ? rhoExprToJS(data.expr) : void 0
+  const args = data ? rhoExprToJson(data.expr) : void 0
 
   log('DEPLOY RETURN DATA', {args, cost, rawData: data})
 
@@ -140,47 +140,3 @@ const appPropose = ({propose, log}: AppProposeEff) => async function ({httpAdmin
 
   return resp
 }
-
-// Converts RhoExpr response from RNode WebAPI
-// https://github.com/rchain/rchain/blob/b7331ae05/node/src/main/scala/coop/rchain/node/api/WebApi.scala#L128-L147
-// - return!("One argument")   // monadic
-// - return!((true, A, B))     // monadic as tuple
-// - return!(true, A, B)       // polyadic
-// new return(`rho:rchain:deployId`) in {
-//   return!((true, "Hello from blockchain!"))
-// }
-// TODO: make it stack safe
-const rhoExprToJS = (input: any) => {
-  const loop = (rhoExpr: any) => convert(rhoExpr)(converters)
-  const converters = R.toPairs(converterMapping(loop))
-  return loop(input)
-}
-
-const convert = (rhoExpr: any) => R.pipe(
-  R.map(matchTypeConverter(rhoExpr)),
-  R.find(x => !R.isNil(x)),
-  // Return the whole object if unknown type
-  x => R.isNil(x) ? [R.identity, rhoExpr] : x,
-  ([f, d]) => f(d)
-)
-
-const matchTypeConverter = (rhoExpr: any) => ([type, f]: [string, any]) => {
-  const d = R.path([type, 'data'], rhoExpr)
-  return R.isNil(d) ? void 666 : [f, d]
-}
-
-const converterMapping = (loop: any) => ({
-  "ExprInt": R.identity,
-  "ExprBool": R.identity,
-  "ExprString": R.identity,
-  "ExprBytes": R.identity,
-  "ExprUri": R.identity,
-  "UnforgDeploy": R.identity,
-  "UnforgDeployer": R.identity,
-  "UnforgPrivate": R.identity,
-  "ExprUnforg": loop,
-  "ExprPar": R.map(loop),
-  "ExprTuple": R.map(loop),
-  "ExprList": R.map(loop),
-  "ExprMap": R.mapObjIndexed(loop),
-})
