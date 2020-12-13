@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { RevAccount } from '@tgrospic/rnode-http-js'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
+import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell } from './common'
 
 export interface TransferSt {
   readonly account: RevAccount
@@ -81,41 +81,39 @@ export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, warn}: T
   const canTransfer      = account && toAccount && amount && (account || ethDetected)
   const amountPreview    = showRevDecimal(amount)
 
-  return html`
-    <div class="ctrl transfer-ctrl">
-      <h2>Transfer REV tokens</h2>
-      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to make transfers.</b>` : html`
-        <div>Sends transfer deploy to selected validator RNode.</div>
+  return <div class="ctrl transfer-ctrl">
+    <h2>Transfer REV tokens</h2>
+    {isWalletEmpty ? <b>REV wallet is empty, add accounts to make transfers.</b> : <>
+      <div>Sends transfer deploy to selected validator RNode.</div>
 
-        <!-- Source REV address dropdown -->
-        <div ...${labelStyle(!!account)}>${labelSource}</div>
-        <select onchange=${onSelectFrom}>
-          ${wallet.map(({name, revAddr}) =>
-            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
-          )}
-        </select>
+      {/* Source REV address dropdown */}
+      <div {...labelStyle(!!account)}>{labelSource}</div>
+      <select onChange={onSelectFrom}>
+        {wallet.map(({name, revAddr}) =>
+          <option value={revAddr}>{name}: {revAddr}</option>
+        )}
+      </select>
 
-        <!-- Target REV address dropdown -->
-        <div ...${labelStyle(!!toAccount)}>${labelDestination}</div>
-        <select onchange=${onSelectTo}>
-          ${wallet.map(({name, revAddr}) =>
-            html`<option value=${revAddr}>${name}: ${revAddr}</option>`
-          )}
-        </select>
+      {/* Target REV address dropdown */}
+      <div {...labelStyle(!!toAccount)}>{labelDestination}</div>
+      <select onChange={onSelectTo}>
+        {wallet.map(({name, revAddr}) =>
+          <option value={revAddr}>{name}: {revAddr}</option>
+        )}
+      </select>
 
-        <!-- REV amount -->
-        <div></div>
-        <div ...${labelStyle(!!amount)}>${labelAmount}</div>
-        <input type=number class="rev-amount"
-          value=${amount} placeholder=${labelAmount} oninput=${valEv('amount')} />
-        ${labelRev(amountPreview)}
+      {/* REV amount */}
+      <div></div>
+      <div {...labelStyle(!!amount)}>{labelAmount}</div>
+      <input type="number" class="rev-amount"
+        value={amount} placeholder={labelAmount} onInput={valEv('amount')} />
+      {labelRev(amountPreview)}
 
-        <!-- Action buttons / results -->
-        <div></div>
-        <button onclick=${send(account, toAccount, amount)} disabled=${!canTransfer}>Transfer</button>
-        ${status && html`<b>${status}</b>`}
-        ${error && html`<b class=warning>${showNetworkError(error)}</b>`}
-      `}
-    </div>
-  `
+      {/* Action buttons / results */}
+      <div></div>
+      <button onClick={send(account, toAccount, amount)} disabled={!canTransfer}>Transfer</button>
+      {status && <b>{status}</b>}
+      {error && <b class="warning">{showNetworkError(error)}</b>}
+    </>}
+  </div>
 }

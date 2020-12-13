@@ -2,7 +2,7 @@ import * as R from 'ramda'
 import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../rchain-networks'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { newRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
-import { makeRenderer, html, handleHashHref, Cell } from './common'
+import { h, makeRenderer, handleHashHref, Cell } from './common'
 
 // Controls
 import { selectorCtrl, SelectorSt } from './selector-ctrl'
@@ -75,38 +75,36 @@ const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
   const setDeployStatus   = customDeploySt.o('status').set
 
   // App render
-  return html`
-    <div class=${sel.valNode.name} onclick=${handleHashHref}>
-      <div class="ctrl">
-        Demo client for RNode <a href=${repoUrl} target=_blank>${repoUrl}</a>
-        <h1>RNode client testing page</h1>
-      </div>
-      <!-- Selector control -->
-      <hr/>
-      ${selectorCtrl(selSt, {nets})}
-
-      <!-- REV wallet control -->
-      ${addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount})}
-
-      <!-- Check balance control -->
-      ${balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)})}
-
-      <!-- Transfer REV control -->
-      <hr/>
-      ${transferCtrl(transferSt, {
-        wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
-      })}
-
-      <!-- Custom deploy control -->
-      <hr/>
-      ${customDeployCtrl(customDeploySt, {
-        wallet, node: valNodeUrls,
-        onSendDeploy: onSendDeploy(valNodeUrls, setDeployStatus),
-        onPropose: onPropose(valNodeUrls),
-        warn,
-      })}
+  return <div class={sel.valNode.name} onClick={handleHashHref}>
+    <div class="ctrl">
+      Demo client for RNode <a href={repoUrl} target="_blank">{repoUrl}</a>
+      <h1>RNode client testing page</h1>
     </div>
-  `
+    {/* Selector control */}
+    <hr/>
+    {selectorCtrl(selSt, {nets})}
+
+    {/* REV wallet control */}
+    {addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount})}
+
+    {/* Check balance control */}
+    {balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)})}
+
+    {/* Transfer REV control */}
+    <hr/>
+    {transferCtrl(transferSt, {
+      wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
+    })}
+
+    {/* Custom deploy control */}
+    <hr/>
+    {customDeployCtrl(customDeploySt, {
+      wallet, node: valNodeUrls,
+      onSendDeploy: onSendDeploy(valNodeUrls, setDeployStatus),
+      onPropose: onPropose(valNodeUrls),
+      warn,
+    })}
+  </div>
 }
 
 const nets = [localNet, testNet, mainNet]
@@ -129,7 +127,7 @@ const initialState: Partial<AppState> = {
   // Selected validator
   sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
   // Initial wallet
-  wallet: defaultWallet,
+  wallet: [], //defaultWallet,
 
   // transfer: {
   //   amount: ''

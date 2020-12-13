@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { RevAccount } from '@tgrospic/rnode-http-js'
 import { NodeUrls } from '../rchain-networks'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError, html, Cell } from './common'
+import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {
   return!((42, true, "Hello from blockchain!"))
@@ -118,53 +118,51 @@ export const customDeployCtrl = (st: Cell<CustomDeploySt>, {wallet = [], node, o
   const canDeploy        = (code || '').trim() !== '' && !!selRevAddr
   const phloLimitPreview = showRevDecimal(phloLimit)
 
-  return html`
-    <div class="ctrl custom-deploy-ctrl">
-      <h2>Custom deploy</h2>
-      ${isWalletEmpty ? html`<b>REV wallet is empty, add accounts to make deploys.</b>` : html`
-        <span>Send deploy to selected validator RNode.</span>
+  return <div class="ctrl custom-deploy-ctrl">
+    <h2>Custom deploy</h2>
+    {isWalletEmpty ? <b>REV wallet is empty, add accounts to make deploys.</b> : <>
+      <span>Send deploy to selected validator RNode.</span>
 
-        <!-- Rholang examples -->
-        <div>
-          <span>Sample code: </span>
-          ${samples.map(([title, code]) =>
-            html`<a href=# onclick=${updateCodeEv(code)}>${title}</a>`
-          )}
-        </div>
+      {/* Rholang examples */}
+      <div>
+        <span>Sample code: </span>
+        {samples.map(([title, code]) =>
+          <a href="#" onClick={updateCodeEv(code)}>{title}</a>
+        )}
+      </div>
 
-        <!-- REV address dropdown -->
-        <div ...${labelStyle(!!selRevAddr)}>${labelAddr}</div>
-        <select onchange=${accountChangeEv}>
-          ${wallet.map(({name, revAddr}) =>
-            html`<option>${name}: ${revAddr}</option>`
-          )}
-        </select>
+      {/* REV address dropdown */}
+      <div {...labelStyle(!!selRevAddr)}>{labelAddr}</div>
+      <select onChange={accountChangeEv}>
+        {wallet.map(({name, revAddr}) =>
+          <option>{name}: {revAddr}</option>
+        )}
+      </select>
 
-        <!-- Rholang code (editor) -->
-        <div ...${labelStyle(!!code)}>${labelCode}</div>
-        <textarea class="deploy-code"
-          value=${code} rows=13 placeholder="Rholang code"
-          oninput=${valEv('code')}>
-        </textarea>
+      {/* Rholang code (editor) */}
+      <div {...labelStyle(!!code)}>{labelCode}</div>
+      <textarea class="deploy-code"
+        value={code} rows={13} placeholder="Rholang code"
+        onInput={valEv('code')}>
+      </textarea>
 
-        <!-- Phlo limit -->
-        <div ...${labelStyle(true)}>${labelPhloLimit}</div>
-        <input type=number class="phlo-limit"
-          value=${phloLimit} placeholder=${labelPhloLimit} oninput=${valEv('phloLimit')} />
-        ${labelRev(phloLimitPreview)}
+      {/* Phlo limit */}
+      <div {...labelStyle(true)}>{labelPhloLimit}</div>
+      <input type="number" class="phlo-limit"
+        value={phloLimit} placeholder={labelPhloLimit} onInput={valEv('phloLimit')} />
+      {labelRev(phloLimitPreview)}
 
-        <!-- Action buttons / results -->
-        <div></div>
-        <button onclick=${onSendDeployEv(code)} disabled=${!canDeploy}>Deploy Rholang code</button>
-        ${status && html`<b>${status}</b>`}
-        ${dataError && html`<b class=warning>${showNetworkError(dataError)}</b>`}
+      {/* Action buttons / results */}
+      <div></div>
+      <button onClick={onSendDeployEv(code)} disabled={!canDeploy}>Deploy Rholang code</button>
+      {status && <b>{status}</b>}
+      {dataError && <b class="warning">{showNetworkError(dataError)}</b>}
 
-        <!-- Propose -->
-        <div></div>
-        ${showPropose && html`<button onclick=${onProposeEv}>Propose</button>`}
-        ${showPropose && proposeStatus && html`<b>${proposeStatus}</b>`}
-        ${showPropose && proposeError && html`<b class=warning>${showNetworkError(proposeError)}</b>`}
-      `}
-    </div>
-  `
+      {/* Propose */}
+      <div></div>
+      {showPropose && <button onClick={onProposeEv}>Propose</button>}
+      {showPropose && proposeStatus && <b>{proposeStatus}</b>}
+      {showPropose && proposeError && <b class="warning">{showNetworkError(proposeError)}</b>}
+    </>}
+  </div>
 }

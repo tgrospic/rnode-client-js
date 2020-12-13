@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { newRevAccount, createRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
 import { ethereumAddress, ethDetected } from '@tgrospic/rnode-http-js'
-import { labelStyle, html, Cell } from './common'
+import { h, labelStyle, Cell } from './common'
 
 export interface AddressSt extends RevAccount {
   text: string
@@ -59,13 +59,13 @@ export const addressCtrl = (st: Cell<AddressSt>, {wallet, onAddAccount}: Address
   // Control state
   const {text, privKey, pubKey, ethAddr, revAddr, name} = st.view({})
 
-  const description = html`
-    <span class=info>
+  const description =
+    <span class="info">
       Any address used on this page must be first added as an account and assign a name. All accounts are then shown in dropdown menus to select as send or receive address.
       <br/>
       Entered information is not stored anywhere except on the page. After exit or refresh the page, all information is lost.
     </span>
-  `
+
   const labelSource     = 'REV address / ETH address / Public key / Private key'
   const metamaskTitle   = 'Copy ETH address from selected Metamask account'
   const newAccountTitle = 'Generate new private key (public key, ETH, REV)'
@@ -75,60 +75,56 @@ export const addressCtrl = (st: Cell<AddressSt>, {wallet, onAddAccount}: Address
   const addDisabled     = !name || !name.trim()
   const isEdit          = !!revAddr
 
-  return html`
-    <div class="ctrl address-ctrl">
-      <h2>REV wallet (import REV address, ETH address, public/private key, Metamask)</h2>
-      ${description}
+  return <div class="ctrl address-ctrl">
+    <h2>REV wallet (import REV address, ETH address, public/private key, Metamask)</h2>
+    {description}
 
-      <!-- Input textbox -->
-      <div ...${labelStyle(!!text)}>${labelSource}</div>
-      <input type=text autocomplete=nono placeholder=${labelSource} value=${text} oninput=${addrKeyPressEv} />
+    {/* Input textbox */}
+    <div {...labelStyle(!!text)}>{labelSource}</div>
+    <input type="text" autocomplete="nono" placeholder={labelSource} value={text} onInput={addrKeyPressEv} />
 
-      <!-- New accounts -->
-      ${ethDetected && html`
-        <button title=${metamaskTitle} disabled=${isEdit} onclick=${fillMetamaskAccountEv}>Metamask account</button>
-      `}
-      <button title=${newAccountTitle} disabled=${isEdit} onclick=${newRevAddrEv}>New account</button>
+    {/* New accounts */}
+    {ethDetected &&
+      <button title={metamaskTitle} disabled={isEdit} onClick={fillMetamaskAccountEv}>Metamask account</button>
+    }
+    <button title={newAccountTitle} disabled={isEdit} onClick={newRevAddrEv}>New account</button>
 
-      <!-- Edit wallet item -->
-      ${isEdit && html`
-        <div class="address-gen">
-          <table>
-            ${privKey && html`<tr><td>Private key</td><td>${privKey}</td></tr>`}
-            ${pubKey && html`<tr><td>Public key</td><td>${pubKey}</td></tr>`}
-            ${ethAddr && html`<tr><td>ETH</td><td>${ethAddr}</td></tr>`}
-            <tr><td>REV</td><td><b>${revAddr}</b></td></tr>
-          </table>
-          <!-- Action buttons -->
-          <input type=text class="addr-name" placeholder=${namePlaceholder} value=${name} oninput=${nameKeyPressEv} />
-          <button class="add-account" title=${saveTitle} onclick=${addAccount} disabled=${addDisabled}>Save account</button>
-          <button title=${closeTitle} onclick=${clear}>Close</button>
-        </div>
-      `}
-
-      <!-- Wallet display -->
-      ${wallet && !!wallet.length && html`
-        <table class=wallet>
-          <thead>
-            <tr><th>Account</th><th>REV</th><th>ETH</th><th>PUBLIC</th><th>PRIVATE</th></tr>
-          </thead>
-          ${wallet.map(({name, privKey = '', pubKey = '', ethAddr = '', revAddr}) => {
-            const rev  = revAddr.slice(0, 10)
-            const eth  = ethAddr.slice(0, 10)
-            const pub  = pubKey.slice(0, 10)
-            const priv = privKey.slice(0, 5)
-            return html`
-              <tr>
-                <td class=account onclick=${updateEv(revAddr)}>${name}</td>
-                <td>${rev}</td>
-                <td>${eth}</td>
-                <td>${pub}</td>
-                <td>${priv ? html`<span title='Private key saved with this account'>✓</span>` : ''}</td>
-              </tr>
-            `
-          })}
+    {/* Edit wallet item */}
+    {isEdit &&
+      <div class="address-gen">
+        <table>
+          {privKey && <tr><td>Private key</td><td>{privKey}</td></tr>}
+          {pubKey  && <tr><td>Public key</td> <td>{pubKey}</td></tr>}
+          {ethAddr && <tr><td>ETH</td>        <td>{ethAddr}</td></tr>}
+                      <tr><td>REV</td>        <td><b>{revAddr}</b></td></tr>
         </table>
-      `}
-    </div>
-  `
+        {/* Action buttons */}
+        <input type="text" class="addr-name" placeholder={namePlaceholder} value={name} onInput={nameKeyPressEv} />
+        <button class="add-account" title={saveTitle} onClick={addAccount} disabled={addDisabled}>Save account</button>
+        <button title={closeTitle} onClick={clear}>Close</button>
+      </div>
+    }
+
+    {/* Wallet display */}
+    {wallet && !!wallet.length &&
+      <table class="wallet">
+        <thead>
+          <tr><th>Account</th><th>REV</th><th>ETH</th><th>PUBLIC</th><th>PRIVATE</th></tr>
+        </thead>
+        {wallet.map(({name, privKey = '', pubKey = '', ethAddr = '', revAddr}) => {
+          const rev  = revAddr.slice(0, 10)
+          const eth  = ethAddr.slice(0, 10)
+          const pub  = pubKey.slice(0, 10)
+          const priv = privKey.slice(0, 5)
+          return <tr>
+              <td class="account" onClick={updateEv(revAddr)}>{name}</td>
+              <td>{rev}</td>
+              <td>{eth}</td>
+              <td>{pub}</td>
+              <td>{priv ? <span title="Private key saved with this account">✓</span> : ''}</td>
+            </tr>
+        })}
+      </table>
+    }
+  </div>
 }
