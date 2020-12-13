@@ -1,6 +1,6 @@
 // Rholang code to check REVs balance
 // - intended for use with RNode exploratory deploy
-export const checkBalance_rho = addr => `
+export const checkBalance_rho = (addr: string) => `
   new return, rl(\`rho:registry:lookup\`), RevVaultCh, vaultCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     for (@(_, RevVault) <- RevVaultCh) {

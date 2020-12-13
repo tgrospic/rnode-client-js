@@ -1,6 +1,6 @@
 // Rholang code to transfer REVs
 // https://github.com/rchain/rchain/blob/3eca061/rholang/examples/vault_demo/3.transfer_funds.rho
-export const transferFunds_rho = (revAddrFrom, revAddrTo, amount) => `
+export const transferFunds_rho = (revAddrFrom: string, revAddrTo: string, amount: string) => `
   new rl(\`rho:registry:lookup\`), RevVaultCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     for (@(_, RevVault) <- RevVaultCh) {

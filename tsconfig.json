@@ -1,17 +1,30 @@
 {
   "compilerOptions": {
-    "resolveJsonModule": true,
-    "noImplicitAny": true,
-    "alwaysStrict": true,
-    "noImplicitThis": true,
+    "declaration": true,
+    "declarationDir": "dist-types",
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": false
+    "noImplicitAny": true,
+    "module": "ES6",
+    "strictPropertyInitialization": true,
+    "moduleResolution": "Node",
+    "target": "es5",
+    "allowJs": false,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "h.Fragment",
+    "lib": [
+      "dom",
+      "dom.iterable",
+    ],
   },
   "include": [
-    "src/web-ts/**/*",
-    "rnode-grpc-gen/js/rnode-grpc-js.d.ts"
+    "src/**/*"
   ],
-  "exclude": [
-    "node_modules"
-  ]
 }

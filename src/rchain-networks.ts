@@ -1,9 +1,32 @@
-const defaultPorts    = { grpc: 40401, http: 40403, httpAdmin: 40405 }
-const defaultPortsSSL = { grpc: 40401, https: 443, httpAdmin: 40405 }
+import * as R from 'ramda'
+
+export interface RNodeInfo {
+  readonly domain: string
+  readonly grpc?: number
+  readonly http?: number
+  readonly https?: number
+  readonly httpAdmin?: number
+  readonly httpsAdmin?: number
+  // Network info
+  readonly name?: NetworkName
+  readonly title?: string
+}
+
+export interface RChainNetwork {
+  readonly title: string
+  readonly name: NetworkName
+  readonly hosts: RNodeInfo[]
+  readonly readOnlys: RNodeInfo[]
+}
+
+export type NetworkName = 'localnet' | 'testnet' | 'mainnet'
+
+const defaultPorts: Partial<RNodeInfo>    = { grpc: 40401, http: 40403, httpAdmin: 40405 }
+const defaultPortsSSL: Partial<RNodeInfo> = { grpc: 40401, https: 443, httpAdmin: 40405 }
 
 // Local network
 
-export const localNet = {
+export const localNet: RChainNetwork = {
   title: 'Local network',
   name: 'localnet',
   hosts: [
@@ -26,16 +49,14 @@ export const localNet = {
 
 // Test network
 
-const range = n => [...Array(n).keys()]
-
-const getTestNetUrls = n => ({
+const getTestNetUrls = (n: number) => ({
   domain: `node${n}.testnet.rchain-dev.tk`,
   ...defaultPortsSSL,
 })
 
-const testnetHosts = range(5).map(getTestNetUrls)
+const testnetHosts = R.range(0, 5).map(getTestNetUrls)
 
-export const testNet = {
+export const testNet: RChainNetwork = {
   title: 'RChain testing network',
   name: 'testnet',
   hosts: testnetHosts,
@@ -48,14 +69,16 @@ export const testNet = {
 
 // MAIN network
 
-const getMainNetUrls = n => ({
-  domain: `node${n}.root-shard.mainnet.rchain.coop`,
-  ...defaultPortsSSL,
-})
+const getMainNetUrls = function (n: number): RNodeInfo {
+  return {
+    domain: `node${n}.root-shard.mainnet.rchain.coop`,
+    ...defaultPortsSSL,
+  }
+}
 
-const mainnetHosts = range(20).filter(n => n != 2).map(getMainNetUrls)
+const mainnetHosts = R.range(0, 20).filter(n => n != 2).map(getMainNetUrls)
 
-export const mainNet = {
+export const mainNet: RChainNetwork = {
   title: 'RChain MAIN network',
   name: 'mainnet',
   hosts: mainnetHosts,
@@ -68,15 +91,27 @@ export const mainNet = {
   ],
 }
 
-export const getNodeUrls = ({name, domain, grpc, http, https, httpAdmin, httpsAdmin}) => {
+export interface NodeUrls {
+  readonly network: NetworkName
+  readonly grpcUrl: string
+  readonly httpUrl: string
+  readonly httpAdminUrl: string
+  readonly statusUrl: string
+  readonly getBlocksUrl: string
+  // Testnet only
+  readonly logsUrl: string
+  readonly filesUrl: string
+}
+
+export const getNodeUrls = function ({name, domain, grpc, http, https, httpAdmin, httpsAdmin}: RNodeInfo): NodeUrls {
   const scheme       = !!https ? 'https' : !!http ? 'http' : ''
   const schemeAdmin  = !!httpsAdmin ? 'https' : !!httpAdmin ? 'http' : ''
-  const httpUrl      = !!https || !!http ? `${scheme}://${domain}:${https || http}` : void 8
-  const httpAdminUrl = !!httpsAdmin || !!httpAdmin ? `${schemeAdmin}://${domain}:${httpsAdmin || httpAdmin}` : void 8
-  const grpcUrl      = !!grpc ? `${domain}:${grpc}` : void 8
+  const httpUrl      = !!https || !!http ? `${scheme}://${domain}:${https || http}` : ''
+  const httpAdminUrl = !!httpsAdmin || !!httpAdmin ? `${schemeAdmin}://${domain}:${httpsAdmin || httpAdmin}` : ''
+  const grpcUrl      = !!grpc ? `${domain}:${grpc}` : ''
 
   return {
-    network      : name,
+    network      : name as NetworkName,
     grpcUrl,
     httpUrl,
     httpAdminUrl,
