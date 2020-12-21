@@ -53,7 +53,7 @@ const getMainNetUrls = n => ({
   ...defaultPortsSSL,
 })
 
-const mainnetHosts = range(20).filter(n => n != 2).map(getMainNetUrls)
+const mainnetHosts = range(30).map(getMainNetUrls)
 
 export const mainNet = {
   title: 'RChain MAIN network',
