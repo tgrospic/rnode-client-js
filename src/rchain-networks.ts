@@ -76,7 +76,7 @@ const getMainNetUrls = function (n: number): RNodeInfo {
   }
 }
 
-const mainnetHosts = R.range(0, 20).filter(n => n != 2).map(getMainNetUrls)
+const mainnetHosts = R.range(0, 30).map(getMainNetUrls)
 
 export const mainNet: RChainNetwork = {
   title: 'RChain MAIN network',
