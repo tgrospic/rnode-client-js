@@ -143,5 +143,6 @@ const converterMapping = loop => ({
   "ExprPar": R.map(loop),
   "ExprTuple": R.map(loop),
   "ExprList": R.map(loop),
+  "ExprSet": R.map(loop),
   "ExprMap": R.mapObjIndexed(loop),
 })
