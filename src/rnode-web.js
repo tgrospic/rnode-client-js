@@ -63,7 +63,7 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
   const [{ blockNumber }] = await rnodeHttp(node.httpUrl, 'blocks/1')
 
   // Create a deploy
-  const phloLimitNum = !!phloLimit || phloLimit == 0 ? phloLimit : 250e3
+  const phloLimitNum = !!phloLimit || phloLimit == 0 ? phloLimit : 500e3
   const deployData = {
     term: code,
     phloLimit: phloLimitNum, phloPrice: 1,

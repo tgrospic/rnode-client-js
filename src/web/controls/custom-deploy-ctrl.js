@@ -36,7 +36,7 @@ const samples = [
 ]
 
 const initSelected = (st, wallet) => {
-  const {selRevAddr, phloLimit = 250000} = st
+  const {selRevAddr, phloLimit = 500e3} = st
 
   // Pre-select first account if not selected
   const initRevAddr = R.isNil(selRevAddr) && !R.isNil(wallet) && !!wallet.length
