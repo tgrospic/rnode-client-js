@@ -28,10 +28,14 @@ export const localNet = {
 
 const range = n => [...Array(n).keys()]
 
-const getTestNetUrls = n => ({
-  domain: `node${n}.testnet.rchain-dev.tk`,
-  ...defaultPortsSSL,
-})
+const getTestNetUrls = n => {
+  const instance = `node${n}`
+  return {
+    domain: `${instance}.testnet.rchain.coop`,
+    instance,
+    ...defaultPortsSSL,
+  }
+}
 
 const testnetHosts = range(5).map(getTestNetUrls)
 
@@ -40,7 +44,7 @@ export const testNet = {
   name: 'testnet',
   hosts: testnetHosts,
   readOnlys: [
-    { domain: 'observer.testnet.rchain.coop', ...defaultPortsSSL },
+    { domain: 'observer.testnet.rchain.coop', instance: 'observer', ...defaultPortsSSL },
     // Jim's read-only node
     { domain: 'rnode1.rhobot.net', ...defaultPortsSSL },
   ],
@@ -68,7 +72,7 @@ export const mainNet = {
   ],
 }
 
-export const getNodeUrls = ({name, domain, grpc, http, https, httpAdmin, httpsAdmin}) => {
+export const getNodeUrls = ({name, domain, grpc, http, https, httpAdmin, httpsAdmin, instance}) => {
   const scheme       = !!https ? 'https' : !!http ? 'http' : ''
   const schemeAdmin  = !!httpsAdmin ? 'https' : !!httpAdmin ? 'http' : ''
   const httpUrl      = !!https || !!http ? `${scheme}://${domain}:${https || http}` : void 8
@@ -83,7 +87,8 @@ export const getNodeUrls = ({name, domain, grpc, http, https, httpAdmin, httpsAd
     statusUrl    : `${httpUrl}/status`,
     getBlocksUrl : `${httpUrl}/api/blocks`,
     // Testnet only
-    logsUrl : `http://${domain}:8181/logs/name:rnode`,
-    filesUrl: `http://${domain}:18080`,
+    logsUrl : instance && `http://${domain}:8181/logs/name:${instance}`,
+    // TODO: what0s wrong with files?
+    //filesUrl: `http://${domain}:18080`,
   }
 }

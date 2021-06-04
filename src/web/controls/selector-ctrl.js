@@ -62,8 +62,8 @@ export const selectorCtrl = (st, {nets}) => {
     m('a', {target: '_blank', href: valUrls.statusUrl}, 'status'),
     m('a', {target: '_blank', href: valUrls.getBlocksUrl}, 'blocks'),
     isTestnet && [
-      m('a', {target: '_blank', href: valUrls.logsUrl}, 'logs'),
-      m('a', {target: '_blank', href: valUrls.filesUrl}, 'files'),
+      valUrls.logsUrl  && m('a', {target: '_blank', href: valUrls.logsUrl}, 'logs'),
+      valUrls.filesUrl && m('a', {target: '_blank', href: valUrls.filesUrl}, 'files'),
     ],
     m('table',
       valUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', valUrls.grpcUrl))),
@@ -96,8 +96,8 @@ export const selectorCtrl = (st, {nets}) => {
     m('a', {target: '_blank', href: readUrls.statusUrl}, 'status'),
     m('a', {target: '_blank', href: readUrls.getBlocksUrl}, 'blocks'),
     isTestnet && [
-      m('a', {target: '_blank', href: readUrls.logsUrl}, 'logs'),
-      m('a', {target: '_blank', href: readUrls.filesUrl}, 'files'),
+      readUrls.logsUrl  && m('a', {target: '_blank', href: readUrls.logsUrl}, 'logs'),
+      readUrls.filesUrl && m('a', {target: '_blank', href: readUrls.filesUrl}, 'files'),
     ],
     m('table',
       readUrls.grpcUrl && m('tr', m('td', 'gRPC'), m('td', m('pre', readUrls.grpcUrl))),
