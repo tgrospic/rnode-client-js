@@ -71,8 +71,8 @@ export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
     <a target="_blank" href={valUrls.statusUrl}>status</a>
     <a target="_blank" href={valUrls.getBlocksUrl}>blocks</a>
     {isTestnet && <>
-      <a target="_blank" href={valUrls.logsUrl}>logs</a>
-      <a target="_blank" href={valUrls.filesUrl}>files</a>
+      {valUrls.logsUrl  && <a target="_blank" href={valUrls.logsUrl}>logs</a>}
+      {valUrls.filesUrl && <a target="_blank" href={valUrls.filesUrl}>files</a>}
     </>}
     <table>
       {valUrls.grpcUrl && <tr><td>gRPC</td> <td><pre>{valUrls.grpcUrl}</pre></td></tr>}
@@ -101,8 +101,8 @@ export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
     <a target="_blank" href={readUrls.statusUrl}>status</a>
     <a target="_blank" href={readUrls.getBlocksUrl}>blocks</a>
     {isTestnet && <>
-      <a target="_blank" href={readUrls.logsUrl}>logs</a>
-      <a target="_blank" href={readUrls.filesUrl}>files</a>
+      {readUrls.logsUrl  && <a target="_blank" href={readUrls.logsUrl}>logs</a>}
+      {readUrls.filesUrl && <a target="_blank" href={readUrls.filesUrl}>files</a>}
     </>}
     <table>
       {readUrls.grpcUrl && <tr><td>gRPC</td> <td><pre>{readUrls.grpcUrl}</pre></td></tr>}
