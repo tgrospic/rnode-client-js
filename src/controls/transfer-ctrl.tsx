@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { RevAccount } from '@tgrospic/rnode-http-js'
-import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell } from './common'
+import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell, blockEventKey } from './common'
 
 export interface TransferSt {
   readonly account: RevAccount
@@ -106,7 +106,10 @@ export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, warn}: T
       <div></div>
       <div {...labelStyle(!!amount)}>{labelAmount}</div>
       <input type="number" class="rev-amount"
-        value={amount} placeholder={labelAmount} onInput={valEv('amount')} />
+        value={amount} placeholder={labelAmount}
+        onInput={valEv('amount')}
+        onKeyDown={blockEventKey(/^[a-zA-Z]$/)}
+      />
       {labelRev(amountPreview)}
 
       {/* Action buttons / results */}

@@ -49,6 +49,13 @@ export const showRevDecimal = (amount: string) => {
 export const labelRev = (amount: string) =>
   amount && html`<span>${amount} <b>REV</b></span>`
 
+export const blockEventKey = (regex: RegExp) => (ev: KeyboardEvent) => {
+  console.log({ev: ev})
+  if (ev.key.match(regex)) {
+    ev.preventDefault()
+  }
+}
+
 export const showNetworkError = (errMessage: string) =>
   errMessage == 'Failed to fetch'
     ? `${errMessage}: select a running RNode from the above selector.`

@@ -1,7 +1,7 @@
 import * as R from 'ramda'
 import { RevAccount } from '@tgrospic/rnode-http-js'
 import { NodeUrls } from '../rchain-networks'
-import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell } from './common'
+import { h, labelStyle, showRevDecimal, labelRev, showNetworkError, Cell, blockEventKey } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {
   return!((42, true, "Hello from blockchain!"))
@@ -149,7 +149,10 @@ export const customDeployCtrl = (st: Cell<CustomDeploySt>, {wallet = [], node, o
       {/* Phlo limit */}
       <div {...labelStyle(true)}>{labelPhloLimit}</div>
       <input type="number" class="phlo-limit"
-        value={phloLimit} placeholder={labelPhloLimit} onInput={valEv('phloLimit')} />
+        value={phloLimit} placeholder={labelPhloLimit}
+        onInput={valEv('phloLimit')}
+        onKeyDown={blockEventKey(/^[a-zA-Z]$/)}
+      />
       {labelRev(phloLimitPreview)}
 
       {/* Action buttons / results */}
