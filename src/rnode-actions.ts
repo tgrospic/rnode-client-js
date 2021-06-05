@@ -1,6 +1,6 @@
 import * as R from 'ramda'
-import { GetDeployDataEff, ProposeEff, RawRNodeHttpEff, RNodeWebAPI, SendDeployEff } from '@tgrospic/rnode-http-js'
-import { RevAccount, rhoExprToJson } from '@tgrospic/rnode-http-js'
+import { GetDeployDataEff, GetSignedDeployEff, ProposeEff, RawRNodeHttpEff, RNodeWebAPI, SendDeployEff } from '@tgrospic/rnode-http-js'
+import { RevAccount, rhoExprToJson, signDeploy } from '@tgrospic/rnode-http-js'
 import { NodeUrls } from './rchain-networks'
 import { checkBalance_rho } from './rho/check-balance'
 import { transferFunds_rho } from './rho/transfer-funds'
@@ -13,10 +13,12 @@ export type AppRNodeEffects = {
   appTransfer(args: AppTransferArgs): Promise<string>
   appSendDeploy(args: AppSendDeployArgs): Promise<string>
   appPropose(args: NodeUrls): Promise<string>
+  // WIP - offline deploy
+  appOfflineTransfer(args: AppTransferArgs): Promise<string>
 }
 
 export const makeRNodeActions = function (rnodeWeb: RNodeWebAPI, {log, warn}: ConsoleEff): AppRNodeEffects {
-  const { rnodeHttp, sendDeploy, getDataForDeploy, propose } = rnodeWeb
+  const { rnodeHttp, sendDeploy, getDataForDeploy, propose, getSignedDeploy } = rnodeWeb
 
   // App actions to process communication with RNode
   return {
@@ -24,6 +26,8 @@ export const makeRNodeActions = function (rnodeWeb: RNodeWebAPI, {log, warn}: Co
     appTransfer    : appTransfer({sendDeploy, getDataForDeploy, propose, log, warn}),
     appSendDeploy  : appSendDeploy({sendDeploy, getDataForDeploy, log}),
     appPropose     : appPropose({propose, log}),
+    // WIP - offline deploy
+    appOfflineTransfer: appOfflineTransfer({getSignedDeploy, log, warn}),
   }
 }
 
@@ -35,6 +39,46 @@ const appCheckBalance = ({rnodeHttp}: RawRNodeHttpEff) => async function ({node,
   const dataBal     = e && e.ExprInt && e.ExprInt.data
   const dataError   = e && e.ExprString && e.ExprString.data
   return [dataBal, dataError]
+}
+
+export type AppOfflineTransferEff = GetSignedDeployEff & ConsoleEff
+
+/**
+ * Offline transfer
+ */
+const appOfflineTransfer = (effects: AppOfflineTransferEff) => async function ({node, fromAccount, toAccount, amount, setStatus}: AppTransferArgs) {
+  const {getSignedDeploy, log, warn} = effects
+
+  log('OFFLINE TRANSFER', {amount, from: fromAccount.name, to: toAccount.name, node: node.httpUrl})
+
+  setStatus(`Creating signed deploy ...`)
+
+  // Send deploy
+  const code = transferFunds_rho(fromAccount.revAddr, toAccount.revAddr, amount)
+  const signedDeploy = await getSignedDeploy(node, fromAccount, code)
+
+  const {signature} = signedDeploy
+  log('DEPLOY ID (signature)', signature)
+
+  // Download deploy
+  const downloadDeploy = function (deploy: any) {
+    const a = document.createElement("a")
+    document.body.appendChild(a)
+    a.setAttribute("style", "display: none")
+    const json = JSON.stringify(deploy)
+    const blob = new Blob([json], {type: "octet/stream"})
+    const url  = window.URL.createObjectURL(blob)
+    a.setAttribute("href", url)
+    a.setAttribute("download", "signed-deploy.json")
+    a.click()
+    window.URL.revokeObjectURL(url)
+    a.remove()
+  }
+
+  downloadDeploy(signedDeploy)
+
+  // Return shell command to push deploy
+  return `curl ${node.httpUrl}/api/deploy -d @signed-deploy.json`
 }
 
 export type AppTransferEff = SendDeployEff & GetDeployDataEff & ProposeEff & ConsoleEff

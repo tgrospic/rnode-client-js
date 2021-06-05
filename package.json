@@ -17,7 +17,7 @@
     "gh-pages": "npm run build && git checkout gh-pages && rm web.* style.* && cp dist/* . && rm -r dist dist-types .cache node_modules && git add ."
   },
   "dependencies": {
-    "@tgrospic/rnode-http-js": "^0.1.6",
+    "@tgrospic/rnode-http-js": "^0.1.7",
     "blakejs": "^1.1.0",
     "bs58": "^4.0.1",
     "elliptic": "^6.5.3",

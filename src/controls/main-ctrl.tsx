@@ -35,12 +35,15 @@ export type AppEffects = AppRNodeEffects & ConsoleEff
 const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
 
 const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
-  const { appCheckBalance, appTransfer, appSendDeploy, appPropose, log, warn } = effects
+  const { appCheckBalance, appTransfer, appOfflineTransfer, appSendDeploy, appPropose, log, warn } = effects
 
   const onCheckBalance = (node: NodeUrls) => (revAddr: string) => appCheckBalance({node, revAddr})
 
   const onTransfer = (node: NodeUrls, setStatus: (s: string) => any) => ({fromAccount, toAccount, amount}: TransferData) =>
     appTransfer({node, fromAccount, toAccount, amount, setStatus})
+
+  const onOfflineTransfer = (node: NodeUrls, setStatus: (s: string) => any) => ({fromAccount, toAccount, amount}: TransferData) =>
+    appOfflineTransfer({node, fromAccount, toAccount, amount, setStatus})
 
   const onSendDeploy = (node: NodeUrls, setStatus: (s: string) => any) => ({code, account, phloLimit}: SendDeployArgs) =>
     appSendDeploy({node, code, account, phloLimit, setStatus})
@@ -93,7 +96,9 @@ const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
     {/* Transfer REV control */}
     <hr/>
     {transferCtrl(transferSt, {
-      wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
+      wallet, warn,
+      onTransfer: onTransfer(valNodeUrls, setTransferStatus),
+      onOfflineTransfer: onOfflineTransfer(valNodeUrls, setTransferStatus),
     })}
 
     {/* Custom deploy control */}

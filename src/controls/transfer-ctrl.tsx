@@ -26,6 +26,12 @@ export interface TransferActions {
     toAccount: RevAccount,
     amount: string
   }) => Promise<string>
+  // WIP - offline transfer
+  readonly onOfflineTransfer: (t: {
+    fromAccount: RevAccount,
+    toAccount: RevAccount,
+    amount: string
+  }) => Promise<string>
 }
 
 const initSelected = (st: TransferSt, wallet: RevAccount[]) => {
@@ -42,7 +48,7 @@ const initSelected = (st: TransferSt, wallet: RevAccount[]) => {
   return {...st, account: selAccount, toAccount: selToAccount}
 }
 
-export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, warn}: TransferActions) => {
+export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, onOfflineTransfer, warn}: TransferActions) => {
   const valEv = (name: keyof TransferSt) => (ev: Event) => {
     const val = (ev.target as HTMLInputElement).value
     st.update(s => ({...s, [name]: val}))
@@ -58,6 +64,18 @@ export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, warn}: T
       .catch(ex => {
         st.update(s => ({...s, status: '', error: ex.message}))
         warn('Transfer error', ex)
+      })
+  }
+
+  const downloadSignedDeploy = (account: RevAccount, toAccount: RevAccount, amount: string) => async () => {
+    st.update(s => ({...s, status: '...', error: ''}))
+    await onOfflineTransfer({fromAccount: account, toAccount, amount})
+      .then(x => {
+        st.update(s => ({...s, status: x, error: ''}))
+      })
+      .catch(ex => {
+        st.update(s => ({...s, status: '', error: ex.message}))
+        warn('Offline transfer error', ex)
       })
   }
 
@@ -115,6 +133,7 @@ export const transferCtrl = (st: Cell<TransferSt>, {wallet, onTransfer, warn}: T
       {/* Action buttons / results */}
       <div></div>
       <button onClick={send(account, toAccount, amount)} disabled={!canTransfer}>Transfer</button>
+      <button onClick={downloadSignedDeploy(account, toAccount, amount)} disabled={!canTransfer}>Download signed deploy</button>
       {status && <b>{status}</b>}
       {error && <b class="warning">{showNetworkError(error)}</b>}
     </>}
