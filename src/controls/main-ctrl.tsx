@@ -125,7 +125,7 @@ const initialState: Partial<AppState> = {
   // Validators to choose
   nets,
   // Selected validator
-  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
+  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[0] },
   // Initial wallet
   wallet: [], //defaultWallet,
 

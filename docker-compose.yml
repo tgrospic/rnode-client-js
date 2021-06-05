@@ -18,31 +18,17 @@ services:
               --wallets-file /data/genesis/wallets.txt --bonds-file /data/genesis/bonds.txt
               --tls-certificate-path /data/node.certificate.pem --tls-key-path /data/node.key.pem
               --approve-duration 10seconds --approve-interval 10seconds
+              --dev-mode
     ports:
     - $MY_NET_IP:40401:40401
     - $MY_NET_IP:40402:40402
     - $MY_NET_IP:40403:40403
     - $MY_NET_IP:40405:40405
-    # Ports exposed externally
+    # Ports used in RNode address (exposed externally)
     - $MY_NET_IP:40400:40400
     - $MY_NET_IP:40404:40404
     volumes:
     - ./data:/data
-
-  read:
-    << : *default-rnode
-    container_name: read
-    command: run -b $VALIDATOR_BOOT_ADDRESS --allow-private-addresses --host read --no-upnp
-              --protocol-port 40410 --discovery-port 40414
-              --approve-duration 10seconds --approve-interval 10seconds
-              --fork-choice-check-if-stale-interval 30seconds --fork-choice-stale-threshold 30seconds
-    ports:
-    - $MY_NET_IP:40411:40401
-    - $MY_NET_IP:40413:40403
-    - $MY_NET_IP:40415:40405
-    # Ports exposed externally
-    - $MY_NET_IP:40410:40410
-    - $MY_NET_IP:40414:40414
 
 networks:
   rchain-net:
