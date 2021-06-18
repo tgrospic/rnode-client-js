@@ -11,6 +11,7 @@ export interface RNodeInfo {
   // Network info
   readonly name?: NetworkName
   readonly title?: string
+  readonly network?: RChainNetwork
 }
 
 export interface RChainNetwork {
@@ -18,9 +19,11 @@ export interface RChainNetwork {
   readonly name: NetworkName
   readonly hosts: RNodeInfo[]
   readonly readOnlys: RNodeInfo[]
+  // Test net
+  readonly faucet?: string
 }
 
-export type NetworkName = 'localnet' | 'testnet' | 'mainnet'
+export type NetworkName = 'localnet' | 'testnet-bm' | 'testnet' | 'mainnet'
 
 const defaultPorts: Partial<RNodeInfo>    = { grpc: 40401, http: 40403, httpAdmin: 40405 }
 const defaultPortsSSL: Partial<RNodeInfo> = { grpc: 40401, https: 443, httpAdmin: 40405 }
@@ -48,6 +51,29 @@ export const localNet: RChainNetwork = {
   ]
 }
 
+// Test network (block-merge)
+
+const getTestNetBMUrls = (n: number) => {
+  const instance = `node${n}`
+  return {
+    domain: `${instance}.bm.testnet.rchain.coop`,
+    instance,
+    ...defaultPortsSSL,
+  }
+}
+
+const testnetBMHosts = R.range(0, 5).map(getTestNetBMUrls)
+
+export const testNetBlockMerge: RChainNetwork = {
+  title: 'RChain testing network (block-merge)',
+  name: 'testnet-bm',
+  hosts: testnetBMHosts,
+  readOnlys: [
+    { domain: 'observer.bm.testnet.rchain.coop', instance: 'observer', ...defaultPortsSSL },
+  ],
+  faucet: 'https://status.bm.testnet.rchain.coop/testnet/faucet',
+}
+
 // Test network
 
 const getTestNetUrls = (n: number) => {
@@ -70,6 +96,7 @@ export const testNet: RChainNetwork = {
     // Jim's read-only node
     { domain: 'rnode1.rhobot.net', ...defaultPortsSSL },
   ],
+  faucet: 'https://status.rchain.coop/testnet/faucet'
 }
 
 // MAIN network

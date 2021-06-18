@@ -44,15 +44,15 @@ export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
   const {valNode, readNode} = st.view({})
 
   const isLocal   = valNode.name === 'localnet'
-  const isTestnet = valNode.name === 'testnet'
   const isMainnet = valNode.name === 'mainnet'
   const valUrls   = getNodeUrls(valNode)
   const readUrls  = getNodeUrls(readNode)
+  const faucetUrl = valNode.network?.faucet
 
   return <div class="ctrl selector-ctrl">
     {/* Validator selector */}
     <h2>RChain Network selector</h2>
-    <h3>{valNode.title} - validator node</h3>
+    <h3>{valNode.title} - validator node {faucetUrl && <a target="_blank" href={faucetUrl}>faucet</a>}</h3>
     <select onInput={onSelIdx}>
       {nets.map(({title, hosts, name}) =>
         <optgroup class={`${name}-color`} label={title}>
@@ -70,10 +70,8 @@ export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
     <span>Direct links</span>
     <a target="_blank" href={valUrls.statusUrl}>status</a>
     <a target="_blank" href={valUrls.getBlocksUrl}>blocks</a>
-    {isTestnet && <>
-      {valUrls.logsUrl  && <a target="_blank" href={valUrls.logsUrl}>logs</a>}
-      {valUrls.filesUrl && <a target="_blank" href={valUrls.filesUrl}>files</a>}
-    </>}
+    {valUrls.logsUrl  && <a target="_blank" href={valUrls.logsUrl}>logs</a>}
+    {valUrls.filesUrl && <a target="_blank" href={valUrls.filesUrl}>files</a>}
     <table>
       {valUrls.grpcUrl && <tr><td>gRPC</td> <td><pre>{valUrls.grpcUrl}</pre></td></tr>}
                           <tr><td>HTTP</td> <td><pre>{valUrls.httpUrl}</pre></td></tr>
@@ -100,10 +98,8 @@ export const selectorCtrl = (st: Cell<SelectorSt>, {nets}: SelectorActions) => {
     <span>Direct links</span>
     <a target="_blank" href={readUrls.statusUrl}>status</a>
     <a target="_blank" href={readUrls.getBlocksUrl}>blocks</a>
-    {isTestnet && <>
-      {readUrls.logsUrl  && <a target="_blank" href={readUrls.logsUrl}>logs</a>}
-      {readUrls.filesUrl && <a target="_blank" href={readUrls.filesUrl}>files</a>}
-    </>}
+    {readUrls.logsUrl  && <a target="_blank" href={readUrls.logsUrl}>logs</a>}
+    {readUrls.filesUrl && <a target="_blank" href={readUrls.filesUrl}>files</a>}
     <table>
       {readUrls.grpcUrl && <tr><td>gRPC</td> <td><pre>{readUrls.grpcUrl}</pre></td></tr>}
                            <tr><td>HTTP</td> <td><pre>{readUrls.httpUrl}</pre></td></tr>

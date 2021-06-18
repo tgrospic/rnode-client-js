@@ -84,6 +84,10 @@ optgroup > option {
   color: #000;
 }
 
+.testnet-bm-color {
+  color: #009bad;
+}
+
 .testnet-color {
   color: @color-blue;
 }
@@ -96,6 +100,24 @@ optgroup > option {
   font-size: 1.2rem;
 }
 
+// Test net (block-merge)
+.testnet-bm {
+  h2 {
+    .testnet-bm-color
+  }
+
+  .address-ctrl {
+    background-color: @color-bg-light-blue;
+  }
+
+  .add-account:not([disabled]) {
+    .testnet-bm-color;
+    font-weight: bold;
+  }
+}
+
+
+// Test net
 .testnet {
   h2 {
     .testnet-color
@@ -111,6 +133,7 @@ optgroup > option {
   }
 }
 
+// Main net
 .mainnet {
   h2 {
     .mainnet-color

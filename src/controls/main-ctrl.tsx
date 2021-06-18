@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls } from '../rchain-networks'
+import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls, testNetBlockMerge } from '../rchain-networks'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { newRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
 import { h, makeRenderer, handleHashHref, Cell } from './common'
@@ -112,12 +112,15 @@ const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
   </div>
 }
 
-const nets = [localNet, testNet, mainNet]
-  .map(({title, name, hosts, readOnlys}) => ({
-    title, name,
-    hosts: hosts.map(x => ({...x, title, name})),
-    readOnlys: readOnlys.map(x => ({...x, title, name})),
-  }))
+const nets = [localNet, testNetBlockMerge, testNet, mainNet]
+  .map(network => {
+    const {title, name, hosts, readOnlys} = network
+    return {
+      title, name,
+      hosts: hosts.map(x => ({...x, title, name, network})),
+      readOnlys: readOnlys.map(x => ({...x, title, name, network})),
+    }
+  })
 
 const defaultWallet: RevAccount[] = [
   { name: 'New account', ...newRevAccount() },
