@@ -65,6 +65,11 @@ const mainCtrl = (st, effects) => {
       m('h1', 'RNode client testing page'),
     ),
 
+    m('.hf-info',
+      m.trust('<b>Main net</b> is currently offline because of <b>Hard Fork 1</b> procedure. '),
+      m.trust('See <a target="_blank" href="https://github.com/rchain/rchip-proposals/issues/42">RCHIP#42</a> for more info.'),
+    ),
+
     // Selector control
     m('hr'),
     selectorCtrl(selSt, {nets}),
