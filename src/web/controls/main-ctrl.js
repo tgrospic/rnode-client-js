@@ -57,6 +57,19 @@ const mainCtrl = (st, effects) => {
   const setTransferStatus = transferSt.o('status').set
   const setDeployStatus   = customDeploySt.o('status').set
 
+
+  // TEMP: Hard Fork 1 info
+  const startMs = new Date('2021-07-18 15:00').getTime()
+  const endMs   = new Date('2021-07-25 01:00').getTime()
+  const nowMs   = Date.now()
+  const leftMs  = endMs - nowMs
+  const hfMsgOn = leftMs > 0
+  // Make smaller with time
+  const pos  = leftMs / (endMs - startMs)
+  const zoom = (1 - .5) * pos + .5
+  // TEMP: Hard Fork 1 info
+
+
   // App render
   return m(`.${sel.valNode.name}`,
     m('.ctrl',
@@ -65,8 +78,8 @@ const mainCtrl = (st, effects) => {
       m('h1', 'RNode client testing page'),
     ),
 
-    m('.hf-info',
-      m.trust('<b>Main net</b> is currently offline because of <b>Hard Fork 1</b> procedure. '),
+    hfMsgOn && m('.hf-info', { style: `zoom: ${zoom}` },
+      m.trust('<b>Main net</b> is back online after the <b>Hard Fork 1</b>. '),
       m.trust('See <a target="_blank" href="https://github.com/rchain/rchip-proposals/issues/42">RCHIP#42</a> for more info.'),
     ),
 
