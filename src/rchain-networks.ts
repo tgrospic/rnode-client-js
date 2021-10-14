@@ -23,7 +23,7 @@ export interface RChainNetwork {
   readonly faucet?: string
 }
 
-export type NetworkName = 'localnet' | 'testnet-bm' | 'testnet' | 'mainnet'
+export type NetworkName = 'localnet' | 'testnet-llbm' | 'testnet-bm' | 'testnet' | 'mainnet'
 
 const defaultPorts: Partial<RNodeInfo>    = { grpc: 40401, http: 40403, httpAdmin: 40405 }
 const defaultPortsSSL: Partial<RNodeInfo> = { grpc: 40401, https: 443, httpAdmin: 40405 }
@@ -49,6 +49,29 @@ export const localNet: RChainNetwork = {
     { domain: 'localhost', grpc: 40441, http: 40443, httpAdmin: 40445 },
     { domain: 'localhost', grpc: 40451, http: 40453, httpAdmin: 40455 },
   ]
+}
+
+// Test network (leaderless block-merge)
+
+const getTestNetLLBMUrls = (n: number) => {
+  const instance = `node${n}`
+  return {
+    domain: `${instance}.llbm.testnet.rchain.coop`,
+    instance,
+    ...defaultPortsSSL,
+  }
+}
+
+const testnetLLBMHosts = R.range(0, 5).map(getTestNetLLBMUrls)
+
+export const testNetLLBlockMerge: RChainNetwork = {
+  title: 'RChain testing network (leaderless block-merge)',
+  name: 'testnet-llbm',
+  hosts: testnetLLBMHosts,
+  readOnlys: [
+    { domain: 'observer.llbm.testnet.rchain.coop', instance: 'observer', ...defaultPortsSSL },
+  ],
+  faucet: 'https://status.llbm.testnet.rchain.coop/testnet/faucet',
 }
 
 // Test network (block-merge)

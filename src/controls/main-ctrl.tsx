@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls, testNetBlockMerge } from '../rchain-networks'
+import { localNet, testNet, mainNet, getNodeUrls, RChainNetwork, NodeUrls, testNetBlockMerge, testNetLLBlockMerge } from '../rchain-networks'
 import { ethDetected } from '@tgrospic/rnode-http-js'
 import { newRevAccount, RevAccount } from '@tgrospic/rnode-http-js'
 import { h, makeRenderer, handleHashHref, Cell } from './common'
@@ -112,7 +112,7 @@ const mainCtrl = (st: Cell<AppState>, effects: AppEffects) => {
   </div>
 }
 
-const nets = [localNet, testNetBlockMerge, testNet, mainNet]
+const nets = [localNet, testNetLLBlockMerge, testNetBlockMerge, testNet, mainNet]
   .map(network => {
     const {title, name, hosts, readOnlys} = network
     return {

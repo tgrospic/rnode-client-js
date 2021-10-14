@@ -4,6 +4,7 @@
 
 @color-bg-light-red: #b1a8a847;
 @color-bg-light-blue: #c2c7ce61;
+@color-bg-light-green: #b1c3b148;
 
 :root {
   font-size: .9rem;
@@ -84,6 +85,10 @@ optgroup > option {
   color: #000;
 }
 
+.testnet-llbm-color {
+  color: #00ad00;
+}
+
 .testnet-bm-color {
   color: #009bad;
 }
@@ -99,6 +104,23 @@ optgroup > option {
 .rev {
   font-size: 1.2rem;
 }
+
+// Test net (leaderless block-merge)
+.testnet-llbm {
+  h2 {
+    .testnet-llbm-color
+  }
+
+  .address-ctrl {
+    background-color: @color-bg-light-green;
+  }
+
+  .add-account:not([disabled]) {
+    .testnet-llbm-color;
+    font-weight: bold;
+  }
+}
+
 
 // Test net (block-merge)
 .testnet-bm {
