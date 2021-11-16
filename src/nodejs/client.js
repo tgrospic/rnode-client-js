@@ -11,8 +11,14 @@ require('../../rnode-grpc-gen/js/DeployServiceV1_pb')
 require('../../rnode-grpc-gen/js/ProposeServiceV1_pb')
 
 const { log, warn } = console
+const util = require('util')
 
-const sampleRholangCode = 'new out(`rho:io:stdout`) in { out!("Nodejs deploy test") }'
+const sampleRholangCode = `
+  new return(\`rho:rchain:deployId\`), out(\`rho:io:stdout\`) in {
+    return!("Return value from deploy") |
+    out!("Nodejs deploy test")
+  }
+`
 
 const rnodeExternalUrl = 'localhost:40401'
 // const rnodeExternalUrl = 'node8.testnet.rchain-dev.tk:40401'
@@ -47,17 +53,11 @@ const rnodeExample = async () => {
   log('VDAG', vdagObj.map(x => x.content).join(''))
 
 
-  const listenData = await listenForDataAtName({
-    depth: 10,
-    name: { exprsList: [{gString: 'RChain'}, {gInt: 123}] },
-  })
-  log('LISTEN', listenData)
-
   // Sample deploy
 
   const secp256k1 = new ec('secp256k1')
-  const key = secp256k1.genKeyPair()
-  // const key = '1bf36a3d89c27ddef7955684b97667c75454317d8964528e57b2308947b250b0'
+  // const key = secp256k1.genKeyPair()
+  const key = 'bb6f30056d1981b98e729cef72a82920e6242a4395e500bd24bd6c6e6a65c36c'
 
   const deployData = {
     term: sampleRholangCode,
@@ -74,9 +74,18 @@ const rnodeExample = async () => {
   const { result } = await doDeploy(deploy)
   log('DEPLOY RESPONSE', result)
 
+  // Create new block with deploy
 
   const { result: proposeRes } = await propose()
   log('PROPOSE RESPONSE', proposeRes)
+
+  // Get result from deploy
+
+  const listenData = await listenForDataAtName({
+    depth: 5,
+    name: { unforgeablesList: [{gDeployIdBody: { sig: deploy.sig }}] },
+  })
+  log('LISTEN', util.inspect(listenData, {depth: 10, colors: true}))
 }
 
 rnodeExample()
