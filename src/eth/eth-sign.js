@@ -31,7 +31,7 @@ export const verifyDeployEth = deploySigned => {
   const deployLen = deploySerialized.length
   const msgPrefix = `\x19Ethereum Signed Message:\n${deployLen}`
   const prefixBin = decodeAscii(msgPrefix)
-  const msg       = [...prefixBin, ...deploySerialized]
+  const msg       = ethUtil.toBuffer([...prefixBin, ...deploySerialized])
   const hashed    = ethUtil.keccak256(msg)
 
   // Check deployer's signature
