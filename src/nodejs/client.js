@@ -1,8 +1,10 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
+// @ts-check
 const grpc = require('@grpc/grpc-js')
 const { ec } = require('elliptic')
-const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy } = require('@tgrospic/rnode-grpc-js')
+
+const { rnodeDeploy, rnodePropose, signDeploy, verifyDeploy, rhoParToJson } = require('@tgrospic/rnode-grpc-js')
 
 // Generated files with rnode-grpc-js tool
 const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
@@ -14,14 +16,16 @@ const { log, warn } = console
 const util = require('util')
 
 const sampleRholangCode = `
-  new return(\`rho:rchain:deployId\`), out(\`rho:io:stdout\`) in {
-    return!("Return value from deploy") |
-    out!("Nodejs deploy test")
+  new return(\`rho:rchain:deployId\`), out(\`rho:io:stdout\`), x in {
+    out!("Nodejs deploy test") |
+
+    // Return value from Rholang
+    return!(("Return value from deploy", [1], true, Set(42), {"my_key": "My value"}, *x))
   }
 `
 
 const rnodeExternalUrl = 'localhost:40401'
-// const rnodeExternalUrl = 'node8.testnet.rchain-dev.tk:40401'
+// const rnodeExternalUrl = 'node3.testnet.rchain.coop:40401'
 
 const rnodeInternalUrl = 'localhost:40402'
 
@@ -61,9 +65,10 @@ const rnodeExample = async () => {
 
   const deployData = {
     term: sampleRholangCode,
+    timestamp: Date.now(),
     phloprice: 1,
     phlolimit: 10e3,
-    validafterblocknumber: 0,
+    validafterblocknumber: lastBlockObj.blockinfo?.blockinfo.blocknumber || 0,
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
@@ -81,11 +86,22 @@ const rnodeExample = async () => {
 
   // Get result from deploy
 
-  const listenData = await listenForDataAtName({
+  const { payload: { blockinfoList } } = await listenForDataAtName({
     depth: 5,
     name: { unforgeablesList: [{gDeployIdBody: { sig: deploy.sig }}] },
   })
-  log('LISTEN', util.inspect(listenData, {depth: 10, colors: true}))
+
+  // Raw data (Par objects) returned from Rholang
+  const pars = blockinfoList[0].postblockdataList
+
+  log('RAW_DATA', util.inspect(pars, {depth: 100, colors: true}))
+
+  // Rholang term converted to JSON
+  // NOTE: Only part of Rholang types are converted:
+  //       primitive types, List, Set, object (Map), Uri, ByteArray, unforgeable names.
+  const json = pars.map(rhoParToJson)
+
+  log('JSON', util.inspect(json, {depth: 100, colors: true}))
 }
 
 rnodeExample()

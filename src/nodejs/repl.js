@@ -1,6 +1,8 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
+// @ts-check
 const grpc = require('@grpc/grpc-js')
+
 const { rnodeRepl } = require('@tgrospic/rnode-grpc-js')
 
 // Generated files with rnode-grpc-js tool

@@ -1,8 +1,10 @@
 // Reference to TypeScript definitions for IntelliSense in VSCode
 /// <reference path="../../rnode-grpc-gen/js/rnode-grpc-js.d.ts" />
+// @ts-check
 const grpc = require('@grpc/grpc-js')
 const { ec } = require('elliptic')
-const blake = require('blakejs')
+const { blake2bHex } = require('blakejs')
+
 const { rnodeService, rnodeProtobuf, signDeploy, verifyDeploy } = require('@tgrospic/rnode-grpc-js')
 
 const protoSchema = require('../../rnode-grpc-gen/js/pbjs_generated.json')
@@ -12,10 +14,7 @@ require('../../rnode-grpc-gen/js/ProposeServiceV1_pb')
 const { log, warn } = console
 
 const rnodeUrl = 'localhost:40402'
-// const rnodeUrl = 'node0.testnet.rchain-dev.tk:40401'
-
-const encodeBase16 = bytes =>
-  Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, 0)).join('')
+// const rnodeUrl = 'node3.testnet.rchain.coop:40401'
 
 const secp256k1 = new ec('secp256k1')
 
@@ -95,15 +94,13 @@ const rnodeExample = async args => {
   })
 
   // Private/public key used for signing registry access (it can be the same as deploy key).
-  const privateKey = secp256k1.keyFromPrivate('<private_key_hex>')
-  const publicKey  = Uint8Array.from(privateKey.getPublic('array'))
+  const privateKey   = secp256k1.keyFromPrivate('<private_key_hex>')
+  const publicKeyHex = privateKey.getPublic('hex')
   // log("PRIV KEY", secp256k1.genKeyPair().getPrivate('hex')) // generate new key
 
   // Sign `(nonce, unforgName)`
-  const hashed       = blake.blake2bHex(dataToSign, void 666, 32)
-  const sigArray     = privateKey.sign(hashed, {canonical: true}).toDER('array')
-  const signatureHex = encodeBase16(sigArray)
-  const publicKeyHex = encodeBase16(publicKey)
+  const hashed       = blake2bHex(dataToSign, void 666, 32)
+  const signatureHex = privateKey.sign(hashed, {canonical: true}).toDER('hex')
 
   const contract = `
     new MyContract, rs(\`rho:registry:insertSigned:secp256k1\`), uriOut, out(\`rho:io:stdout\`)
