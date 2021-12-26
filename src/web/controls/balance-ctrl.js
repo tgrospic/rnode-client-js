@@ -1,3 +1,4 @@
+// @ts-check
 import m from 'mithril'
 import * as R from 'ramda'
 import { labelStyle, showRevDecimal, showNetworkError } from './common'

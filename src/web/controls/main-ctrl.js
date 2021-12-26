@@ -1,4 +1,4 @@
-// // @ts-check
+// @ts-check
 import * as R from 'ramda'
 import m from 'mithril'
 import { localNet, testNet, mainNet, getNodeUrls } from '../../rchain-networks'
@@ -11,6 +11,7 @@ import { addressCtrl } from './address-ctrl'
 import { balanceCtrl } from './balance-ctrl'
 import { transferCtrl } from './transfer-ctrl'
 import { customDeployCtrl } from './custom-deploy-ctrl'
+import { newRevAddress } from '@tgrospic/rnode-grpc-js'
 
 /*
   This will display the test page to select local, testnet, and mainnet validators
@@ -34,7 +35,9 @@ const mainCtrl = (st, effects) => {
 
   const appendUpdateLens = pred => R.lens(R.find(pred), (x, xs) => {
     const idx = R.findIndex(pred, xs)
+    // @ts-ignore - `R.update` types doesn't have defined curried variant
     const apply = idx === -1 ? R.append : R.update(idx)
+    // @ts-ignore
     return apply(x, xs)
   })
 
@@ -126,7 +129,7 @@ const initialState = {
   // Selected validator
   sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
   // Initial wallet
-  wallet: [], // [{name: 'My REV account', ...newRevAddr()}]
+  wallet: [], // [{name: 'My REV account', ...newRevAddress()}],
 }
 
 export const startApp = (element, effects) => {

@@ -1,3 +1,4 @@
+// @ts-check
 import * as R from 'ramda'
 import { ec } from 'elliptic'
 
@@ -36,7 +37,8 @@ const makeRNodeHttpInternal = domFetch => async (httpUrl, apiMethod, data) => {
   const result = await resp.json()
   // Add status if server error
   if (!resp.ok) {
-    const ex = Error(result)
+    const ex = Error(result);
+    // @ts-ignore
     ex.status = resp.status
     throw ex
   }

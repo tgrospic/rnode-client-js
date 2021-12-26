@@ -1,3 +1,4 @@
+// @ts-check
 const defaultPorts    = { grpc: 40401, http: 40403, httpAdmin: 40405 }
 const defaultPortsSSL = { grpc: 40401, https: 443, httpAdmin: 40405 }
 

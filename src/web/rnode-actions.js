@@ -1,3 +1,4 @@
+// @ts-check
 import * as R from 'ramda'
 import { checkBalance_rho } from '../rho/check-balance'
 import { transferFunds_rho } from '../rho/transfer-funds'

@@ -1,8 +1,9 @@
+// @ts-check
 import * as R from 'ramda'
 import m from 'mithril'
 import {
   getAddrFromPrivateKey, getAddrFromPublicKey, getAddrFromEth,
-  newRevAddr, verifyRevAddr,
+  newRevAddress, verifyRevAddr,
 } from '@tgrospic/rnode-grpc-js'
 import { labelStyle } from './common'
 import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
@@ -54,7 +55,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
   }
 
   const newRevAddrEv = _ => {
-    const {privKey} = newRevAddr()
+    const {privKey} = newRevAddress()
     updateAddress(privKey)
   }
 

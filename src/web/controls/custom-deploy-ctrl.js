@@ -1,3 +1,4 @@
+// @ts-check
 import m from 'mithril'
 import * as R from 'ramda'
 import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
@@ -35,7 +36,10 @@ const samples = [
   ['registry lookup', sampleRegistryLookup],
 ]
 
-const initSelected = (st, wallet) => {
+/**
+ * @param { import("@tgrospic/rnode-grpc-js").RevAddress[] } wallet
+ */
+const initSelected = (st, wallet /** @param any[] */) => {
   const {selRevAddr, phloLimit = 500e3} = st
 
   // Pre-select first account if not selected

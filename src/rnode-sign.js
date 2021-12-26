@@ -1,3 +1,4 @@
+// @ts-check
 import blake from 'blakejs'
 import { ec } from 'elliptic'
 import jspb from 'google-protobuf'

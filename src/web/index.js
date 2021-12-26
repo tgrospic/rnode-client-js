@@ -1,3 +1,4 @@
+// @ts-check
 // Web example with REV transfer and balance check
 import { pageLog, handleHashHref } from './controls/common'
 import { makeRNodeWeb } from '../rnode-web'

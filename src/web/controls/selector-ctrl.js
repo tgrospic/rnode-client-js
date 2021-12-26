@@ -1,7 +1,7 @@
+// @ts-check
 import * as R from 'ramda'
 import m from 'mithril'
 import { getNodeUrls } from '../../rchain-networks'
-import { labelStyle } from './common'
 
 export const selectorCtrl = (st, {nets}) => {
   const findValidatorByIndex = index =>
@@ -76,7 +76,6 @@ export const selectorCtrl = (st, {nets}) => {
 
     // Read-only selector
     m('h3', `${readNode.title} - read-only node`),
-    (isTestnet || isMainnet) && !!readNode.http && m('', labelStyle(true), httpMixedContentInfo),
     m('select', {onchange: onSelReadIdx},
       nets.filter(x => x.name === valNode.name).map(({title, readOnlys}) =>
         m('optgroup', {label: title},

@@ -1,5 +1,6 @@
+// @ts-check
 export const encodeBase16 = bytes =>
-  Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, 0)).join('')
+  Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, "0")).join('')
 
 export const decodeBase16 = hexStr => {
   const removed0x = hexStr.replace(/^0x/, '')

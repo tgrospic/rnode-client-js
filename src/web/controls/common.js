@@ -1,3 +1,4 @@
+// @ts-check
 import * as R from 'ramda'
 import m from 'mithril'
 
