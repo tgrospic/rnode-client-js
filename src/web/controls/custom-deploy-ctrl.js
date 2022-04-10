@@ -1,7 +1,7 @@
 // @ts-check
 import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
+import { labelStyle, showTokenDecimal, labelRev, showNetworkError } from './common'
 
 const sampleReturnCode = `new return(\`rho:rchain:deployId\`) in {
   return!((42, true, "Hello from blockchain!"))
@@ -93,17 +93,18 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
   const {selRevAddr, code, phloLimit, status, dataError, proposeStatus, proposeError}
     = initSelected(st.view({}), wallet)
 
+  const tokenName        = node.tokenName
   const labelAddr        = 'Signing account'
   const labelCode        = 'Rholang code'
-  const labelPhloLimit   = 'Phlo limit (in revlettes x10^8)'
+  const labelPhloLimit   = `Phlo limit (in tiny ${tokenName} x10^${node.tokenDecimal})`
   const isWalletEmpty    = R.isNil(wallet) || R.isEmpty(wallet)
   const showPropose      = node.network === 'localnet'
   const canDeploy        = (code || '').trim() !== '' && !!selRevAddr
-  const phloLimitPreview = showRevDecimal(phloLimit)
+  const phloLimitPreview = showTokenDecimal(phloLimit, node.tokenDecimal)
 
   return m('.ctrl.custom-deploy-ctrl',
     m('h2', 'Custom deploy'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make deploys.') : [
+    isWalletEmpty ? m('b', `${node.tokenName} wallet is empty, add accounts to make deploys.`) : [
       m('span', 'Send deploy to selected validator RNode.'),
 
       // Rholang examples
@@ -131,7 +132,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
       m('input[type=number].phlo-limit', {
         value: phloLimit, placeholder: labelPhloLimit, oninput: valEv('phloLimit')
       }),
-      labelRev(phloLimitPreview),
+      labelRev(phloLimitPreview, tokenName),
 
       // Action buttons / results
       m(''),

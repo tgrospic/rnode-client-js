@@ -91,15 +91,15 @@ const mainCtrl = (st, effects) => {
     selectorCtrl(selSt, {nets}),
 
     // REV wallet control
-    addressCtrl(addressSt, {wallet, onAddAccount: onSaveAccount}),
+    addressCtrl(addressSt, {wallet, node: valNodeUrls, onAddAccount: onSaveAccount}),
 
     // Check balance control
-    balanceCtrl(balanceSt, {wallet, onCheckBalance: onCheckBalance(readNodeUrls)}),
+    balanceCtrl(balanceSt, {wallet, node: valNodeUrls, onCheckBalance: onCheckBalance(readNodeUrls)}),
     m('hr'),
 
     // Transfer REV control
     transferCtrl(transferSt, {
-      wallet, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
+      wallet, node: valNodeUrls, onTransfer: onTransfer(valNodeUrls, setTransferStatus), warn,
     }),
 
     // Custom deploy control
@@ -114,9 +114,9 @@ const mainCtrl = (st, effects) => {
 }
 
 const nets = [localNet, testNet, mainNet]
-  .map(({title, name, hosts, readOnlys}) => ({
-    title, name,
-    hosts: hosts.map(x => ({...x, title, name})),
+  .map(({title, name, tokenName, tokenDecimal: tokenDecimal, hosts, readOnlys}) => ({
+    title, name, tokenName,
+    hosts: hosts.map(x => ({...x, title, name, tokenName, tokenDecimal})),
     readOnlys: readOnlys.map(x => ({...x, title, name})),
   }))
 

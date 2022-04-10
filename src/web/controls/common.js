@@ -10,8 +10,8 @@ const styleShowHide  = isVis => ({ opacity: isVis ? .65 : 0, height: isVis ? 'au
 
 export const labelStyle = isVis => ({ style: {...labelBaseStyle, ...styleShowHide(isVis) } })
 
-export const showRevDecimal = amount => {
-  const d = 8 // decimal places
+export const showTokenDecimal = (amount, digits)=> {
+  const d = digits // decimal places
   const amountNr   = parseInt(amount)
   const amountStr  = isNaN(amountNr) ? '' : `${amountNr}`
   const length     = amountStr.length
@@ -27,8 +27,8 @@ export const showRevDecimal = amount => {
   }
 }
 
-export const labelRev = amount =>
-  amount && m('span.rev', amount, m('b', ' REV'))
+export const labelRev = (amount, tokenName) =>
+  amount && m('span.rev', amount, m('b', ` ${tokenName}`))
 
 export const showNetworkError = errMessage =>
   errMessage == 'Failed to fetch'

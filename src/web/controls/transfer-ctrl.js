@@ -1,7 +1,7 @@
 // @ts-check
 import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, labelRev, showNetworkError } from './common'
+import { labelStyle, showTokenDecimal, labelRev, showNetworkError } from './common'
 import { ethDetected } from '../../eth/eth-wrapper'
 
 const initSelected = (st, wallet) => {
@@ -18,7 +18,7 @@ const initSelected = (st, wallet) => {
   return {...st, account: selAccount, toAccount: selToAccount}
 }
 
-export const transferCtrl = (st, {wallet, onTransfer, warn}) => {
+export const transferCtrl = (st, {wallet, node, onTransfer, warn}) => {
   const valEv = name => ev => {
     const val = ev.target.value
     st.update(s => ({...s, [name]: val}))
@@ -49,16 +49,17 @@ export const transferCtrl = (st, {wallet, onTransfer, warn}) => {
   // Control state
   const {account, toAccount, amount, status, error} = initSelected(st.view({}), wallet)
 
-  const labelSource      = 'Source REV address'
-  const labelDestination = 'Destination REV address'
-  const labelAmount      = 'Amount (in revlettes x10^8)'
+  const {tokenName, tokenDecimal} = node
+  const labelSource      = `Source ${tokenName} address`
+  const labelDestination = `Destination ${tokenName} address`
+  const labelAmount      = `Amount (in tiny ${tokenName} x10^${tokenDecimal})`
   const isWalletEmpty    = R.isNil(wallet) || R.isEmpty(wallet)
   const canTransfer      = account && toAccount && amount && (account || ethDetected)
-  const amountPreview    = showRevDecimal(amount)
+  const amountPreview    = showTokenDecimal(amount, tokenDecimal)
 
   return m('.ctrl.transfer-ctrl',
-    m('h2', 'Transfer REV tokens'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to make transfers.') : [
+    m('h2', `Transfer ${tokenName} tokens`),
+    isWalletEmpty ? m('b', `${tokenName} wallet is empty, add accounts to make transfers.`) : [
       m('', 'Sends transfer deploy to selected validator RNode.'),
 
       // Source REV address dropdown
@@ -85,7 +86,7 @@ export const transferCtrl = (st, {wallet, onTransfer, warn}) => {
         placeholder: labelAmount, value: amount,
         oninput: valEv('amount'),
       }),
-      labelRev(amountPreview),
+      labelRev(amountPreview, tokenName),
 
       // Action button / result
       m(''),

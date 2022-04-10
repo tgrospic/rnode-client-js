@@ -8,7 +8,7 @@ import {
 import { labelStyle } from './common'
 import { ethereumAddress, ethDetected } from '../../eth/eth-wrapper'
 
-export const addressCtrl = (st, {wallet, onAddAccount}) => {
+export const addressCtrl = (st, {wallet, node, onAddAccount}) => {
   const updateAddress = text => {
     const val = text.replace(/^0x/, '').trim()
     // Account from private key, public key, ETH or REV address
@@ -67,14 +67,15 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
   // Control state
   const {text, privKey, pubKey, ethAddr, revAddr, name} = st.view({})
 
+  const tokenName = node.tokenName
   const description = m('span.info',
     `Any address used on this page must be first added as an account and assign a name. All accounts are then shown in dropdown menus to select as send or receive address.`,
     m('br'),
     `Entered information is not stored anywhere except on the page. After exit or refresh the page, all information is lost.`
   )
-  const labelSource = 'REV address / ETH address / Public key / Private key'
+  const labelSource = `${tokenName} address / ETH address / Public key / Private key`
   const metamaskTitle = 'Copy ETH address from selected Metamask account'
-  const newAccountTitle = 'Generate new private key (public key, ETH, REV)'
+  const newAccountTitle = `Generate new private key (public key, ETH, ${tokenName})`
   const saveTitle = 'Save account with assigned name'
   const closeTitle = 'Cancel edit of account'
   const namePlaceholder = 'Friendly name for account'
@@ -82,7 +83,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
   const isEdit = !!revAddr
 
   return m('.ctrl.address-ctrl',
-    m('h2', 'REV wallet (import REV address, ETH address, public/private key, Metamask)'),
+    m('h2', `${tokenName} wallet (import ${tokenName} address, ETH address, public/private key, Metamask)`),
     description,
 
     // Input textbox
@@ -102,7 +103,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
         privKey && m('tr', m('td', 'Private key'), m('td', privKey)),
         pubKey  && m('tr', m('td', 'Public key'), m('td', pubKey)),
         ethAddr && m('tr', m('td', 'ETH'), m('td', ethAddr)),
-        m('tr', m('td', 'REV'), m('td', m('b', revAddr))),
+        m('tr', m('td', tokenName), m('td', m('b', revAddr))),
       ),
       // Action buttons
       m('input[type=text].addr-name', {placeholder: namePlaceholder, value: name, oninput: nameKeyPressEv}),
@@ -114,7 +115,7 @@ export const addressCtrl = (st, {wallet, onAddAccount}) => {
     wallet && !!wallet.length && m('table.wallet',
       m('thead',
         m('th', 'Account'),
-        m('th', 'REV'),
+        m('th', tokenName),
         m('th', 'ETH'),
         m('th', 'PUBLIC'),
         m('th', 'PRIVATE'),

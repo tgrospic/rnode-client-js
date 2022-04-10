@@ -1,7 +1,7 @@
 // @ts-check
 import m from 'mithril'
 import * as R from 'ramda'
-import { labelStyle, showRevDecimal, showNetworkError } from './common'
+import { labelStyle, showTokenDecimal, showNetworkError } from './common'
 
 const initSelected = (st, wallet) => {
   const {account} = st
@@ -13,7 +13,9 @@ const initSelected = (st, wallet) => {
   return {...st, account: selAccount}
 }
 
-export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
+export const balanceCtrl = (st, {wallet = [], node, onCheckBalance}) => {
+  const {tokenName, tokenDecimal} = node
+
   const checkBalanceEv = async _ => {
     st.update(s => ({...s, dataBal: '...', dataError: ''}))
 
@@ -21,7 +23,7 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
       .catch(ex => ['', ex.message])
 
     const dataBal = typeof bal === 'number'
-      ? bal === 0 ? `${bal}` : `${bal} (${showRevDecimal(bal)} REV)` : ''
+      ? bal === 0 ? `${bal}` : `${bal} (${showTokenDecimal(bal, tokenDecimal)} ${tokenName})` : ''
     st.update(s => ({...s, dataBal, dataError}))
   }
 
@@ -30,15 +32,15 @@ export const balanceCtrl = (st, {wallet = [], onCheckBalance}) => {
     st.set({account})
   }
 
-  const labelAddr     = 'REV address'
+  const labelAddr     = `${tokenName} address`
   const isWalletEmpty = R.isNil(wallet) || R.isEmpty(wallet)
 
   // Control state
   const {account, dataBal, dataError} = initSelected(st.view({}), wallet)
 
   return m('.ctrl.balance-ctrl',
-    m('h2', 'Check REV balance'),
-    isWalletEmpty ? m('b', 'REV wallet is empty, add accounts to check balance.') : [
+    m('h2', `Check ${tokenName} balance`),
+    isWalletEmpty ? m('b', `${tokenName} wallet is empty, add accounts to check balance.`) : [
       m('', 'Sends exploratory deploy to selected read-only RNode.'),
 
       // REV address dropdown

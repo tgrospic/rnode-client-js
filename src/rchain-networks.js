@@ -7,11 +7,18 @@ const defaultShardId = 'root'
 const testNetShardId = '' // not used until after v0.13.0-alpha
 const mainNetShardId = '' // not used until HF2
 
+// Token name
+const tokenName = 'REV'
+// Number of decimal places for token display (balance, phlo limit, labels)
+const defautTokenDecimal = 8
+
 // Local network
 
 export const localNet = {
   title: 'Local network',
   name: 'localnet',
+  tokenName,
+  tokenDecimal: defautTokenDecimal,
   hosts: [
     { domain: 'localhost', shardId: defaultShardId, ...defaultPorts },
     { domain: 'localhost', shardId: defaultShardId, grpc: 40411, http: 40413, httpAdmin: 40415 },
@@ -49,6 +56,8 @@ const testnetHosts = range(5).map(getTestNetUrls)
 export const testNet = {
   title: 'RChain testing network',
   name: 'testnet',
+  tokenName,
+  tokenDecimal: defautTokenDecimal,
   hosts: testnetHosts,
   readOnlys: [
     { domain: 'observer.testnet.rchain.coop', instance: 'observer', shardId: testNetShardId, ...defaultPortsSSL },
@@ -68,6 +77,8 @@ const mainnetHosts = range(30).map(getMainNetUrls)
 export const mainNet = {
   title: 'RChain MAIN network',
   name: 'mainnet',
+  tokenName,
+  tokenDecimal: defautTokenDecimal,
   hosts: mainnetHosts,
   readOnlys: [
     // Load balancer (not gRPC) server for us, asia and eu servers
@@ -78,7 +89,7 @@ export const mainNet = {
   ],
 }
 
-export const getNodeUrls = ({name, shardId, domain, grpc, http, https, httpAdmin, httpsAdmin, instance}) => {
+export const getNodeUrls = ({name, tokenName, tokenDecimal, shardId, domain, grpc, http, https, httpAdmin, httpsAdmin, instance}) => {
   const scheme       = !!https ? 'https' : !!http ? 'http' : ''
   const schemeAdmin  = !!httpsAdmin ? 'https' : !!httpAdmin ? 'http' : ''
   const httpUrl      = !!https || !!http ? `${scheme}://${domain}:${https || http}` : void 8
@@ -87,6 +98,8 @@ export const getNodeUrls = ({name, shardId, domain, grpc, http, https, httpAdmin
 
   return {
     network      : name,
+    tokenName,
+    tokenDecimal,
     shardId,
     grpcUrl,
     httpUrl,

@@ -71,7 +71,7 @@ export const selectorCtrl = (st, {nets}) => {
       isLocal && m('tr', m('td', 'Admin'), m('td', m('pre', valUrls.httpAdminUrl))),
     ),
     isMainnet && [
-      m('p.warning', 'You are connected to MAIN RChain network. Any deploy will use REAL REVs.'),
+      m('p.warning', `You are connected to MAIN RChain network. Any deploy will use REAL ${valUrls.tokenName}s.`),
     ],
 
     // Read-only selector
