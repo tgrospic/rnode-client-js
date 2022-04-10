@@ -131,6 +131,7 @@ const rnodeExample = async args => {
     phloprice: 1,
     phlolimit: 150e3,
     validafterblocknumber: lastBlockNr,
+    shardid: 'root',
   }
 
   const deploy = signDeploy(deployPrivateKey, deployData)

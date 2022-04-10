@@ -69,6 +69,7 @@ const rnodeExample = async () => {
     phloprice: 1,
     phlolimit: 10e3,
     validafterblocknumber: lastBlockObj.blockinfo?.blockinfo.blocknumber || 0,
+    shardid: 'root',
   }
   const deploy = signDeploy(key, deployData)
   log('SIGNED DEPLOY', deploy)
