@@ -17,13 +17,13 @@ export const recoverPublicKeyEth = (data, sigHex) => {
 
 export const verifyDeployEth = deploySigned => {
   const {
-    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber, shardId,
     deployer, sig, // : Array[Byte]
   } = deploySigned
 
   // Serialize deploy data for signing
   const deploySerialized = deployDataProtobufSerialize({
-    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber, shardId,
   })
 
   // Create a hash of message with prefix

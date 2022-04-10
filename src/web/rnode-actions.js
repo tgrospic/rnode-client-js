@@ -63,7 +63,7 @@ const appTransfer = effects => async ({node, fromAccount, toAccount, amount, set
 const appSendDeploy = effects => async ({node, code, account, phloLimit, setStatus}) => {
   const {sendDeploy, getDataForDeploy, log} = effects
 
-  log('SENDING DEPLOY', {account: account.name, phloLimit, node: node.httpUrl, code})
+  log('SENDING DEPLOY', {account: account.name, phloLimit, shardId: node.shardId, node: node.httpUrl, code})
 
   setStatus(`Deploying ...`)
 

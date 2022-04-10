@@ -71,6 +71,7 @@ const sendDeploy = rnodeHttp => async (node, account, code, phloLimit) => {
     phloLimit: phloLimitNum, phloPrice: 1,
     validAfterBlockNumber: blockNumber,
     timestamp: Date.now(),
+    shardId: node.shardId,
   }
 
   const deploy = !!account.privKey
@@ -186,12 +187,12 @@ const signPrivKey = (deployData, privateKey)  => {
 // Converts JS object from protobuf spec. to Web API spec.
 const toWebDeploy = deployData => {
   const {
-    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber,
+    term, timestamp, phloPrice, phloLimit, validAfterBlockNumber, shardId,
     deployer, sig, sigAlgorithm,
   } = deployData
 
   const result = {
-    data: { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber },
+    data: { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber, shardId },
     sigAlgorithm,
     signature: encodeBase16(sig),
     deployer: encodeBase16(deployer),
