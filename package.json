@@ -9,7 +9,7 @@
     "start:web": "parcel src/web/index.html",
     "build:web": "npm-run-all clean build",
     "build": "parcel build --public-url ./ src/web/index.html",
-    "rnode-generate": "rnode-grpc --rnode-version v0.12.4",
+    "rnode-generate": "rnode-grpc --rnode-version dev",
     "rnode-generate-dev": "rnode-grpc --rnode-version dev --gen-dir rnode-grpc-dev",
     "clean": "rimraf dist .cache",
     "clean:all": "rimraf dist .cache rnode-grpc-gen node_modules",
