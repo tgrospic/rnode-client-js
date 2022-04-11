@@ -1,6 +1,6 @@
 {
   "name": "@tgrospic/rnode-client-js",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "RNode sample client: nodejs & web",
   "author": "Tomislav Grospic",
   "license": "MIT",
@@ -30,11 +30,16 @@
   "devDependencies": {
     "@parcel/transformer-less": "^2.1.1",
     "@types/elliptic": "^6.4.14",
+    "assert": "^2.0.0",
+    "buffer": "^6.0.3",
+    "events": "^3.3.0",
     "grpc-tools": "^1.11.2",
     "less": "^4.1.2",
     "parcel": "^2.1.1",
+    "process": "^0.11.10",
     "protobufjs": "^6.11.2",
     "rimraf": "^3.0.2",
+    "stream-browserify": "^3.0.0",
     "typescript": "^4.4.4"
   },
   "browserslist": "> 0.25%, not dead",
