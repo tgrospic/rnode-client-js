@@ -53,13 +53,20 @@ const mainCtrl = (st, effects) => {
   const transferSt     = st.o('transfer')
   const customDeploySt = st.o('customDeploy')
 
-  const {nets, sel, wallet} = st.view()
+  const {nets, netsDev, netsTestMain, sel, wallet, devMode} = st.view()
   const valNodeUrls  = getNodeUrls(sel.valNode)
   const readNodeUrls = getNodeUrls(sel.readNode)
 
   const setTransferStatus = transferSt.o('status').set
   const setDeployStatus   = customDeploySt.o('status').set
 
+  const onDevMode = ({enabled}) => {
+    // Show local network in dev mode
+    const nets = enabled ? netsDev : netsTestMain
+    const net  = nets[0]
+    const sel  = {valNode: net.hosts[0], readNode: net.readOnlys[0]}
+    st.update(s => ({...s, nets, sel, devMode: enabled}))
+  }
 
   // TEMP: Hard Fork 1 info
   const startMs = new Date('2021-07-18 15:00').getTime()
@@ -71,7 +78,6 @@ const mainCtrl = (st, effects) => {
   const pos  = leftMs / (endMs - startMs)
   const zoom = (1 - .5) * pos + .5
   // TEMP: Hard Fork 1 info
-
 
   // App render
   return m(`.${sel.valNode.name}`,
@@ -88,7 +94,7 @@ const mainCtrl = (st, effects) => {
 
     // Selector control
     m('hr'),
-    selectorCtrl(selSt, {nets}),
+    selectorCtrl(selSt, {nets, onDevMode}),
 
     // REV wallet control
     addressCtrl(addressSt, {wallet, node: valNodeUrls, onAddAccount: onSaveAccount}),
@@ -113,23 +119,33 @@ const mainCtrl = (st, effects) => {
   )
 }
 
-const nets = [localNet, testNet, mainNet]
-  .map(({title, name, tokenName, tokenDecimal: tokenDecimal, hosts, readOnlys}) => ({
+// Initialize all networks for display in UI
+const prepareNets = nets =>
+  nets.map(({title, name, tokenName, tokenDecimal: tokenDecimal, hosts, readOnlys}) => ({
     title, name, tokenName,
     hosts: hosts.map(x => ({...x, title, name, tokenName, tokenDecimal})),
     readOnlys: readOnlys.map(x => ({...x, title, name})),
   }))
 
-const initNet = nets[0]
+const devMode      = false
+const netsDev      = prepareNets([localNet])
+const netsTestMain = prepareNets([testNet, mainNet])
+const nets         = devMode ? netsDev : netsTestMain
+const initNet      = nets[0]
 
 // Initial application state
 const initialState = {
+  // All networks
+  netsDev,
+  netsTestMain,
   // Validators to choose
   nets,
   // Selected validator
-  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[1] },
+  sel: { valNode: initNet.hosts[0], readNode: initNet.readOnlys[0] },
   // Initial wallet
   wallet: [], // [{name: 'My REV account', ...newRevAddress()}],
+  // Dev mode  (show local networks)
+  devMode,
 }
 
 export const startApp = (element, effects) => {

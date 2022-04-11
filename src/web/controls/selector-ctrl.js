@@ -3,7 +3,7 @@ import * as R from 'ramda'
 import m from 'mithril'
 import { getNodeUrls } from '../../rchain-networks'
 
-export const selectorCtrl = (st, {nets}) => {
+export const selectorCtrl = (st, {nets, onDevMode}) => {
   const findValidatorByIndex = index =>
     nets.flatMap(({hosts}) => hosts)[index]
 
@@ -21,6 +21,11 @@ export const selectorCtrl = (st, {nets}) => {
     st.set({valNode, readNode: sel})
   }
 
+  const onDevModeInput = ev => {
+    const checked = ev.target?.checked || false
+    onDevMode({enabled: checked})
+  }
+
   const getDdlText = ({name, domain, grpc, https, http}) => {
     const httpInfo = !!https ? `:${https}` : !!http ? `:${http}` : ' '
     const isLocal  = name === 'localnet'
@@ -31,17 +36,22 @@ export const selectorCtrl = (st, {nets}) => {
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
   // Control state
-  const {valNode, readNode} = st.view({})
+  const {valNode, readNode, devMode} = st.view({})
 
   const isLocal   = valNode.name === 'localnet'
   const isTestnet = valNode.name === 'testnet'
   const isMainnet = valNode.name === 'mainnet'
   const valUrls   = getNodeUrls(valNode)
   const readUrls  = getNodeUrls(readNode)
+  // Dev mode tooltip text
+  const devModeText = `Development mode for locally accessible nodes`
 
   return m('.ctrl.selector-ctrl',
     // Validator selector
     m('h2', 'RChain Network selector'),
+    // Dev mode switch
+    m('label', {title: devModeText},
+      m('input[type=checkbox]', {checked: devMode, oninput: onDevModeInput}), 'dev mode'),
     m('h3', `${valNode.title} - validator node`),
     m('select', {onchange: onSelIdx},
       nets.map(({title, hosts, name}) =>
