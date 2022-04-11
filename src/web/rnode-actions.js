@@ -26,7 +26,7 @@ const appCheckBalance = ({rnodeHttp}) => async ({node, revAddr}) => {
 const appTransfer = effects => async ({node, fromAccount, toAccount, amount, setStatus}) => {
   const {sendDeploy, getDataForDeploy, propose, log, warn} = effects
 
-  log('TRANSFER', {amount, from: fromAccount.name, to: toAccount.name, node: node.httpUrl})
+  log('TRANSFER', {amount, from: fromAccount.name, to: toAccount.name, shardId: node.shardId, node: node.httpUrl})
 
   setStatus(`Deploying ...`)
 
