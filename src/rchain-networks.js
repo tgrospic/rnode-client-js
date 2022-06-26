@@ -4,7 +4,7 @@ const defaultPortsSSL = { grpc: 40401, https: 443, httpAdmin: 40405 }
 
 // Shard IDs
 const defaultShardId = 'root'
-const testNetShardId = 'testnet5'
+const testNetShardId = 'testnet6'
 const mainNetShardId = '' // not used until HF2
 
 // Token name
