@@ -37,8 +37,9 @@ const rnodeExample = async () => {
     getBlocks,
     lastFinalizedBlock,
     visualizeDag,
-    listenForDataAtName,
+    deployStatus,
     doDeploy,
+    listenForDataAtName,
   } = rnodeDeploy(options(rnodeExternalUrl))
 
   const { propose } = rnodePropose(options(rnodeInternalUrl))
@@ -53,7 +54,7 @@ const rnodeExample = async () => {
   log('BLOCKS', blocks)
 
 
-  const vdagObj = await visualizeDag({ depth: 2, showjustificationlines: true })
+  const vdagObj = await visualizeDag({ depth: 20, showjustificationlines: true })
   log('VDAG', vdagObj.map(x => x.content).join(''))
 
 
@@ -85,24 +86,39 @@ const rnodeExample = async () => {
   const { result: proposeRes } = await propose()
   log('PROPOSE RESPONSE', proposeRes)
 
-  // Get result from deploy
+  // Get result from deploy (deployStatus is valid from RNode version 0.13.x)
 
-  const { payload: { blockinfoList } } = await listenForDataAtName({
+  const { deployexecstatus } = await deployStatus({
+    deployid: deploy.sig,
+  })
+
+  // Raw data (Par objects) returned from Rholang
+  const res = deployexecstatus?.processedwithsuccess?.deployresultList ?? []
+
+  log('RAW_DATA', util.inspect(res, {depth: 100, colors: true}))
+
+  // Rholang term converted to JSON
+  // NOTE: Only part of Rholang types are converted:
+  //       primitive types, List, Set, object (Map), Uri, ByteArray, unforgeable names.
+  const json = res.map(rhoParToJson)
+
+  log('JSON', util.inspect(json, {depth: 100, colors: true}))
+
+
+  // Get result from deploy
+  // NOTE: old way which will become obsolete in future versions of RNode)
+
+  const { payload } = await listenForDataAtName({
     depth: 5,
     name: { unforgeablesList: [{gDeployIdBody: { sig: deploy.sig }}] },
   })
 
   // Raw data (Par objects) returned from Rholang
-  const pars = blockinfoList[0].postblockdataList
+  const res2 = payload?.blockinfoList?.at(0)?.postblockdataList ?? []
 
-  log('RAW_DATA', util.inspect(pars, {depth: 100, colors: true}))
+  const json2 = res2.map(rhoParToJson)
 
-  // Rholang term converted to JSON
-  // NOTE: Only part of Rholang types are converted:
-  //       primitive types, List, Set, object (Map), Uri, ByteArray, unforgeable names.
-  const json = pars.map(rhoParToJson)
-
-  log('JSON', util.inspect(json, {depth: 100, colors: true}))
+  log('JSON', util.inspect(json2, {depth: 100, colors: true}))
 }
 
 rnodeExample()

@@ -28,6 +28,9 @@ const rnodeExample = async args => {
   const { Par } = rnodeProtobuf({ protoSchema })
 
   /*
+   * NOTE: This example is only valid until RNode v0.12.x version.
+   * =============================================================
+   *
    * To insert data to the registry, with the signature, tuple `(nonce, data)`
    * must be signed by the client.
    *
