@@ -13,12 +13,16 @@ import { transferCtrl } from './transfer-ctrl'
 import { customDeployCtrl } from './custom-deploy-ctrl'
 import { newRevAddress } from '@tgrospic/rnode-grpc-js'
 
+import { makeRNodeWeb } from '../../rnode-web'
+
 /*
   This will display the test page to select local, testnet, and mainnet validators
   and make REV transfers and check balance.
 */
 
+const {rnodeHttp} = makeRNodeWeb({fetch})
 const repoUrl = 'https://github.com/tgrospic/rnode-client-js'
+const randomOffset = Math.floor(Math.random() * (2 - 1 + 1)) + 1 //Random number between 1 and 2, for load balancing
 
 const mainCtrl = (st, effects) => {
   const { appCheckBalance, appTransfer, appSendDeploy, appPropose, log, warn } = effects
@@ -47,13 +51,14 @@ const mainCtrl = (st, effects) => {
       .set(account)
 
   // State lenses for each control
-  const selSt          = st.o('sel')
-  const addressSt      = st.o('address')
-  const balanceSt      = st.o('balance')
-  const transferSt     = st.o('transfer')
-  const customDeploySt = st.o('customDeploy')
+  const selSt               = st.o('sel')
+  const addressSt           = st.o('address')
+  const balanceSt            = st.o('balance')
+  const transferSt           = st.o('transfer')
+  const customDeploySt       = st.o('customDeploy')
+  const autoSelectIntervalSt = st.o('autoSelectInterval')
 
-  const {nets, netsDev, netsTestMain, sel, wallet, devMode} = st.view()
+  const {nets, netsDev, netsTestMain, sel, wallet, devMode, autoSelectDisabled} = st.view()
   const valNodeUrls  = getNodeUrls(sel.valNode)
   const readNodeUrls = getNodeUrls(sel.readNode)
 
@@ -66,6 +71,42 @@ const mainCtrl = (st, effects) => {
     const net  = nets[0]
     const sel  = {valNode: net.hosts[0], readNode: net.readOnlys[0]}
     st.update(s => ({...s, nets, sel, devMode: enabled}))
+  }
+
+  const FetchNextValidator = async () => {
+    const {autoSelectDisabled} = st.view()
+    if (autoSelectDisabled) {
+      //Disables transfer/deploy buttons once during toggle
+      transferSt.update(s => ({...s, fetching: true}))
+      customDeploySt.update(s => ({...s, fetching: true}))
+    }
+    const { nextToPropose } = await rnodeHttp("https://status.rchain.coop", 'validators')
+
+    const net  = nets[1] //Select Mainnet
+    
+    const next = net.hosts.filter(obj => {
+      return obj.domain === nextToPropose.host
+    })[0];
+    const nextId = net.hosts.indexOf(next);
+
+    const sel  = {valNode: net.hosts[(nextId + randomOffset) % net.hosts.length], readNode: net.readOnlys[0]}
+
+    st.update(s => ({...s, sel}))
+    transferSt.update(s => ({...s, fetching: false}))
+    customDeploySt.update(s => ({...s, fetching: false}))
+  }
+
+  const onAutoSelectToggle = ({disabled}) => {
+    if (!disabled) {
+      const interval = setInterval(FetchNextValidator, 5 * 1000)
+      autoSelectIntervalSt.set({interval: interval})
+      FetchNextValidator() //Trigger immediately
+    } else {
+      const {interval} = autoSelectIntervalSt.view({})
+      clearInterval(interval)
+    }
+
+    st.update(s => ({...s, autoSelectDisabled: disabled}))
   }
 
   // TEMP: Hard Fork 1 info
@@ -94,7 +135,7 @@ const mainCtrl = (st, effects) => {
 
     // Selector control
     m('hr'),
-    selectorCtrl(selSt, {nets, onDevMode}),
+    selectorCtrl(selSt, {nets, onDevMode, onAutoSelectToggle}),
 
     // REV wallet control
     addressCtrl(addressSt, {wallet, node: valNodeUrls, onAddAccount: onSaveAccount}),
@@ -128,6 +169,7 @@ const prepareNets = nets =>
   }))
 
 const devMode      = false
+const autoSelectDisabled = true
 const netsDev      = prepareNets([localNet])
 const netsTestMain = prepareNets([testNet, mainNet])
 const nets         = devMode ? netsDev : netsTestMain
@@ -146,6 +188,7 @@ const initialState = {
   wallet: [], // [{name: 'My REV account', ...newRevAddress()}],
   // Dev mode  (show local networks)
   devMode,
+  autoSelectDisabled: autoSelectDisabled
 }
 
 export const startApp = (element, effects) => {

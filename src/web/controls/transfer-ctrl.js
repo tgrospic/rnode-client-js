@@ -47,14 +47,14 @@ export const transferCtrl = (st, {wallet, node, onTransfer, warn}) => {
   }
 
   // Control state
-  const {account, toAccount, amount, status, error} = initSelected(st.view({}), wallet)
+  const {account, toAccount, amount, status, error, fetching} = initSelected(st.view({}), wallet)
 
   const {tokenName, tokenDecimal} = node
   const labelSource      = `Source ${tokenName} address`
   const labelDestination = `Destination ${tokenName} address`
   const labelAmount      = `Amount (in tiny ${tokenName} x10^${tokenDecimal})`
   const isWalletEmpty    = R.isNil(wallet) || R.isEmpty(wallet)
-  const canTransfer      = account && toAccount && amount && (account || ethDetected)
+  const canTransfer      = account && toAccount && amount && (account || ethDetected) && !fetching
   const amountPreview    = showTokenDecimal(amount, tokenDecimal)
 
   return m('.ctrl.transfer-ctrl',
