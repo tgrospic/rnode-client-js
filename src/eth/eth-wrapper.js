@@ -3,6 +3,8 @@
 // Updated by EIP-1193 (ethereum.request)
 // https://eips.ethereum.org/EIPS/eip-1193
 
+import { encodeBase16 } from "../lib"
+
 // Ethereum object injected by Metamask
 const eth_ = window.ethereum
 
@@ -34,7 +36,8 @@ export const ethereumAddress = async () => {
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
 export const ethereumSign = async (bytes, ethAddr) => {
   // Create args, fix arrays/buffers
-  const args = { params: [[...bytes], ethAddr] }
+  const msg  = encodeBase16(bytes)
+  const args = { params: [msg, ethAddr] }
 
   // Returns signature in hex format
   return await ethRequest('personal_sign', args)
