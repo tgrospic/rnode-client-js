@@ -90,7 +90,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
   }
 
   // Control state
-  const {selRevAddr, code, phloLimit, status, dataError, proposeStatus, proposeError}
+  const {selRevAddr, code, phloLimit, status, dataError, proposeStatus, proposeError, fetching}
     = initSelected(st.view({}), wallet)
 
   const tokenName        = node.tokenName
@@ -99,7 +99,7 @@ export const customDeployCtrl = (st, {wallet = [], node, onSendDeploy, onPropose
   const labelPhloLimit   = `Phlo limit (in tiny ${tokenName} x10^${node.tokenDecimal})`
   const isWalletEmpty    = R.isNil(wallet) || R.isEmpty(wallet)
   const showPropose      = node.network === 'localnet'
-  const canDeploy        = (code || '').trim() !== '' && !!selRevAddr
+  const canDeploy        = (code || '').trim() !== '' && !!selRevAddr  && !fetching
   const phloLimitPreview = showTokenDecimal(phloLimit, node.tokenDecimal)
 
   return m('.ctrl.custom-deploy-ctrl',

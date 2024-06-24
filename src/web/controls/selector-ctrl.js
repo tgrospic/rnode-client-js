@@ -3,7 +3,7 @@ import * as R from 'ramda'
 import m from 'mithril'
 import { getNodeUrls } from '../../rchain-networks'
 
-export const selectorCtrl = (st, {nets, onDevMode}) => {
+export const selectorCtrl = (st, {nets, onDevMode, onAutoSelectToggle}) => {
   const findValidatorByIndex = index =>
     nets.flatMap(({hosts}) => hosts)[index]
 
@@ -13,6 +13,8 @@ export const selectorCtrl = (st, {nets, onDevMode}) => {
   const onSelIdx = ev => {
     const sel  = findValidatorByIndex(ev.target.selectedIndex)
     const read = sel.name === valNode.name ? readNode : findReadOnlyByIndex(0, sel.name)
+    const isMainnet = sel.name === 'mainnet'
+    sel.name !== valNode.name ? onAutoSelectToggle({disabled: !isMainnet}) : undefined
     st.set({valNode: sel, readNode: read})
   }
 
@@ -26,6 +28,11 @@ export const selectorCtrl = (st, {nets, onDevMode}) => {
     onDevMode({enabled: checked})
   }
 
+  const onAutoSelectInput = ev => {
+    const checked = ev.target?.checked || false
+    onAutoSelectToggle({disabled: checked})
+  }
+
   const getDdlText = ({name, domain, grpc, https, http}) => {
     const httpInfo = !!https ? `:${https}` : !!http ? `:${http}` : ' '
     const isLocal  = name === 'localnet'
@@ -36,7 +43,7 @@ export const selectorCtrl = (st, {nets, onDevMode}) => {
     R.eqBy(({domain, gprc, https, http}) => ({domain, gprc, https, http}), v1, v2)
 
   // Control state
-  const {valNode, readNode, devMode} = st.view({})
+  const {valNode, readNode, devMode, autoSelectDisabled} = st.view({})
 
   const isLocal   = valNode.name === 'localnet'
   const isTestnet = valNode.name === 'testnet'
@@ -45,6 +52,7 @@ export const selectorCtrl = (st, {nets, onDevMode}) => {
   const readUrls  = getNodeUrls(readNode)
   // Dev mode tooltip text
   const devModeText = `Development mode for locally accessible nodes`
+  const autoSelectText = `Disable automatic selection of validator`
 
   return m('.ctrl.selector-ctrl',
     // Validator selector
@@ -65,6 +73,11 @@ export const selectorCtrl = (st, {nets, onDevMode}) => {
         ),
       ),
     ),
+
+    isMainnet && [
+      m('label', {title: autoSelectText},
+      m('input[type=checkbox]', {checked: autoSelectDisabled, oninput: onAutoSelectInput}), 'Disable Auto Select')
+    ],
 
     // Validator info
     m(''),
